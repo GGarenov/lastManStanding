@@ -1,0 +1,24 @@
+@import '../../../styles/variables.less';
+
+.content {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.cancelButton {
+  background: var(--secondary-bg);
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--secondary-bg) 80%, transparent)";
+  }
+}
+
+.destructiveAction {
+  background: var(--destructive-bg);
+  color: var(--destructive-text);
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--destructive-bg) 90%, #000000 10%)";
+  }
+}
+

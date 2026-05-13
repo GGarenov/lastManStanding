@@ -1,0 +1,98 @@
+/* Design tokens only. Native <dialog> styling. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 50;
+  width: calc(100vw - 2rem);
+  max-width: 32rem;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--card-text);
+  padding: 1.5rem;
+  border-radius: var(--radius-base);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .header {
+    text-align: left;
+  }
+  .footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--app-text);
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+  margin: 0;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: var(--radius-base);
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  font-size: 0.875rem;
+  &:hover { opacity: 0.9; }
+}
+
+.cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: var(--radius-base);
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  &:hover { opacity: 0.9; }
+}

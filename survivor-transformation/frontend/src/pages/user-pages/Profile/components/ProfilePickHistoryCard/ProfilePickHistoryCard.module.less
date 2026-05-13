@@ -1,0 +1,99 @@
+@import '../../../../../styles/variables.less';
+
+.card {
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.pickHistoryCard {
+  margin-bottom: 1.5rem;
+}
+
+.pickHistoryContent {
+  padding: 1.25rem;
+}
+
+.pickHistoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pickHistoryTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.progressIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--success-bg);
+}
+
+.pickList {
+  & > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+.pickItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+  background: ~"color-mix(in srgb, var(--muted-bg) 30%, transparent)";
+}
+
+.roundLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-text);
+  width: 2rem;
+}
+
+.pickTeamInfo {
+  min-width: 0;
+  flex: 1;
+}
+
+.pickTeamName {
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.pickRoundLabel {
+  font-size: 0.75rem;
+  color: var(--muted-text);
+}
+
+.pickCheck {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: var(--success-bg);
+}
+
+.pickPlaceholder {
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--muted-bg);
+  color: var(--muted-text);
+}
+
+.pickPlaceholderIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.pickPlaceholderText {
+  font-weight: 500;
+  color: var(--muted-text);
+}

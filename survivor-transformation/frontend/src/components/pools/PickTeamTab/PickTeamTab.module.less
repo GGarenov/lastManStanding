@@ -1,0 +1,286 @@
+@import '../../../styles/variables.less';
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.headingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.headingNote {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.deadlineRow {
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.highlightCard {
+  border-color: ~"color-mix(in srgb, var(--primary-bg) 30%, transparent)";
+  background: ~"color-mix(in srgb, var(--primary-bg) 10%, transparent)";
+}
+
+.highlightContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.highlightLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.highlightTeam {
+  font-weight: 600;
+  color: var(--primary-bg);
+}
+
+.usedSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.usedTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.usedChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.usedChip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  background: ~"color-mix(in srgb, var(--secondary-bg) 50%, transparent)";
+}
+
+.usedChipName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.matchesEmptyCard {
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--muted-text);
+}
+
+.matchesGrid {
+  display: grid;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.matchCard {
+  min-width: 0;
+}
+
+.matchContent {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1rem;
+
+  @media (min-width: 640px) {
+    gap: 1rem;
+    padding: 1.1rem;
+  }
+}
+
+.teamSlot {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-radius: var(--radius-base);
+  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  /* Explicit surface so text is always readable (avoids white-on-white) */
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--app-text);
+  padding: 10px;
+}
+
+.teamSlotLeft {
+  align-items: flex-start;
+}
+
+.teamSlotRight {
+  align-items: flex-end;
+}
+
+.teamSlotInner {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  @media (min-width: 640px) {
+    gap: 0.75rem;
+  }
+}
+
+.teamSlotInnerRight {
+  justify-content: flex-end;
+}
+
+.teamSlotButton {
+  min-height: 2.75rem;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+  background: var(--secondary-bg);
+  color: var(--app-text);
+  text-align: left;
+}
+
+.teamSlotButtonEnabled {
+  cursor: pointer;
+}
+
+.teamSlotButtonEnabled:hover {
+  border-color: var(--ring-color);
+  background: var(--muted-bg);
+  box-shadow: 0 0 0 1px var(--ring-color);
+}
+
+.teamSlotButtonEnabled:focus-visible {
+  outline: none;
+  border-color: var(--ring-color);
+  box-shadow: 0 0 0 2px var(--ring-color);
+}
+
+.teamSlotButtonDisabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.teamSlotUsed {
+  pointer-events: none;
+  background: var(--muted-bg);
+  border-color: var(--border-color);
+  border: 1px solid var(--destructive-bg);
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.teamSlotUsed .teamName {
+  color: var(--muted-text);
+}
+
+.teamName {
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (min-width: 640px) {
+    font-size: 0.9rem;
+  }
+}
+
+.vsLabel {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted-text);
+}
+
+.flag {
+  flex-shrink: 0;
+}
+
+.flagUsed {
+  filter: grayscale(100%);
+  opacity: 1;
+}
+
+.usedBadge {
+  display: inline-block;
+  margin-top: 0.15rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--destructive-text);
+  background: red;
+  border-radius: var(--radius-base);
+}
+
+.confirmContent {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.confirmFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+.confirmButton {
+  min-height: 2.75rem;
+  width: 100%;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #16a34a;
+  color: #ffffff;
+
+  @media (min-width: 640px) {
+    width: auto;
+    min-width: 11.25rem;
+  }
+}
+
+.confirmButton:hover {
+  background: #15803d;
+}
+
+.confirmIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}

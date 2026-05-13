@@ -1,0 +1,61 @@
+@import '../../../../../styles/variables.less';
+
+.card {
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.progressCard {
+  margin-bottom: 1.5rem;
+}
+
+.progressCardContent {
+  padding: 1.25rem;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.progressIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--success-bg);
+}
+
+.progressTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.progressMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.progressMetaText {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.progressBarTrack {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+  background: var(--muted-bg);
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--success-bg);
+  transition: width 0.2s;
+}

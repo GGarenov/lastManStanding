@@ -1,0 +1,186 @@
+@import '../palette.less';
+
+// ---------------------------------------------------------------------------
+// Internal palette — wired through @Element_Color / @Text_Color so that
+// operator/styles/palette.less overrides propagate everywhere.
+// ---------------------------------------------------------------------------
+@_bg-base: @Element_Color1;
+@_fg-base: @Text_Color2;
+@_primary: @Element_Color12;
+@_card: @Element_Color2;
+@_muted: @Element_Color3;
+@_muted-fg: @Text_Color3;
+@_secondary: @Element_Color6;
+@_destructive: @Element_Color16;
+@_destructive-fg: @Text_Color2;
+@_success: @Element_Color17;
+@_warning: @Element_Color15;
+@_sidebar-bg: @Element_Color5;
+@_sidebar-accent: @Element_Color21;
+
+// ---------------------------------------------------------------------------
+// Semantic tokens (plan 2.2). Components use var(--app-bg), var(--card-bg), etc.
+// ---------------------------------------------------------------------------
+@app-bg: @_bg-base;
+@app-text: @_fg-base;
+@card-bg: @_card;
+@card-text: @_fg-base;
+@primary-bg: @_primary;
+@primary-text: @_bg-base;
+@muted-bg: @_muted;
+@muted-text: @_muted-fg;
+@border-color: @_secondary;
+@input-bg: @_secondary;
+@ring-color: @_primary;
+@destructive-bg: @_destructive;
+@destructive-text: @_destructive-fg;
+@success-bg: @_success;
+@success-text: @_bg-base;
+@warning-bg: @_warning;
+@warning-text: @_bg-base;
+@radius-base: 0.5rem;
+@popover-bg: @_card;
+@popover-text: @_fg-base;
+@secondary-bg: @_secondary;
+@secondary-text: @_fg-base;
+@accent-bg: @_secondary;
+@accent-text: @_fg-base;
+@sidebar-background: @_sidebar-bg;
+@sidebar-foreground: @_fg-base;
+@sidebar-primary: @_primary;
+@sidebar-primary-foreground: @_bg-base;
+@sidebar-accent: @_sidebar-accent;
+@sidebar-accent-foreground: @_fg-base;
+@sidebar-border: @_sidebar-accent;
+@sidebar-ring: @_primary;
+
+// ---------------------------------------------------------------------------
+// Semantic tokens (survivor app). Components use var(--survivor-*) only.
+// ---------------------------------------------------------------------------
+
+// App shell
+@survivor-app-bg: @Element_Color1;
+@survivor-app-text: @Text_Color2;
+@survivor-text-muted: @Text_Color3;
+
+// Button — primary (orange)
+@survivor-button-primary-bg: @Element_Color12;
+@survivor-button-primary-text: @Text_Color4;
+
+// Button — secondary / success (green)
+@survivor-button-success-bg: @Element_Color17;
+@survivor-button-success-text: @Text_Color4;
+
+// Button — danger / destructive (red)
+@survivor-button-danger-bg: @Element_Color16;
+@survivor-button-danger-text: @Text_Color4;
+
+// Button — shared (text color when not overridden by variant)
+@survivor-button-text: @Text_Color2;
+
+// Button — layout (optional; components can use fixed values instead)
+@survivor-button-border-radius: 3px;
+@survivor-button-height: 40px;
+@survivor-button-font-size: 15px;
+
+// Login / auth-specific tokens
+@survivor-error-text: @Text_Color8;
+@survivor-link-primary-text: @Element_Color12;
+@survivor-login-card-bg: @Element_Color4;
+@survivor-login-card-text: @Text_Color2;
+
+// ---------------------------------------------------------------------------
+// Output as CSS custom properties for components.
+// ---------------------------------------------------------------------------
+.declareCssVariables() {
+  // Port from index.css (plan 2.2) — semantic tokens
+  --app-bg: @app-bg;
+  --app-text: @app-text;
+  --card-bg: @card-bg;
+  --card-text: @card-text;
+  --primary-bg: @primary-bg;
+  --primary-text: @primary-text;
+  --muted-bg: @muted-bg;
+  --muted-text: @muted-text;
+  --border-color: @border-color;
+  --input-bg: @input-bg;
+  --ring-color: @ring-color;
+  --destructive-bg: @destructive-bg;
+  --destructive-text: @destructive-text;
+  --success-bg: @success-bg;
+  --success-text: @success-text;
+  --warning-bg: @warning-bg;
+  --warning-text: @warning-text;
+  --radius-base: @radius-base;
+  --popover-bg: @popover-bg;
+  --popover-text: @popover-text;
+  --secondary-bg: @secondary-bg;
+  --secondary-text: @secondary-text;
+  --accent-bg: @accent-bg;
+  --accent-text: @accent-text;
+  --sidebar-background: @sidebar-background;
+  --sidebar-foreground: @sidebar-foreground;
+  --sidebar-primary: @sidebar-primary;
+  --sidebar-primary-foreground: @sidebar-primary-foreground;
+  --sidebar-accent: @sidebar-accent;
+  --sidebar-accent-foreground: @sidebar-accent-foreground;
+  --sidebar-border: @sidebar-border;
+  --sidebar-ring: @sidebar-ring;
+
+  --element-color-1: @Element_Color1;
+  --element-color-2: @Element_Color2;
+  --element-color-3: @Element_Color3;
+  --element-color-4: @Element_Color4;
+  --element-color-5: @Element_Color5;
+  --element-color-6: @Element_Color6;
+  --element-color-7: @Element_Color7;
+  --element-color-8: @Element_Color8;
+  --element-color-9: @Element_Color9;
+  --element-color-10: @Element_Color10;
+  --element-color-11: @Element_Color11;
+  --element-color-12: @Element_Color12;
+  --element-color-13: @Element_Color13;
+  --element-color-14: @Element_Color14;
+  --element-color-15: @Element_Color15;
+  --element-color-16: @Element_Color16;
+  --element-color-17: @Element_Color17;
+  --element-color-18: @Element_Color18;
+  --element-color-19: @Element_Color19;
+  --element-color-20: @Element_Color20;
+  --element-color-21: @Element_Color21;
+  --element-color-22: @Element_Color22;
+  --element-color-23: @Element_Color23;
+  --text-color-1: @Text_Color1;
+  --text-color-2: @Text_Color2;
+  --text-color-3: @Text_Color3;
+  --text-color-4: @Text_Color4;
+  --text-color-5: @Text_Color5;
+  --text-color-6: @Text_Color6;
+  --text-color-7: @Text_Color7;
+  --text-color-8: @Text_Color8;
+  --text-color-9: @Text_Color9;
+  --text-color-10: @Text_Color10;
+
+  --survivor-app-bg: @survivor-app-bg;
+  --survivor-app-text: @survivor-app-text;
+  --survivor-text-muted: @survivor-text-muted;
+
+  --survivor-button-primary-bg: @survivor-button-primary-bg;
+  --survivor-button-primary-text: @survivor-button-primary-text;
+  --survivor-button-success-bg: @survivor-button-success-bg;
+  --survivor-button-success-text: @survivor-button-success-text;
+  --survivor-button-danger-bg: @survivor-button-danger-bg;
+  --survivor-button-danger-text: @survivor-button-danger-text;
+  --survivor-button-text: @survivor-button-text;
+  --survivor-button-border-radius: @survivor-button-border-radius;
+  --survivor-button-height: @survivor-button-height;
+  --survivor-button-font-size: @survivor-button-font-size;
+
+  --survivor-error-text: @survivor-error-text;
+  --survivor-link-primary-text: @survivor-link-primary-text;
+  --survivor-login-card-bg: @survivor-login-card-bg;
+  --survivor-login-card-text: @survivor-login-card-text;
+}
+
+// Operator vars override (must be at the END to allow operator overrides)
+@import (optional) '../../../operator/styles/vars/survivor-first.less';

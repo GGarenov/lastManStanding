@@ -1,0 +1,542 @@
+@import '../../../styles/variables.less';
+
+.page {
+  min-height: 100vh;
+  background: var(--app-bg);
+}
+
+.main {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem 1.5rem 3rem;
+  max-width: 80rem;
+}
+
+.noPoolCard {
+  padding: 2rem;
+  text-align: center;
+}
+
+.noPoolIcon {
+  margin-left: auto;
+  margin-right: auto;
+  width: 3rem;
+  height: 3rem;
+  color: var(--muted-text);
+  margin-bottom: 1rem;
+}
+
+.noPoolTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.noPoolText {
+  color: var(--muted-text);
+  margin-bottom: 1rem;
+}
+
+.winnerBannerWrap {
+  margin-bottom: 1.5rem;
+}
+
+.eliminatedBanner {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-base);
+  border: 1px solid ~"color-mix(in srgb, var(--destructive-bg) 30%, transparent)";
+  background: ~"color-mix(in srgb, var(--destructive-bg) 10%, transparent)";
+  color: var(--destructive-bg);
+}
+
+.eliminatedBannerIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.eliminatedBannerText {
+  font-weight: 500;
+}
+
+.eliminatedBannerSub {
+  opacity: 0.9;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--primary-bg);
+  background: ~"color-mix(in srgb, var(--primary-bg) 10%, transparent)";
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--app-text);
+  margin-bottom: 0.5rem;
+}
+
+.titleGreen {
+  color: #22c55e;
+}
+
+.subtitle {
+  color: var(--muted-text);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.roundRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background: ~"color-mix(in srgb, #ef4444 10%, transparent)";
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.liveDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #ef4444;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.roundTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.selectorCard {
+  margin-bottom: 1.5rem;
+}
+
+.selectorContent {
+  padding: 1rem;
+}
+
+.selectorRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.selectorLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.selectTrigger {
+  width: 300px;
+}
+
+.loadingCard {
+  margin-bottom: 1.5rem;
+}
+
+.loadingContent {
+  padding: 1.5rem;
+}
+
+.loadingRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loadingIcon {
+  width: 1rem;
+  height: 1rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: var(--muted-text);
+}
+
+.errorRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--destructive-bg);
+}
+
+.emptyCard {
+  padding: 1.5rem;
+  color: var(--muted-text);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statCard {
+  padding: 1.5rem;
+}
+
+.statIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.statIconGreen {
+  padding: 0.75rem;
+  border-radius: var(--radius-base);
+  background: ~"color-mix(in srgb, #22c55e 10%, transparent)";
+}
+
+.statIconOrange {
+  padding: 0.75rem;
+  border-radius: var(--radius-base);
+  background: ~"color-mix(in srgb, #f97316 10%, transparent)";
+}
+
+.statIconRed {
+  padding: 0.75rem;
+  border-radius: var(--radius-base);
+  background: ~"color-mix(in srgb, #ef4444 10%, transparent)";
+}
+
+.statIconPurple {
+  padding: 0.75rem;
+  border-radius: var(--radius-base);
+  background: ~"color-mix(in srgb, #a855f7 10%, transparent)";
+}
+
+.statIconSvg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.statIconSvgGreen {
+  color: #22c55e;
+}
+
+.statIconSvgOrange {
+  color: #f97316;
+}
+
+.statIconSvgRed {
+  color: #ef4444;
+}
+
+.statIconSvgPurple {
+  color: #a855f7;
+}
+
+.statValue {
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.statValueGreen {
+  color: #22c55e;
+}
+
+.statValueOrange {
+  color: #f97316;
+}
+
+.statValuePurple {
+  color: #a855f7;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-text);
+  margin-top: 0.25rem;
+}
+
+.sectionCard {
+  margin-bottom: 1.5rem;
+}
+
+.sectionContent {
+  padding: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--muted-text);
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.distList {
+  &>*+* {
+    margin-top: 1rem;
+  }
+}
+
+.distItem {
+  padding: 0.75rem;
+  border-radius: var(--radius-base);
+  margin: -0.75rem;
+  transition: background 0.2s;
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--muted-bg) 50%, transparent)";
+  }
+}
+
+.distRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.distTeam {
+  font-weight: 500;
+  color: var(--app-text);
+  flex: 1;
+}
+
+.distCount {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.progressTrack {
+  width: 100%;
+  height: 0.5rem;
+  background: var(--muted-bg);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(to right, #22c55e, #3b82f6);
+  transition: width 0.5s ease-out;
+}
+
+.recentList {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+
+  &>*+* {
+    margin-top: 0.75rem;
+  }
+}
+
+.recentItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-base);
+  transition: background 0.15s;
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--muted-bg) 50%, transparent)";
+  }
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+}
+
+.username {
+  font-weight: 500;
+  color: var(--app-text);
+  min-width: 100px;
+}
+
+.teamName {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+  flex: 1;
+}
+
+.timeAgo {
+  font-size: 0.75rem;
+  color: var(--muted-text);
+  white-space: nowrap;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+}
+
+.tableHeaderRow {
+  background: ~"color-mix(in srgb, var(--muted-bg) 50%, transparent)";
+}
+
+.tableHead {
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.tableCellUser {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tableAvatar {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+}
+
+.tableCellTeam {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emptyCenter {
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted-text);
+}
+
+.errorCardContent {
+  padding: 2rem;
+  text-align: center;
+}
+
+.errorIcon {
+  width: 2rem;
+  height: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  color: var(--destructive-bg);
+}
+
+.errorText {
+  color: var(--destructive-bg);
+  margin-bottom: 1rem;
+}
+
+.skeletonCard {
+  padding: 1.5rem;
+}
+
+.skeletonIcon {
+  height: 3rem;
+  width: 3rem;
+  border-radius: var(--radius-base);
+}
+
+.skeletonValue {
+  height: 2.25rem;
+  width: 4rem;
+}
+
+.skeletonLabel {
+  height: 1rem;
+  width: 6rem;
+}
+
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.skeletonBar {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+}
+
+.sectionSubtitle {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+  margin-top: 0.25rem;
+}

@@ -1,0 +1,137 @@
+@import '../../../styles/variables.less';
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.cardHeaderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.cardTitle {
+  font-size: 1rem;
+}
+
+.errorText {
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--destructive-bg);
+}
+
+.loadingText {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--muted-text);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+}
+
+.actionsHeader {
+  text-align: right;
+  width: 5rem;
+}
+
+.emptyCell {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--muted-text);
+}
+
+.nameCell {
+  max-width: 7.5rem;
+
+  @media (min-width: 640px) {
+    max-width: 11.25rem;
+  }
+
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emailCell {
+  max-width: 8.75rem;
+
+  @media (min-width: 640px) {
+    max-width: 12.5rem;
+  }
+
+  color: var(--muted-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roleBadge {
+  text-transform: capitalize;
+}
+
+.dateCell {
+  color: var(--muted-text);
+}
+
+.actionsCell {
+  text-align: right;
+}
+
+.actionButton {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+.iconSmall {
+  width: 1rem;
+  height: 1rem;
+}
+
+.menuContent {
+  background: var(--popover-bg);
+}
+
+.menuItemDelete {
+  color: var(--destructive-bg);
+
+  &:focus-visible {
+    color: var(--destructive-bg);
+    background: ~"color-mix(in srgb, var(--destructive-bg) 10%, transparent)";
+  }
+}
+
+.menuIcon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+}
+

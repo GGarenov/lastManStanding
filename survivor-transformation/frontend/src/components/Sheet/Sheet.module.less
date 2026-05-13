@@ -1,0 +1,71 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.panel {
+  position: fixed;
+  z-index: 50;
+  background: var(--card-bg);
+  color: var(--card-text);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 1.5rem;
+  transition: transform 0.3s ease;
+
+  &.right {
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 85%;
+    max-width: 24rem;
+  }
+  &.left {
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 85%;
+    max-width: 24rem;
+  }
+  &.top {
+    top: 0;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  &.bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 1px solid var(--border-color);
+  }
+}
+
+.header {
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--muted-text);
+  cursor: pointer;
+  border-radius: var(--radius-base);
+
+  &:hover {
+    color: var(--app-text);
+    background: var(--muted-bg);
+  }
+}

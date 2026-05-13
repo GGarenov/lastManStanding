@@ -1,0 +1,103 @@
+@import '../../styles/variables.less';
+
+.howSection {
+  margin-top: 3rem;
+  margin-bottom: 4rem;
+}
+
+.howEyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  color: var(--muted-text);
+  text-align: center;
+}
+
+.howTitle {
+  margin-top: 0.75rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--app-text);
+
+  @media (min-width: 768px) {
+    font-size: 2.25rem;
+  }
+}
+
+.howTitleHighlight {
+  color: #22c55e;
+}
+
+.howGrid {
+  margin-top: 2.5rem;
+  display: grid;
+  gap: 1.25rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.howCard {
+  border: 1px solid var(--border-color);
+  background: ~"color-mix(in srgb, var(--card-bg) 90%, transparent)";
+}
+
+.howCardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.howIconWrapPrimary,
+.howIconWrapWarning,
+.howIconWrapDanger,
+.howIconWrapNeutral {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.howIconWrapPrimary {
+  background: ~"color-mix(in srgb, #22c55e 16%, transparent)";
+  color: #22c55e;
+}
+
+.howIconWrapWarning {
+  background: ~"color-mix(in srgb, #eab308 16%, transparent)";
+  color: #eab308;
+}
+
+.howIconWrapDanger {
+  background: ~"color-mix(in srgb, #f97373 16%, transparent)";
+  color: #f97373;
+}
+
+.howIconWrapNeutral {
+  background: ~"color-mix(in srgb, #38bdf8 16%, transparent)";
+  color: #38bdf8;
+}
+
+.howIcon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.howCardTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.howCardText {
+  font-size: 0.9rem;
+  color: var(--muted-text);
+}
+

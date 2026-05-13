@@ -1,0 +1,103 @@
+.statsSection {
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+}
+
+.statsBannerCard {
+    border-radius: 1.25rem;
+    border: 1px solid ~"color-mix(in srgb, var(--primary-bg) 20%, transparent)";
+    background: radial-gradient(circle at top left,
+            ~"color-mix(in srgb, #fbbf24 10%, transparent)",
+            transparent),
+        radial-gradient(circle at bottom right,
+            ~"color-mix(in srgb, #22c55e 8%, transparent)",
+            transparent),
+        var(--card-bg);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+}
+
+.statsBannerContent {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: center;
+    padding-top: 1.75rem;
+    padding-bottom: 1.75rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+    }
+}
+
+.statsBannerLeft {
+    border-right: 1px solid ~"color-mix(in srgb, var(--border-color) 80%, transparent)";
+    padding-right: 2rem;
+
+    @media (max-width: 768px) {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid ~"color-mix(in srgb, var(--border-color) 80%, transparent)";
+        padding-bottom: 1.5rem;
+    }
+}
+
+.statsBannerLabelRow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #fbbf24;
+}
+
+.statsBannerIcon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.statsBannerLabel {
+    font-weight: 600;
+}
+
+.statsBannerValue {
+    margin-top: 0.75rem;
+    font-size: 2.6rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #fed7aa;
+
+    @media (min-width: 768px) {
+        font-size: 3rem;
+    }
+}
+
+.statsBannerRight {
+    display: flex;
+    justify-content: center;
+}
+
+.statsBannerGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+
+    @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.statsBannerItemLabel {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted-text);
+}
+
+.statsBannerItemValue {
+    margin-top: 0.35rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--app-text);
+}

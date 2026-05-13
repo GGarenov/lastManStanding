@@ -1,0 +1,62 @@
+@import '../../styles/variables.less';
+
+.page {
+  min-height: 100vh;
+  background: var(--app-bg);
+}
+
+.main {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.5rem 3.5rem;
+}
+
+.adminButton {
+  margin-top: 1rem;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+}
+
+.rulesGrid {
+  margin-top: 3rem;
+  display: grid;
+  gap: 1rem;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.rulesCard {
+  border: 1px solid var(--border-color);
+  background: ~"color-mix(in srgb, var(--card-bg) 80%, transparent)";
+  text-align: center;
+}
+
+.rulesCardWide {
+  @media (min-width: 640px) {
+    grid-column: span 2;
+  }
+}
+
+.rulesCardHeader {
+  padding-bottom: 0.5rem;
+}
+
+.rulesCardTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.rulesCardContent {
+  padding-top: 0;
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}

@@ -1,0 +1,20 @@
+@import '../../../styles/variables.less';
+
+.page {
+  min-height: 100vh;
+  background: var(--app-bg);
+}
+
+.main {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem 1.5rem 3rem;
+  max-width: 80rem;
+}
+
+.section {
+  & > * + * {
+    margin-top: 1.5rem;
+  }
+}

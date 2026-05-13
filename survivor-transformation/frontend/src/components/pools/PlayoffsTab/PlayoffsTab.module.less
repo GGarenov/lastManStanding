@@ -1,0 +1,386 @@
+@import '../../../styles/variables.less';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.emptyCard {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--muted-text);
+}
+
+/* --- Linear fallback grid --- */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+.roundSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.roundTitle {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.matchesColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.matchCardContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  font-size: 0.875rem;
+}
+
+.matchSide {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.matchSideRight {
+  justify-content: flex-end;
+}
+
+.teamName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--muted-text);
+}
+
+/* --- Symmetric knockout (WC / EURO) --- */
+.knockoutRoot {
+  border-radius: var(--radius-base);
+  padding: 1.25rem 1rem 1.5rem;
+  background: color-mix(in srgb, var(--app-bg) 88%, black);
+  border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+}
+
+.knockoutHeader {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.knockoutTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.knockoutTitlePlain {
+  color: var(--app-text);
+}
+
+.knockoutTitleAccent {
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--primary-bg) 95%, white),
+    color-mix(in srgb, var(--ring-color) 80%, var(--primary-bg))
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.knockoutSubtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted-text);
+}
+
+.knockoutArena {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.65rem;
+  min-width: min(100%, 72rem);
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Subtle column separators for live bracket (reference UI). */
+.knockoutArenaConnectors {
+  .wing .bracketColumn + .bracketColumn {
+    border-left: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+    padding-left: 0.45rem;
+  }
+
+  .knockoutCenter {
+    border-left: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+.wing {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 0;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.bracketColumn {
+  flex: 1 1 0;
+  min-width: 6.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.columnTitle {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--muted-text);
+  line-height: 1.2;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.15rem;
+}
+
+.columnMatches {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 0.45rem;
+}
+
+.knockoutCenter {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0 0.35rem;
+  min-width: 9.5rem;
+}
+
+.centerBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.centerLabelFinal {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--destructive-bg);
+}
+
+.koCard {
+  border-radius: var(--radius-base);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border-color) 45%, transparent);
+  background: color-mix(in srgb, var(--card-bg) 55%, var(--app-bg));
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--app-text) 6%, transparent);
+}
+
+.koCardFinal {
+  border-color: color-mix(in srgb, var(--destructive-bg) 65%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--destructive-bg) 35%, transparent),
+    0 0 16px color-mix(in srgb, var(--destructive-bg) 42%, transparent);
+}
+
+.koCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.65rem;
+  background: color-mix(in srgb, var(--card-bg) 35%, var(--muted-bg));
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 35%, transparent);
+}
+
+.koCardCode {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--ring-color) 75%, var(--app-text));
+}
+
+.koCardWhen {
+  color: var(--muted-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.koCardBody {
+  padding: 0.35rem 0.45rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.koRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-height: 1.5rem;
+}
+
+.koRowMain {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.koTeamName {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.koRowScore {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-text);
+}
+
+/* --- Live knockout from pool rounds (Phase C) — mirrors Results tab table tokens --- */
+.liveKnockoutRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.liveSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.liveSectionTitle {
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.liveSectionEmpty {
+  margin: 0;
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.liveTableWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+}
+
+.liveTable {
+  min-width: 20rem;
+}
+
+.liveHeaderRow {
+  background: ~"color-mix(in srgb, var(--muted-bg) 50%, transparent)";
+}
+
+.liveHeaderCell {
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.liveHeaderCellCenter {
+  text-align: center;
+  width: 5rem;
+}
+
+.liveHeaderCellRight {
+  text-align: right;
+}
+
+.liveCellHome {
+  padding: 0.75rem 1rem 0.75rem 0;
+}
+
+.liveCellScore {
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--app-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.liveCellAway {
+  padding: 0.75rem 0 0.75rem 1rem;
+}
+
+.liveTeamRowHome {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.liveTeamRowAway {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.liveTeamName {
+  font-weight: 500;
+  color: var(--app-text);
+}

@@ -1,0 +1,11 @@
+@import '../../styles/variables.less';
+
+.deleteConfirmButton {
+  background: var(--destructive-bg);
+  color: var(--destructive-text);
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--destructive-bg) 90%, #000000 10%)";
+  }
+}
+

@@ -1,0 +1,144 @@
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader } from "@/components/Card/Card";
+import { Button } from "@/components/Button/Button";
+import { Users, Loader2, Clock } from "lucide-react";
+import styles from "./HomeFeaturedPool.module.less";
+
+type FeaturedPool = {
+  id: string;
+  name: string;
+  status: string;
+  participants: number;
+  entryFeeEur?: number;
+  rakePerEntryEur?: number;
+  myStatus?: string;
+};
+
+type HomeFeaturedPoolProps = {
+  activeTournament: boolean;
+  featuredPool: FeaturedPool | null;
+  isUserLoggedIn: boolean;
+  poolsError: string | null;
+  poolsLoading: boolean;
+  joiningId: string | null;
+  onJoin: (poolId: string) => void;
+  formatEntryFeeCopy: (entryFeeEur: number, rakePerEntryEur: number) => string;
+  defaultEntryFeeEur: number;
+  defaultRakeEur: number;
+};
+
+export function HomeFeaturedPool({
+  activeTournament,
+  featuredPool,
+  isUserLoggedIn,
+  poolsError,
+  poolsLoading,
+  joiningId,
+  onJoin,
+  formatEntryFeeCopy,
+  defaultEntryFeeEur,
+  defaultRakeEur,
+}: HomeFeaturedPoolProps) {
+  if (!activeTournament || !featuredPool) return null;
+
+  const myStatus = featuredPool.myStatus ?? "none";
+
+  if (isUserLoggedIn && myStatus === "approved") {
+    return null;
+  }
+
+  return (
+    <section className={styles.section}>
+      {poolsError && (
+        <p className={styles.error} role="alert">
+          {poolsError}
+        </p>
+      )}
+      {poolsLoading ? (
+        <div className={styles.loadingWrap}>
+          <Loader2 className={styles.loadingIcon} />
+        </div>
+      ) : (
+        <Card className={styles.featuredCard}>
+          <CardHeader className={styles.featuredCardHeader}>
+            <div className={styles.featuredCardTitleRow}>
+              <h3 className={styles.featuredCardTitle}>{featuredPool.name}</h3>
+              <span className={styles.featuredCardBadge}>
+                {featuredPool.status}
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className={styles.featuredCardContent}>
+            <div className={styles.featuredMeta}>
+              <Users className={styles.featuredMetaIcon} />
+              <span>
+                {featuredPool.participants} participant
+                {featuredPool.participants !== 1 ? "s" : ""}
+              </span>
+            </div>
+            <div className={styles.featuredActions}>
+              {!isUserLoggedIn ? (
+                <Link to="/login">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className={styles.featuredButtonFull}
+                  >
+                    Log in to buy in
+                  </Button>
+                </Link>
+              ) : myStatus === "none" ? (
+                <>
+                  <p className={styles.buyInText}>
+                    {formatEntryFeeCopy(
+                      featuredPool.entryFeeEur ?? defaultEntryFeeEur,
+                      featuredPool.rakePerEntryEur ?? defaultRakeEur,
+                    )}
+                    . Pay to the admin to confirm your entry. You'll be approved
+                    once payment is received.
+                  </p>
+                  <Button
+                    size="lg"
+                    className={styles.featuredButtonFull}
+                    disabled={joiningId !== null}
+                    onClick={() => onJoin(featuredPool.id)}
+                    variant="primary"
+                  >
+                    {joiningId === featuredPool.id ? (
+                      <>
+                        <Loader2 className={styles.waitingIcon} />
+                        Joining…
+                      </>
+                    ) : (
+                      `Buy in €${
+                        featuredPool.entryFeeEur ?? defaultEntryFeeEur
+                      }`
+                    )}
+                  </Button>
+                </>
+              ) : myStatus === "pending" ? (
+                <div className={styles.waitingBox}>
+                  <Clock className={styles.waitingIcon} />
+                  Waiting for approval
+                </div>
+              ) : myStatus === "approved" || myStatus === "winner" ? (
+                <Link to="/my-pool">
+                  <Button
+                    size="lg"
+                    variant="primary"
+                    className={styles.featuredButtonFull}
+                  >
+                    Go to my pool
+                  </Button>
+                </Link>
+              ) : (
+                <div className={styles.statusBox}>{myStatus}</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </section>
+  );
+}
+

@@ -1,0 +1,54 @@
+@import '../../../../../styles/variables.less';
+
+.card {
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  min-width: 0;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statCard {
+  padding: 1rem;
+  text-align: center;
+}
+
+.statIconWrap {
+  display: flex;
+  justify-content: center;
+  color: var(--success-bg);
+  margin-bottom: 0.25rem;
+}
+
+.statIconWrapBlue {
+  color: var(--primary-bg);
+}
+
+.statIconWrapAmber {
+  color: var(--warning-bg);
+}
+
+.statIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--muted-text);
+}

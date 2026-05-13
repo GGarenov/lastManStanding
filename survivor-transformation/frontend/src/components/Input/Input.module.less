@@ -1,0 +1,27 @@
+/* Design tokens only. */
+.input {
+  display: flex;
+  width: 100%;
+  height: 2.5rem;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--app-text);
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder {
+    color: var(--muted-text);
+  }
+  &:focus {
+    outline: none;
+    border-color: var(--ring-color);
+    box-shadow: 0 0 0 2px var(--ring-color);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}

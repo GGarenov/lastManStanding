@@ -1,0 +1,76 @@
+@import '../../../styles/variables.less';
+
+.fullscreenCenter {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.redirectText {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--survivor-text-muted);
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--survivor-app-bg);
+  color: var(--survivor-app-text);
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  row-gap: 8px;
+}
+
+.input {
+  width: 100%;
+}
+
+.hintText {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--survivor-text-muted);
+}
+
+.submitButton {
+  width: 100%;
+  min-height: 44px;
+}
+
+.errorText {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--survivor-error-text);
+}
+
+.footerText {
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--survivor-text-muted);
+}
+
+.loginLink {
+  color: var(--survivor-link-primary-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}

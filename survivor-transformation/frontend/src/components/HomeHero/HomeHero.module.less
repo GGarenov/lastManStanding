@@ -1,0 +1,229 @@
+@import '../../styles/variables.less';
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-top: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+.heroLogo {
+  height: 3rem;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 2rem;
+
+  @media (min-width: 768px) {
+    height: 4rem;
+    margin-bottom: 2.5rem;
+  }
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+
+  @media (min-width: 960px) {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+}
+
+.heroCopy {
+  max-width: 34rem;
+}
+
+.heroEyebrow {
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--element-color-12);
+}
+
+.heroPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.9rem;
+  margin-bottom: 1.5rem;
+  border-radius: 9999px;
+  background: ~"color-mix(in srgb, var(--primary-bg) 16%, transparent)";
+  color: var(--element-color-15);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.heroCountdownRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.heroCountdownLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.heroHeading {
+  font-size: 2.4rem;
+  line-height: 1.1;
+  font-weight: 700;
+  color: var(--app-text);
+  letter-spacing: -0.03em;
+  margin-bottom: 1rem;
+
+  @media (min-width: 768px) {
+    font-size: 3.4rem;
+  }
+}
+
+.heroHeadingHighlight {
+  color: #22c55e;
+}
+
+.heroLead {
+  max-width: 30rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+.heroImageWrap {
+  justify-self: center;
+  max-width: 30rem;
+
+  @media (min-width: 960px) {
+    max-width: 34rem;
+  }
+}
+
+.heroImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badgeAmber {
+  background: ~"color-mix(in srgb, #f59e0b 20%, transparent)";
+  color: #d97706;
+}
+
+.badgePrimary {
+  border: 1px solid ~"color-mix(in srgb, var(--primary-bg) 40%, transparent)";
+  color: var(--primary-bg);
+}
+
+.heroTitle {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--app-text);
+  letter-spacing: -0.025em;
+  max-width: 56rem;
+  word-break: break-word;
+
+  @media (min-width: 768px) {
+    font-size: 3rem;
+  }
+}
+
+.heroTitleAmber {
+  color: #f59e0b;
+}
+
+.heroText {
+  margin-top: 1.5rem;
+  max-width: 36rem;
+  font-size: 1.125rem;
+  color: var(--muted-text);
+}
+
+.winnerChips {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.winnerChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: ~"color-mix(in srgb, #f59e0b 20%, transparent)";
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #b45309;
+}
+
+.winnerChipIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #d97706;
+}
+
+.prizeText {
+  margin-top: 1rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.prizeHighlight {
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.prizeGradient {
+  background: linear-gradient(to right, var(--primary-bg), #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ctaRow {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.adminButton {
+  margin-top: 1rem;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+}
+
+.iconSm {
+  width: 1rem;
+  height: 1rem;
+}

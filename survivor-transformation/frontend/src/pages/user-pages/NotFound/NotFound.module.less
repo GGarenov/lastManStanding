@@ -1,0 +1,35 @@
+@import '../../../styles/variables.less';
+
+.root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--muted-bg);
+}
+
+.content {
+  text-align: center;
+}
+
+.title {
+  margin-bottom: 1rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.message {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: var(--muted-text);
+}
+
+.link {
+  color: var(--primary-bg);
+  text-decoration: underline;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}

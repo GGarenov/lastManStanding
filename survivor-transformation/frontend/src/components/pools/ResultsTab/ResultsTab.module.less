@@ -1,0 +1,83 @@
+@import '../../../styles/variables.less';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.emptyCard {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--muted-text);
+}
+
+.sectionTitle {
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+}
+
+.table {
+  min-width: 20rem;
+}
+
+.headerRow {
+  background: ~"color-mix(in srgb, var(--muted-bg) 50%, transparent)";
+}
+
+.headerCell {
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.headerCellCenter {
+  text-align: center;
+  width: 5rem;
+}
+
+.headerCellRight {
+  text-align: right;
+}
+
+.resultCellHome {
+  padding: 0.75rem 1rem 0.75rem 0;
+}
+
+.resultCellScore {
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  color: var(--app-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.resultCellAway {
+  padding: 0.75rem 0 0.75rem 1rem;
+}
+
+.teamRowHome {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.teamRowAway {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.teamName {
+  font-weight: 500;
+  color: var(--app-text);
+}
+

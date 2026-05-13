@@ -1,0 +1,173 @@
+@import '../../../styles/variables.less';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.statsGrid {
+  display: grid;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.metricHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+}
+
+.metricTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.metricIcon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-text);
+}
+
+.metricIconSuccess {
+  color: var(--success-bg);
+}
+
+.metricIconDestructive {
+  color: var(--destructive-bg);
+}
+
+.metricIconPrimary {
+  color: var(--primary-bg);
+}
+
+.metricValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.metricValueSuccess {
+  color: var(--success-bg);
+}
+
+.metricValueDestructive {
+  color: var(--destructive-bg);
+}
+
+.metricValuePrimary {
+  color: var(--primary-bg);
+}
+
+.infoGrid {
+  display: grid;
+  gap: 1.5rem;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.infoTitle {
+  font-size: 1rem;
+}
+
+.infoList {
+  & > * + * {
+    margin-top: 1rem;
+  }
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.infoValue {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.infoValueTruncate {
+  max-width: 200px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actionsContent {
+  & > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+.draftText {
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.actionButton {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.actionIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.actionOutlineDestructive {
+  color: var(--destructive-bg);
+
+  &:hover {
+    color: var(--destructive-bg);
+    background: ~"color-mix(in srgb, var(--destructive-bg) 10%, transparent)";
+  }
+}
+
+.pendingBox {
+  margin-top: 1rem;
+  border-radius: var(--radius-base);
+  border: 1px solid ~"color-mix(in srgb, var(--warning-bg) 30%, transparent)";
+  background: ~"color-mix(in srgb, var(--warning-bg) 10%, transparent)";
+  padding: 0.75rem;
+}
+
+.pendingButton {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  color: var(--warning-text);
+  border-color: ~"color-mix(in srgb, var(--warning-bg) 40%, transparent)";
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--warning-bg) 20%, transparent)";
+  }
+}
+
+.pendingText {
+  font-size: 0.875rem;
+  color: var(--warning-text);
+}
+

@@ -1,0 +1,37 @@
+/* Design tokens only. CSS-based tooltip on hover. */
+.root {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  display: inline-block;
+  cursor: default;
+}
+
+.content {
+  z-index: 50;
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, -4px);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--popover-text);
+  background: var(--popover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-base);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+}
+
+.root:hover .content,
+.root:focus-within .content {
+  opacity: 1;
+  visibility: visible;
+}

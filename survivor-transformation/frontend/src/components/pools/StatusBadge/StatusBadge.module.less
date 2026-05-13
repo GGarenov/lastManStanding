@@ -1,0 +1,40 @@
+/* Token-based status modifiers for StatusBadge. */
+.badgeMod {
+  font-weight: 500;
+}
+
+.statusMuted {
+  background: var(--muted-bg);
+  color: var(--muted-text);
+  border-color: var(--border-color);
+}
+
+.statusPrimaryTint {
+  background: color-mix(in srgb, var(--primary-bg) 20%, transparent);
+  color: var(--primary-bg);
+  border-color: color-mix(in srgb, var(--primary-bg) 30%, transparent);
+}
+
+.statusSuccessTint {
+  background: color-mix(in srgb, var(--success-bg) 20%, transparent);
+  color: var(--success-bg);
+  border-color: color-mix(in srgb, var(--success-bg) 30%, transparent);
+}
+
+.statusWarningTint {
+  background: color-mix(in srgb, var(--warning-bg) 20%, transparent);
+  color: var(--warning-bg);
+  border-color: color-mix(in srgb, var(--warning-bg) 30%, transparent);
+}
+
+.statusDestructiveTint {
+  background: color-mix(in srgb, var(--destructive-bg) 20%, transparent);
+  color: var(--destructive-bg);
+  border-color: color-mix(in srgb, var(--destructive-bg) 30%, transparent);
+}
+
+.statusRunning {
+  background: color-mix(in srgb, var(--warning-bg) 15%, transparent);
+  color: var(--warning-bg);
+  border-color: color-mix(in srgb, var(--warning-bg) 40%, transparent);
+}

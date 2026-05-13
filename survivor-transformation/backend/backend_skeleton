@@ -1,0 +1,157 @@
+backend/
+├── src/
+│   ├── main.ts
+│   ├── app.module.ts
+│   │
+│   ├── types/
+│   │   └── fastify.d.ts
+│   │
+│   ├── common/
+│   │   └── decorators/
+│   │       ├── current-user.decorator.ts
+│   │       ├── roles.decorator.ts
+│   │       └── public.decorator.ts
+│   │
+│   ├── database/
+│   │   ├── database.module.ts
+│   │   └── database.providers.ts
+│   │
+│   ├── guards/
+│   │   ├── guards.module.ts
+│   │   ├── auth.guard.ts
+│   │   ├── roles.guard.ts
+│   │   └── index.ts
+│   │
+│   ├── modules/
+│   │   ├── index.ts
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── auth.module.ts
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.interface.ts
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── users/
+│   │   │   ├── users.module.ts
+│   │   │   ├── users.controller.ts
+│   │   │   ├── users.service.ts
+│   │   │   ├── users.providers.ts
+│   │   │   ├── schemas/
+│   │   │   │   └── user.schema.ts
+│   │   │   └── user.interface.ts
+│   │   │
+│   │   ├── admin/
+│   │   │   ├── admin.module.ts
+│   │   │   ├── admin.controller.ts
+│   │   │   ├── admin.service.ts
+│   │   │   └── admin.interface.ts
+│   │   │
+│   │   ├── pool/
+│   │   │   ├── pool.module.ts
+│   │   │   ├── pool.controller.ts
+│   │   │   ├── pool.service.ts
+│   │   │   ├── pool.providers.ts
+│   │   │   ├── schemas/
+│   │   │   │   └── pool.schema.ts
+│   │   │   ├── pool.interface.ts
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── participant/
+│   │   │   ├── participant.module.ts
+│   │   │   ├── participant.controller.ts
+│   │   │   ├── participant.service.ts
+│   │   │   ├── participant.providers.ts
+│   │   │   ├── schemas/
+│   │   │   │   └── pool-participant.schema.ts
+│   │   │   ├── participant.interface.ts
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── round/
+│   │   │   ├── round.module.ts
+│   │   │   ├── round.service.ts
+│   │   │   ├── round.providers.ts
+│   │   │   ├── schemas/
+│   │   │   │   ├── round.schema.ts
+│   │   │   │   └── match.schema.ts
+│   │   │   ├── round.interface.ts
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── pick/
+│   │   │   ├── pick.module.ts
+│   │   │   ├── pick.controller.ts
+│   │   │   ├── pick.service.ts
+│   │   │   ├── pick.providers.ts
+│   │   │   ├── schemas/
+│   │   │   │   └── pick.schema.ts
+│   │   │   ├── pick.interface.ts
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── rake/
+│   │   │   ├── rake.module.ts
+│   │   │   ├── rake.controller.ts
+│   │   │   ├── rake.service.ts
+│   │   │   ├── rake.constants.ts
+│   │   │   ├── README.md
+│   │   │   └── index.ts
+│   │   │
+│   │   └── survivor/
+│   │       ├── survivor.module.ts
+│   │       ├── survivor.service.ts
+│   │       ├── survivor.interface.ts
+│   │       └── index.ts
+│   │
+│   └── types/
+│       └── fastify.d.ts
+│
+├── scripts/
+│   └── migrate-usernames.ts
+│
+├── test/
+│   ├── jest-e2e.json
+│   ├── admin/
+│   │   ├── admin.controller.spec.ts
+│   │   └── admin.service.spec.ts
+│   ├── auth/
+│   │   ├── auth.controller.spec.ts
+│   │   └── auth.service.spec.ts
+│   ├── participant/
+│   │   ├── participant.controller.spec.ts
+│   │   └── participant.service.spec.ts
+│   ├── pick/
+│   │   ├── pick.controller.spec.ts
+│   │   └── pick.service.spec.ts
+│   ├── pool/
+│   │   ├── pool.controller.spec.ts
+│   │   └── pool.service.spec.ts
+│   ├── round/
+│   │   └── round.service.spec.ts
+│   ├── survivor/
+│   │   └── survivor.service.spec.ts
+│   └── users/
+│       ├── users.controller.spec.ts
+│       └── users.service.spec.ts
+│
+├── dist/                     # Compiled JavaScript, d.ts, and .map files
+│   └── ...
+│
+├── node_modules/             # Installed dependencies
+│   └── ...
+│
+├── eslint.config.mjs
+├── nest-cli.json
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── tsconfig.build.json
+├── .prettierrc
+├── .gitignore
+├── BACKEND_LOGIC.md
+├── TESTING.md
+└── TO_DO_TASKS.md
+
+# Notes:
+# - Auth and Roles guards live in src/guards and are registered globally (APP_GUARD) for JWT + role-based access.
+# - Game domain is split into dedicated modules: pool, participant, round, pick, rake, and survivor (orchestrator-only).
+# - Rake module: constants (ENTRY_FEE_EUR, RAKE_PER_ENTRY_EUR), RakeService (prize/rake formulas, house earnings summary), GET /admin/rake/summary. Used by AdminService (startPool, createPool) and PoolService (getOpenPools, getMyStatus). See backend/src/modules/rake/README.md.
+# - Survivor module orchestrates round results, eliminations, and winner detection but has no controllers of its own.

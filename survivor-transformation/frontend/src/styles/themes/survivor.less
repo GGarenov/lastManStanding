@@ -1,0 +1,14 @@
+@import '../vars/default.less';
+
+.survivor-theme {
+  .declareCssVariables();
+
+  &--dark {
+    @import '../vars/default-dark';
+    .declareCssVariables();
+  }
+}
+
+:root {
+  .declareCssVariables();
+}

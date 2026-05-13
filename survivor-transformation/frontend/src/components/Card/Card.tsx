@@ -1,0 +1,52 @@
+import { forwardRef } from 'react';
+import styles from './Card.module.less';
+import type {
+  CardProps,
+  CardHeaderProps,
+  CardTitleProps,
+  CardDescriptionProps,
+  CardContentProps,
+  CardFooterProps,
+} from './Card.interface';
+
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={`${styles.card} ${className ?? ''}`.trim()} {...props} />
+  )
+);
+Card.displayName = 'Card';
+
+export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={`${styles.header} ${className ?? ''}`.trim()} {...props} />
+  )
+);
+CardHeader.displayName = 'CardHeader';
+
+export const CardTitle = forwardRef<HTMLParagraphElement, CardTitleProps>(
+  ({ className, ...props }, ref) => (
+    <h3 ref={ref} className={`${styles.title} ${className ?? ''}`.trim()} {...props} />
+  )
+);
+CardTitle.displayName = 'CardTitle';
+
+export const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
+  ({ className, ...props }, ref) => (
+    <p ref={ref} className={`${styles.description} ${className ?? ''}`.trim()} {...props} />
+  )
+);
+CardDescription.displayName = 'CardDescription';
+
+export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={`${styles.content} ${className ?? ''}`.trim()} {...props} />
+  )
+);
+CardContent.displayName = 'CardContent';
+
+export const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={`${styles.footer} ${className ?? ''}`.trim()} {...props} />
+  )
+);
+CardFooter.displayName = 'CardFooter';

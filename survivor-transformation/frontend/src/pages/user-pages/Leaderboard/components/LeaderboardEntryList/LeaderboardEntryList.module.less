@@ -1,0 +1,177 @@
+@import '../../../../../styles/variables.less';
+
+.listCard {
+  padding: 0;
+}
+
+.entryRow {
+  padding: 1rem;
+  transition: background 0.15s;
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--muted-bg) 50%, transparent)";
+  }
+}
+
+.entryRowCurrentWinner {
+  background: ~"color-mix(in srgb, var(--warning-bg) 10%, transparent)";
+  border-left: 4px solid var(--warning-bg);
+}
+
+.entryRowCurrent {
+  background: ~"color-mix(in srgb, var(--success-bg) 10%, transparent)";
+  border-left: 4px solid var(--success-bg);
+}
+
+.entryInner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.entryRank {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+
+  @media (min-width: 640px) {
+    gap: 1rem;
+  }
+}
+
+.rankCell {
+  flex-shrink: 0;
+  width: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rankCrown {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--warning-bg);
+}
+
+.rankNum {
+  color: var(--muted-text);
+  font-weight: 600;
+}
+
+.entryUser {
+  flex: 1;
+  min-width: 0;
+}
+
+.entryUserRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.entryUsername {
+  font-weight: 500;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.youBadge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--success-bg);
+  background: ~"color-mix(in srgb, var(--success-bg) 10%, transparent)";
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.entryStats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-left: 0;
+  padding-left: 0;
+
+  @media (min-width: 640px) {
+    margin-left: 0;
+    padding-left: 0;
+  }
+}
+
+.lastPick {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.lastPickLabel {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+  flex-shrink: 0;
+}
+
+.lastPickTeam {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.lastPickName {
+  font-size: 0.875rem;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roundsCell {
+  text-align: left;
+
+  @media (min-width: 640px) {
+    text-align: right;
+  }
+}
+
+.roundsValue {
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.statusCell {
+  flex-shrink: 0;
+  width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusTrophy {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--warning-bg);
+}
+
+.statusSkull {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--destructive-bg);
+}
+
+.statusShield {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--success-bg);
+}

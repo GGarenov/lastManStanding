@@ -1,0 +1,80 @@
+/* Uses design tokens only. No palette in components. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring-color);
+  }
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &.primary {
+    background: var(--primary-bg);
+    color: var(--primary-text);
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+  }
+  &.secondary {
+    background: var(--secondary-bg);
+    color: var(--secondary-text);
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+  }
+  &.ghost {
+    background: transparent;
+    color: var(--app-text);
+    &:hover:not(:disabled) {
+      background: var(--muted-bg);
+    }
+  }
+  &.destructive {
+    background: var(--destructive-bg);
+    color: var(--destructive-text);
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+  }
+  &.outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--app-text);
+    &:hover:not(:disabled) {
+      background: var(--muted-bg);
+    }
+  }
+
+  &.sm {
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+  }
+  &.md {
+    height: 2.5rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+  }
+  &.lg {
+    height: 2.75rem;
+    padding: 0 1.5rem;
+    font-size: 1rem;
+  }
+  &.icon {
+    height: 2.5rem;
+    width: 2.5rem;
+    padding: 0;
+  }
+}

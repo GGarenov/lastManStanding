@@ -1,0 +1,68 @@
+@import '../../styles/variables.less';
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.headerMain {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backButton {
+  flex-shrink: 0;
+}
+
+.iconSmall {
+  width: 1rem;
+  height: 1rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.description {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.buttonIcon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+}
+
+.deleteButton {
+  color: var(--destructive-bg);
+
+  &:hover {
+    color: var(--destructive-bg);
+    background: ~"color-mix(in srgb, var(--destructive-bg) 10%, transparent)";
+  }
+}
+

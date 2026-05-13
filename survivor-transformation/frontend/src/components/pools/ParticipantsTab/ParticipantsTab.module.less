@@ -1,0 +1,205 @@
+@import '../../../styles/variables.less';
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.errorPage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.errorText {
+  color: var(--destructive-bg);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  color: var(--muted-text);
+}
+
+.statsGrid {
+  display: grid;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.statCard {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.statCardTotal:hover {
+  border-color: ~"color-mix(in srgb, var(--primary-bg) 50%, transparent)";
+}
+
+.statCardPending:hover {
+  border-color: ~"color-mix(in srgb, var(--warning-bg) 50%, transparent)";
+}
+
+.statCardApproved:hover {
+  border-color: ~"color-mix(in srgb, var(--success-bg) 50%, transparent)";
+}
+
+.statCardEliminated:hover {
+  border-color: ~"color-mix(in srgb, var(--destructive-bg) 50%, transparent)";
+}
+
+.statContent {
+  padding-top: 1rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.statValueWarning {
+  color: var(--warning-bg);
+}
+
+.statValueSuccess {
+  color: var(--success-bg);
+}
+
+.statValueDestructive {
+  color: var(--destructive-bg);
+}
+
+.statLabel {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.cardHeaderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.cardTitle {
+  font-size: 1rem;
+}
+
+.controlsRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.searchWrap {
+  position: relative;
+  flex: 1;
+
+  @media (min-width: 640px) {
+    max-width: 16rem;
+  }
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-text);
+}
+
+.searchInput {
+  padding-left: 2.25rem;
+}
+
+.filterButton {
+  flex-shrink: 0;
+}
+
+.menuContent {
+  background: var(--popover-bg);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+}
+
+.actionsHeader {
+  text-align: right;
+}
+
+.emptyCell {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--muted-text);
+}
+
+.nameCell {
+  max-width: 7.5rem;
+
+  @media (min-width: 640px) {
+    max-width: 11.25rem;
+  }
+
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emailCell {
+  max-width: 8.75rem;
+
+  @media (min-width: 640px) {
+    max-width: 12.5rem;
+  }
+
+  color: var(--muted-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.joinedCell {
+  color: var(--muted-text);
+}
+
+.actionsCell {
+  text-align: right;
+}
+
+.actionButton {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+.iconSmall {
+  width: 1rem;
+  height: 1rem;
+}
+
+.menuItemDestructive {
+  color: var(--destructive-bg);
+}
+
+.menuItemIcon {
+  margin-right: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+}
+

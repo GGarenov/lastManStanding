@@ -1,0 +1,51 @@
+@import '../../styles/variables.less';
+
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.inset {
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  height: 3.5rem;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--card-bg);
+  padding: 0 1rem;
+  @media (min-width: 640px) {
+    padding: 0 1.5rem;
+  }
+}
+
+.trigger {
+  margin-left: -0.5rem;
+  
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+.heading {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-text);
+  margin: 0;
+  
+  @media (max-width: 767px) {
+    display: none;
+  }
+}
+
+.main {
+  flex: 1;
+  padding: 1rem;
+  @media (min-width: 640px) {
+    padding: 1.5rem;
+  }
+}
