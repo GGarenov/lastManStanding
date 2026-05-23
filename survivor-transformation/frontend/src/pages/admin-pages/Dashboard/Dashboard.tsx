@@ -7,19 +7,9 @@ import { PoolCard } from "~/components/pools/PoolCard/PoolCard";
 import { usePoolsStore } from "~/store/poolsStore";
 import { useUsersStore } from "~/store/usersStore";
 import * as adminApi from "~/api/admin.api";
-import type { RakeSummaryResponse } from "~/api/admin.api";
 import { toPoolShape, type NormalizedBackendParticipant } from "~/api/mappers";
 import { Pool } from "~/types/pool";
 import styles from "./Dashboard.module.less";
-
-function formatRakeEur(value: number): string {
-  if (value === 0) return "€0";
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 const adminActions = [
   { title: "Create Pool", path: "/admin/create", icon: Plus },
@@ -36,9 +26,6 @@ export default function Dashboard() {
     null,
   );
   const [enrichedPools, setEnrichedPools] = useState<Pool[]>([]);
-  /** Option A: House earnings / Rake summary for business demo. Fetched on mount. */
-  const [rakeSummary, setRakeSummary] = useState<RakeSummaryResponse | null>(null);
-  const [rakeSummaryLoading, setRakeSummaryLoading] = useState(true);
 
   useEffect(() => {
     fetchPools();
@@ -143,25 +130,6 @@ export default function Dashboard() {
     };
   }, [pools]);
 
-  useEffect(() => {
-    let cancelled = false;
-    setRakeSummaryLoading(true);
-    adminApi
-      .getRakeSummary()
-      .then((data) => {
-        if (!cancelled) setRakeSummary(data);
-      })
-      .catch(() => {
-        if (!cancelled) setRakeSummary(null);
-      })
-      .finally(() => {
-        if (!cancelled) setRakeSummaryLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const allPoolsCount = pools.length;
   const totalUsers = users.length;
 
@@ -190,16 +158,6 @@ export default function Dashboard() {
               </p>
               <p className={styles.statValue}>
                 {totalParticipants === null ? "—" : totalParticipants}
-              </p>
-            </div>
-            <div className={styles.statCard}>
-              <p className={styles.statLabel}>
-                House earnings
-              </p>
-              <p className={styles.statValue}>
-                {rakeSummaryLoading
-                  ? "—"
-                  : formatRakeEur(rakeSummary?.totalRakeEur ?? 0)}
               </p>
             </div>
           </div>

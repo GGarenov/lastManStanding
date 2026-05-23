@@ -18,9 +18,6 @@ type HomeHeroProps = {
   activeTournamentLabel?: string | null;
   completedPoolName?: string;
   winnerNames: string[];
-  hasMultipleWinners: boolean;
-  prizeTotalDisplay?: string;
-  prizeEachDisplay?: string | null;
 };
 
 export function HomeHero({
@@ -32,9 +29,6 @@ export function HomeHero({
   activeTournamentLabel,
   completedPoolName,
   winnerNames,
-  hasMultipleWinners,
-  prizeTotalDisplay,
-  prizeEachDisplay,
 }: HomeHeroProps) {
   return (
     <section className={styles.hero}>
@@ -65,21 +59,6 @@ export function HomeHero({
               </span>
             ))}
           </div>
-          <p className={styles.prizeText}>
-            They split the prize pool of{" "}
-            <span className={styles.prizeHighlight}>
-              {prizeTotalDisplay ?? "—"}
-            </span>
-            {hasMultipleWinners && prizeEachDisplay && (
-              <>
-                {" "}
-                <span className={styles.prizeGradient}>
-                  {prizeEachDisplay} each
-                </span>
-              </>
-            )}
-            .
-          </p>
           <div className={styles.ctaRow}>
             <Link
               to="/leaderboard"

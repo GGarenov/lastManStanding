@@ -1,8 +1,19 @@
-# Rake logic — Survivor Pool
+# Rake & financial metadata removal — Survivor Pool
 
-Reference: [docs/TECHNICAL_REPORT.md](docs/TECHNICAL_REPORT.md) (admin rules, rake module, API, game flow). Backend detail: [backend/src/modules/rake/README.md](backend/src/modules/rake/README.md).
+**Status: REMOVED** (completed 2026-05-23 on branch `remove-rake`)
+
+Rake (house fee), per-pool entry fees, and prize pool amounts have been **removed from the application**. The survivor game (picks, elimination, winners) is unchanged. Join flows use generic copy (“pay the admin to confirm your entry”). See [docs/TECHNICAL_REPORT.md](docs/TECHNICAL_REPORT.md) for the current architecture.
+
+**Phases 0–6:** completed. **Phase 7:** documentation updated. **Phase 8:** verification checklist below (update as you QA).
+
+Legacy MongoDB pool documents may still contain `entryFeeEur`, `rakePerEntryEur`, `prizePoolEur`, or `rakeEur`; the app no longer reads or writes them (soft delete).
 
 ---
+
+<details>
+<summary>Historical reference — what rake was (before removal)</summary>
+
+Reference (obsolete paths): backend `modules/rake/` (deleted), frontend `config/rake/` (deleted).
 
 ## What is the rake?
 
@@ -140,146 +151,142 @@ If you also want **no entry fee / prize pool at all**, add the optional tasks in
 
 ---
 
-### Phase 0 — Prep
+### Phase 0 — Prep ✅ DONE
 
-- [ ] **0.1** Create a branch (e.g. `remove-rake`).
-- [ ] **0.2** Agree on DB handling for existing pools:
-  - **Soft:** leave `rakeEur` / `rakePerEntryEur` in MongoDB but stop reading/writing them (fastest).
-  - **Hard:** one-off script or migration to `$unset` those fields on all pool documents.
-- [ ] **0.3** Note API breaking changes for any external clients: remove `rakePerEntryEur` from pool responses; remove `GET /api/admin/rake/summary`.
+- [x] ✅ **0.1** Create a branch (e.g. `remove-rake`).
+  - **Done:** Working branch `remove-rake` (tracks `origin/remove-rake`). Created/checked out 2026-05-23.
+- [x] ✅ **0.2** Agree on DB handling for existing pools:
+  - **Decision: Soft delete** — leave `rakeEur` and `rakePerEntryEur` on existing MongoDB pool documents; application code will stop reading/writing them after Phase 2. No migration script in this effort.
+  - **Rationale:** Fastest, non-destructive, reversible; orphaned fields are harmless. Revisit **hard** `$unset` only if compliance or schema hygiene requires a clean database.
+- [x] ✅ **0.3** Note API breaking changes for any external clients (see below).
+
+#### Phase 0 — API breaking changes (for integrators)
+
+| Change | Before | After |
+|--------|--------|--------|
+| Admin rake summary | `GET /api/admin/rake/summary` → `{ totalRakeEur, byPool }` | **Removed** (404) |
+| Pool list / my status | Responses may include `rakePerEntryEur` | Field **removed** |
+| Pool document (API) | May expose `rakeEur` on started pools | Field **removed** from API (may remain in DB per soft delete) |
+| Create pool body | Optional `rakePerEntryEur` | Field **removed**; ignored if sent until endpoint updated |
+| Prize pool semantics | `prizePoolEur = N × (entryFee − rakePerEntry)` | `prizePoolEur = N × entryFeeEur` (full entry to prize pool) |
+
+**Non-breaking for typical clients:** `prizePoolEur`, `entryFeeEur`, game/pick/leaderboard endpoints unchanged in path; only rake-specific fields and the admin rake endpoint go away.
 
 ---
 
-### Phase 1 — Delete rake-only backend module
+### Phase 1 — Delete rake-only backend module ✅ DONE
 
 **Delete entire directory:**
 
-- [ ] **1.1** `backend/src/modules/rake/` (all files: `rake.module.ts`, `rake.controller.ts`, `rake.service.ts`, `rake.constants.ts`, `index.ts`, `README.md`)
+- [x] ✅ **1.1** `backend/src/modules/rake/` (all files: `rake.module.ts`, `rake.controller.ts`, `rake.service.ts`, `rake.constants.ts`, `index.ts`, `README.md`)
 
 **Unregister module:**
 
-- [ ] **1.2** `backend/src/app.module.ts` — remove `RakeModule` import and from `imports` array.
-- [ ] **1.3** `backend/src/modules/index.ts` — remove `export { RakeModule } from './rake'`.
+- [x] ✅ **1.2** `backend/src/app.module.ts` — remove `RakeModule` import and from `imports` array.
+- [x] ✅ **1.3** `backend/src/modules/index.ts` — remove `export { RakeModule } from './rake'`.
+
+> **Note:** Backend will not compile until **Phase 2** — `admin.module`, `pool.module`, `admin.service`, and `pool.service` still reference the removed module.
 
 ---
 
-### Phase 2 — Backend: decouple pool & admin from rake
+### Phase 2 — Backend: decouple pool & admin from rake ✅ DONE
 
 **Schema & types — remove rake fields:**
 
-- [ ] **2.1** `backend/src/modules/pool/schemas/pool.schema.ts` — delete `rakeEur`, `rakePerEntryEur` schema paths; update comments on `prizePoolEur` / `entryFeeEur`.
-- [ ] **2.2** `backend/src/modules/pool/pool.interface.ts` — remove `rakeEur?`, `rakePerEntryEur?`.
-- [ ] **2.3** `backend/src/modules/survivor/survivor.interface.ts` — remove `rakeEur?`, `rakePerEntryEur?`; fix comments on `prizePoolEur`.
+- [x] ✅ **2.1** `backend/src/modules/pool/schemas/pool.schema.ts` — deleted `rakeEur`, `rakePerEntryEur`; updated comments.
+- [x] ✅ **2.2** `backend/src/modules/pool/pool.interface.ts` — removed rake fields.
+- [x] ✅ **2.3** `backend/src/modules/survivor/survivor.interface.ts` — removed rake fields; updated `prizePoolEur` comment.
 
 **Admin — create/start pool without rake:**
 
-- [ ] **2.4** `backend/src/modules/admin/admin.interface.ts` — remove `rakePerEntryEur` from `CreatePoolDto`; delete `RakeLessThanEntryFeeConstraint` class and `@Validate` usage; keep `entryFeeEur` optional if you still want configurable buy-in.
-- [ ] **2.5** `backend/src/modules/admin/admin.service.ts`:
-  - Remove `RakeService` injection and imports from `../rake/*`.
-  - `createPool`: stop destructuring/passing `rakePerEntryEur`.
-  - `startPool`: set `pool.prizePoolEur = participantsCount * (pool.entryFeeEur ?? DEFAULT_ENTRY_FEE_EUR)` inline (move `ENTRY_FEE_EUR` to e.g. `pool/pool.constants.ts` or keep a single constant in `admin.service` / `pool.service` — do **not** reintroduce a rake module).
-  - Remove assignment to `pool.rakeEur`.
-- [ ] **2.6** `backend/src/modules/admin/admin.module.ts` — remove `RakeModule` from `imports`.
+- [x] ✅ **2.4** `backend/src/modules/admin/admin.interface.ts` — removed `rakePerEntryEur`, `RakeLessThanEntryFeeConstraint`.
+- [x] ✅ **2.5** `backend/src/modules/admin/admin.service.ts` — uses `pool/pool.constants.ts` (`ENTRY_FEE_EUR`, `computePrizePoolEur`); no `rakeEur` on start.
+- [x] ✅ **2.6** `backend/src/modules/admin/admin.module.ts` — removed `RakeModule`.
 
 **Pool service — open pools / my status:**
 
-- [ ] **2.7** `backend/src/modules/pool/pool.module.ts` — remove `RakeModule` import and `forwardRef(() => RakeModule)`.
-- [ ] **2.8** `backend/src/modules/pool/pool.service.ts`:
-  - Remove `RakeService` injection and `../rake/*` imports.
-  - `getOpenPools` / `getMyStatus`: compute `prizePoolEur` as `approvedCount * (pool.entryFeeEur ?? ENTRY_FEE_EUR)` for `open` pools; for active/finished use stored `pool.prizePoolEur`.
-  - Stop returning `rakePerEntryEur` in API payloads.
-- [ ] **2.9** `backend/src/modules/pool/pool.controller.ts` — update JSDoc comments (no `rakePerEntryEur`).
+- [x] ✅ **2.7** `backend/src/modules/pool/pool.module.ts` — removed `RakeModule` / `forwardRef`.
+- [x] ✅ **2.8** `backend/src/modules/pool/pool.service.ts` — inline `computePrizePoolEur`; no `rakePerEntryEur` in responses.
+- [x] ✅ **2.9** `backend/src/modules/pool/pool.controller.ts` — JSDoc updated.
+
+**New shared helper:**
+
+- [x] ✅ **`backend/src/modules/pool/pool.constants.ts`** — `ENTRY_FEE_EUR`, `computePrizePoolEur(approvedCount, entryFeeEur)`.
 
 **Unchanged but verify:**
 
-- [ ] **2.10** `backend/src/modules/pick/pick.service.ts` — still uses `prizePoolEur` only; no change unless you remove prize pool entirely.
+- [x] ✅ **2.10** `backend/src/modules/pick/pick.service.ts` — uses `prizePoolEur` only; no rake references.
+
+> **Note:** Backend **tests** still reference rake (Phase 3). Run `npm run build` in `backend/` — compiles after Phase 2.
 
 ---
 
-### Phase 3 — Backend tests
+### Phase 3 — Backend tests ✅ DONE
 
-- [ ] **3.1** `backend/test/admin/admin.service.spec.ts` — remove `rakeService` mock and `getRakeEur` expectations; assert `prizePoolEur === count * entryFee` (e.g. 2 × 50 = 100 if default entry is 50).
-- [ ] **3.2** `backend/test/pool/pool.service.spec.ts` — remove `RakeService` mock; test inline prize calculation.
-- [ ] **3.3** `backend/test/pick/pick.service.spec.ts` — grep for rake; adjust fixtures if they set `rakePerEntryEur`.
-- [ ] **3.4** Run `npm test` (or project test command) in `backend/` until green.
+- [x] ✅ **3.1** `backend/test/admin/admin.service.spec.ts` — removed `rakeService` mock; asserts `prizePoolEur === count × ENTRY_FEE_EUR` (2 × 50 = 100); added custom `entryFeeEur` case.
+- [x] ✅ **3.2** `backend/test/pool/pool.service.spec.ts` — removed `RakeService` mock; expects `2 × 50` / `4 × 50` via `ENTRY_FEE_EUR`.
+- [x] ✅ **3.3** `backend/test/pick/pick.service.spec.ts` — no rake references; no changes needed.
+- [x] ✅ **3.4** `npm test` in `backend/` — all tests passing.
 
 ---
 
-### Phase 4 — Delete rake-only frontend
+### Phase 4 — Delete rake-only frontend ✅ DONE
 
 **Delete directories / pages:**
 
-- [ ] **4.1** `frontend/src/config/rake/` — entire folder (`constants.ts`, `formatEntryFeeCopy.ts`, `index.ts`).
-- [ ] **4.2** `frontend/src/pages/admin-pages/HouseEarnings/` — `HouseEarnings.tsx`, `HouseEarnings.module.less`.
+- [x] ✅ **4.1** `frontend/src/config/rake/` — deleted `constants.ts`, `formatEntryFeeCopy.ts`, `index.ts`.
+- [x] ✅ **4.2** `frontend/src/pages/admin-pages/HouseEarnings/` — deleted `HouseEarnings.tsx`, `HouseEarnings.module.less`.
 
 **Routing & nav:**
 
-- [ ] **4.3** `frontend/src/App.tsx` — remove `HouseEarnings` import and route `/admin/house-earnings`.
-- [ ] **4.4** `frontend/src/components/AdminSidebar/AdminSidebar.tsx` — remove “House earnings” nav item.
+- [x] ✅ **4.3** `frontend/src/App.tsx` — removed `HouseEarnings` import and `/admin/house-earnings` route.
+- [x] ✅ **4.4** `frontend/src/components/AdminSidebar/AdminSidebar.tsx` — removed “House earnings” nav item and `CircleDollarSign` import.
+
+> **Note:** Frontend will not build until **Phase 5** — `Rules`, `MyPool`, `Home` still import `~/config/rake`; `Dashboard` still calls `getRakeSummary()`.
 
 ---
 
-### Phase 5 — Frontend: update consumers
+### Phase 5 — Frontend: update consumers ✅ DONE
 
 **API layer:**
 
-- [ ] **5.1** `frontend/src/api/admin.api.ts` — remove `rakePerEntryEur` from `CreatePoolPayload`; delete `RakeSummaryResponse`, `RakeSummaryPoolEntry`, `getRakeSummary()`.
-- [ ] **5.2** `frontend/src/api/pools.api.ts` — remove `rakePerEntryEur` from types and normalizers; remove `DEFAULT_RAKE_PER_ENTRY_EUR`.
+- [x] ✅ **5.1** `frontend/src/api/admin.api.ts` — removed `rakePerEntryEur`, rake summary types, `getRakeSummary()`.
+- [x] ✅ **5.2** `frontend/src/api/pools.api.ts` — removed `rakePerEntryEur` from types and normalizers.
 
-**Replace `config/rake` usage** — add `frontend/src/config/pool-fees/` (or similar) with only what you need, e.g.:
+**New `frontend/src/config/pool-fees/`:**
 
-- `ENTRY_FEE_EUR = 50`
-- `formatEntryCopy(entryFeeEur)` → `"€50 entry"` or `"€50 buy-in"`
+- [x] ✅ `constants.ts` — `ENTRY_FEE_EUR`, `ENTRY_FEE_COPY` (no fee split).
+- [x] ✅ `formatEntryCopy.ts` — `formatEntryCopy`, `formatBuyInNote`.
+- [x] ✅ `index.ts` — barrel.
 
-Then update imports:
+**Updated consumers:**
 
-- [ ] **5.3** `frontend/src/pages/admin-pages/CreatePool/CreatePool.tsx` — remove rake field, validation, and payload key; keep entry fee only (optional).
-- [ ] **5.4** `frontend/src/pages/admin-pages/Dashboard/Dashboard.tsx` — remove `rakeSummary` state, `getRakeSummary()` effect, and “House earnings” stat card; remove `formatRakeEur` if unused.
-- [ ] **5.5** `frontend/src/pages/admin-pages/Dashboard/Dashboard.module.less` — delete unused `.rakeSection`, `.rakeList`, etc. (dead styles today if only stat card used them).
-- [ ] **5.6** `frontend/src/pages/user-pages/MyPool/MyPool.tsx` — replace `formatEntryFeeCopy(..., rake)` with simple entry copy; remove `RAKE_EUR` import.
-- [ ] **5.7** `frontend/src/pages/Home/Home.tsx` — stop passing `formatEntryFeeCopy`, `defaultRakeEur`; simplify props.
-- [ ] **5.8** `frontend/src/components/HomeFeaturedPool/HomeFeaturedPool.tsx` — remove `rakePerEntryEur`, `defaultRakeEur`, `formatEntryFeeCopy` rake parameter; show entry fee / prize pool only.
-- [ ] **5.9** `frontend/src/pages/user-pages/Rules/Rules.tsx` — replace `ENTRY_FEE_COPY` with generic copy without fee split (e.g. “Entry fee applies per pool” or fixed `€50 entry`).
+- [x] ✅ **5.3** `CreatePool.tsx` — entry fee only; helper text for full entry → prize pool.
+- [x] ✅ **5.4** `Dashboard.tsx` — removed house earnings stat and `getRakeSummary` effect.
+- [x] ✅ **5.5** `Dashboard.module.less` — removed unused `.rake*` styles.
+- [x] ✅ **5.6** `MyPool.tsx` — `formatBuyInNote` from `pool-fees`.
+- [x] ✅ **5.7** `Home.tsx` — simplified `HomeFeaturedPool` props.
+- [x] ✅ **5.8** `HomeFeaturedPool.tsx` — entry fee only via `formatBuyInNote`.
+- [x] ✅ **5.9** `Rules.tsx` — `ENTRY_FEE_COPY` from `pool-fees`.
 
-**No rake references (prize pool only — verify after edits):**
+**Verified (prize pool only, no rake):**
 
-- [ ] **5.10** `frontend/src/components/PrizePoolBanner/PrizePoolBanner.tsx`
-- [ ] **5.11** `frontend/src/pages/user-pages/Leaderboard/**` (uses `prizePoolEur` only)
-- [ ] **5.12** `frontend/src/pages/Home/hooks/*`, `home.helpers.ts`
+- [x] ✅ **5.10** `PrizePoolBanner.tsx` — unchanged; uses `prizePoolEur` only.
+- [x] ✅ **5.11** `Leaderboard/**` — unchanged; uses `prizePoolEur` only.
+- [x] ✅ **5.12** `Home/hooks/*`, `home.helpers.ts` — unchanged; no rake refs.
 
-- [ ] **5.13** Run `npm run build` (and lint) in `frontend/`.
-
----
-
-### Phase 6 — Optional: remove all fee / prize metadata
-
-Only if the product should have **no** buy-in or prize amounts in the app:
-
-- [ ] **6.1** Remove `entryFeeEur` and `prizePoolEur` from pool schema, APIs, CreatePool form, MyPool/Home buy-in UI, `PrizePoolBanner`, Leaderboard prize display.
-- [ ] **6.2** `PickService` — stop returning `prizePoolEur` in leaderboard payload.
-- [ ] **6.3** Large doc/UI sweep — this is a separate feature removal, not required for rake-only removal.
+- [x] ✅ **5.13** `npm run build` in `frontend/` — success.
 
 ---
 
-### Phase 7 — Documentation & housekeeping
+### Phase 6 — Optional: remove all fee / prize metadata ✅ DONE
 
-- [ ] **7.1** `docs/TECHNICAL_REPORT.md` — remove rake module section, house earnings API, rake fields in schema, game-flow rake steps (~32 mentions).
-- [ ] **7.2** `rake_logic.md` — archive or replace this file with a short note (“rake removed on &lt;date&gt;”) or delete if no longer needed.
-- [ ] **7.3** `frontend/skeleton_frontend` — update tree comment for `config/rake/` and rake-related bullets.
-- [ ] **7.4** Repo-wide grep: `rake`, `RakeService`, `RakeModule`, `rakePerEntry`, `getRakeSummary`, `house-earnings`, `formatEntryFeeCopy`, `RAKE_` — expect **zero** hits in `src/` (except changelog/history if you keep any).
+- [x] ✅ **6.1** Removed `entryFeeEur` and `prizePoolEur` from pool schema, interfaces, admin/pool APIs, CreatePool form, MyPool/Home join copy, deleted `PrizePoolBanner` and `config/pool-fees/`, Leaderboard winners banner (no prize amounts).
+- [x] ✅ **6.2** `PickService.getLeaderboard` — no longer returns `prizePoolEur`; removed pool fetch used only for prize.
+- [x] ✅ **6.3** Frontend `pools.api.ts` leaderboard types updated; Home stats banner shows players/round only (no prize column).
 
 ---
 
-### Phase 8 — Verification checklist
-
-- [ ] **8.1** Admin can create pool with entry fee only (no rake field).
-- [ ] **8.2** Starting pool sets `prizePoolEur = N × entryFeeEur` and does **not** set `rakeEur`.
-- [ ] **8.3** `GET /api/pools/survivor` and `GET /api/pools/:id/me` return `entryFeeEur` + `prizePoolEur`, no rake fields.
-- [ ] **8.4** `GET /api/admin/rake/summary` returns **404** (route removed).
-- [ ] **8.5** No `/admin/house-earnings` route; Dashboard has no house earnings card.
-- [ ] **8.6** MyPool / Home / Rules show copy without “+ €X fee”.
-- [ ] **8.7** Leaderboard and prize banners still show correct `prizePoolEur` for active pools.
-- [ ] **8.8** Backend + frontend tests pass.
 
 ---
 
@@ -302,3 +309,29 @@ Only if the product should have **no** buy-in or prize amounts in the app:
 4. **Tests + grep** to prevent regressions.
 
 Do **not** leave a hollow `RakeService` with only `getPrizePoolEur` — rename/move a tiny `pool-fee` helper under `pool/` if you want shared math, or keep the one-liner inline to avoid a misleading module name.
+
+</details>
+
+---
+
+### Phase 7 — Documentation & housekeeping ✅ DONE
+
+- [x] ✅ **7.1** `docs/TECHNICAL_REPORT.md` — removed rake module, house earnings API, fee/prize schema fields; updated admin rules, APIs, game flow, and features; added removal note.
+- [x] ✅ **7.2** `rake_logic.md` — this file: completion banner at top; historical content kept in collapsed section.
+- [x] ✅ **7.3** `frontend/skeleton_frontend` — removed `config/rake/`, `PrizePoolBanner/`; updated notes.
+- [x] ✅ **7.4** Grep in `backend/src` and `frontend/src`: **zero** matches for `RakeService`, `RakeModule`, `rakePerEntry`, `getRakeSummary`, `house-earnings`, `formatEntryFeeCopy`, `pool-fees`, `PrizePoolBanner` (only unrelated `rake` substring in `tournament-logo.svg` binary).
+
+---
+
+### Phase 8 — Verification checklist ✅ DONE
+
+Verified 2026-05-23 (code inspection + automated tests).
+
+- [x] ✅ **8.1** `CreatePoolDto` has `name`, `description`, `tournamentKey` only; `CreatePool.tsx` has no fee inputs; `admin.service.spec` / `admin.controller.spec` create pool with name/description only.
+- [x] ✅ **8.2** `AdminService.startPool` sets `status = 'active'` and `startedAt` only; test asserts `prizePoolEur` / `entryFeeEur` stay undefined on save.
+- [x] ✅ **8.3** `PoolService.getOpenPools` / `getMyStatus` return id, name, status, participant counts, tournamentKey, membership fields only (no fee/prize keys); `pool.service.spec` matches.
+- [x] ✅ **8.4** `backend/src/modules/rake/` deleted; no `rake` routes on `AdminController` (unknown path → 404 at runtime).
+- [x] ✅ **8.5** `App.tsx` has no `/admin/house-earnings`; `Dashboard.tsx` has no house earnings stat or `getRakeSummary`.
+- [x] ✅ **8.6** MyPool / `HomeFeaturedPool`: “pay the pool admin to confirm your entry”; Rules: same generic copy; no `€` fee-split strings in pages.
+- [x] ✅ **8.7** `PrizePoolBanner` removed; `LeaderboardHeader` winners banner lists names only (no prize amounts).
+- [x] ✅ **8.8** Backend: **144 tests passed** (`npm test`). Frontend: **`npm run build` succeeded**.

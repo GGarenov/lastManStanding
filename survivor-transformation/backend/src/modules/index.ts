@@ -1,7 +1,6 @@
 export * from './auth';
 export * from './users';
 export * from './admin';
-export { RakeModule } from './rake';
 export {
   RoundModule,
   RoundService,

@@ -144,9 +144,6 @@ frontend/
 │   │   │   ├── Pagination.tsx
 │   │   │   ├── Pagination.module.less
 │   │   │   └── Pagination.interface.ts
-│   │   ├── PrizePoolBanner/
-│   │   │   ├── PrizePoolBanner.tsx
-│   │   │   └── PrizePoolBanner.module.less
 │   │   ├── RoundCountdownBanner/
 │   │   │   ├── RoundCountdownBanner.tsx
 │   │   │   └── RoundCountdownBanner.module.less
@@ -262,10 +259,6 @@ frontend/
 │   │           └── RecordResultsDialog.module.less
 │   │
 │   ├── config/
-│   │   ├── rake/
-│   │   │   ├── constants.ts
-│   │   │   ├── formatEntryFeeCopy.ts
-│   │   │   └── index.ts
 │   │   └── tournaments/
 │   │       ├── index.ts
 │   │       ├── types.ts
@@ -316,9 +309,6 @@ frontend/
 │   │   │   ├── Dashboard/
 │   │   │   │   ├── Dashboard.tsx
 │   │   │   │   └── Dashboard.module.less
-│   │   │   ├── HouseEarnings/
-│   │   │   │   ├── HouseEarnings.tsx
-│   │   │   │   └── HouseEarnings.module.less
 │   │   │   ├── CreatePool/
 │   │   │   │   ├── CreatePool.tsx
 │   │   │   │   └── CreatePool.module.less
@@ -402,7 +392,8 @@ frontend/
 └── .gitignore
 
 # Notes:
-# - Rake (entry fee / house fee): config/rake has constants (ENTRY_FEE_EUR, RAKE_EUR, ENTRY_FEE_COPY) and formatEntryFeeCopy(entryFeeEur, rakePerEntryEur). API (admin.api CreatePoolPayload; pools.api OpenPool, MyPoolStatusResponse) and normalizers default entryFeeEur/rakePerEntryEur to 50/10. CreatePool form sends them; Dashboard shows House earnings in Stats; HouseEarnings page is full rake summary. MyPool and Home use per-pool entry/rake + formatEntryFeeCopy; Rules uses ENTRY_FEE_COPY only.
+# - Pool join copy: MyPool and Home use generic "join pool / pay admin" text (no entry fee or prize amounts in API or UI).
+# - Home stats: HomeStatsBanner shows total players, players left, current round (no prize pool column).
 #
 # - Operator Override System:
 #   - operator/assets_override/: Place operator-specific assets (logos, images) here. The asset-override plugin will automatically replace default assets.

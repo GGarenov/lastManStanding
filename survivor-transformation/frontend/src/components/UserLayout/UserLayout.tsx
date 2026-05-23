@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { Outlet, useParams, useLocation } from 'react-router-dom';
 import { Navbar } from '~/components/Navbar/Navbar';
 import { RoundCountdownBanner } from '~/components/RoundCountdownBanner/RoundCountdownBanner';
-import { PrizePoolBanner } from '~/components/PrizePoolBanner/PrizePoolBanner';
 import { ActiveTournamentProvider } from '~/contexts/ActiveTournamentContext';
 import { getMyPoolMemberships, getMyPoolStatus } from '~/api/pools.api';
 import styles from './UserLayout.module.less';
@@ -69,7 +68,6 @@ export function UserLayout() {
       <div className={styles.wrapper}>
         <Navbar />
         <RoundCountdownBanner poolId={poolId} tournamentKey={tournamentKey} />
-        <PrizePoolBanner poolId={poolId} />
         <Outlet />
       </div>
     </ActiveTournamentProvider>

@@ -20,7 +20,6 @@ import {
   XCircle,
   ListOrdered,
 } from "lucide-react";
-import { ENTRY_FEE_COPY } from "~/config/rake";
 import styles from "./Rules.module.less";
 
 export default function Rules() {
@@ -45,7 +44,7 @@ export default function Rules() {
             <CardContent className={`${styles.cardContent} ${styles.cardContentSpaceY} ${styles.cardContentText}`}>
               <p>
                 This is a prediction game tied to the tournament - World Cup 2026.
-                You join a pool with an entry fee: {ENTRY_FEE_COPY}. Each round, you pick <strong className={styles.strong}>one team</strong> you think will win.
+                You join a pool and pay the admin to confirm your entry. Each round, you pick <strong className={styles.strong}>one team</strong> you think will win.
                 If your team wins, you stay in. If they draw or lose, you're out. <strong className={styles.strong}>You can never pick the same team twice.</strong>
                 The last player/s left standing wins (or splits) the prize pool.
               </p>
@@ -165,7 +164,7 @@ export default function Rules() {
                   <span className={styles.stepBadgeSolid}>3</span>
                   <div>
                     <p className={styles.stepTitle}>Get approved</p>
-                    <p className={styles.stepDesc}>{ENTRY_FEE_COPY}. Pay to the pool admin to confirm. Once they confirm, you're in.</p>
+                    <p className={styles.stepDesc}>Pay the pool admin to confirm your entry. Once they approve you, you&apos;re in.</p>
                   </div>
                 </div>
                 <div className={styles.listItem}>

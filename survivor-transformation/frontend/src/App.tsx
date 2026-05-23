@@ -12,7 +12,6 @@ import PoolManagement from "~/pages/admin-pages/PoolManagement/PoolManagement";
 import ActivePools from "~/pages/admin-pages/ActivePools/ActivePools";
 import ArchivedPools from "~/pages/admin-pages/ArchivedPools/ArchivedPools";
 import UsersManagement from "~/pages/admin-pages/UsersManagement/UsersManagement";
-import HouseEarnings from "~/pages/admin-pages/HouseEarnings/HouseEarnings";
 import Home from "~/pages/Home/Home";
 import Login from "~/pages/user-pages/Login/Login";
 import Register from "~/pages/user-pages/Register/Register";
@@ -90,14 +89,6 @@ function AppRoutes() {
         element={
           <AdminGuard>
             <UsersManagement />
-          </AdminGuard>
-        }
-      />
-      <Route
-        path="/admin/house-earnings"
-        element={
-          <AdminGuard>
-            <HouseEarnings />
           </AdminGuard>
         }
       />

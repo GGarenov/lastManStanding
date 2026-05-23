@@ -206,12 +206,9 @@ export class PickService {
 
   /**
    * Get leaderboard data for a pool
-   * Returns object with entries, totalPlayers, alivePlayers, prizePoolEur, winnerCount
+   * Returns object with entries, totalPlayers, alivePlayers, winnerCount
    */
   async getLeaderboard(poolId: string) {
-    const pool = await this.poolModel.findById(poolId).lean();
-    const prizePoolEur = pool?.prizePoolEur ?? 0;
-
     // Get all approved and winner participants (so finished pools still show full leaderboard)
     const participants = await this.participantModel
       .find({ poolId, status: { $in: ['approved', 'winner'] } })
@@ -223,7 +220,6 @@ export class PickService {
         entries: [],
         totalPlayers: 0,
         alivePlayers: 0,
-        prizePoolEur,
         winnerCount: 0,
       };
     }
@@ -339,7 +335,6 @@ export class PickService {
       entries: leaderboard,
       totalPlayers: leaderboard.length,
       alivePlayers,
-      prizePoolEur,
       winnerCount,
     };
   }

@@ -38,25 +38,6 @@ export const PoolSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-
-    prizePoolEur: {
-      type: Number,
-    },
-
-    /** Set when pool is started and rake is enabled: approvedCount * RAKE_PER_ENTRY_EUR (house earnings). */
-    rakeEur: {
-      type: Number,
-    },
-
-    /** Entry fee in EUR used for this pool (e.g. 50) for reporting and display consistency. */
-    entryFeeEur: {
-      type: Number,
-    },
-
-    /** Rake in EUR per entry; set at pool creation. Prize per entry = entryFeeEur - rakePerEntryEur. */
-    rakePerEntryEur: {
-      type: Number,
-    },
   },
   { timestamps: true },
 );

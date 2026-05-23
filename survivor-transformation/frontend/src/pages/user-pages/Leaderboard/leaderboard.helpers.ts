@@ -5,15 +5,6 @@ export const ENTRIES_PER_PAGE = 25;
 export type StatusFilter = "all" | "alive" | "eliminated" | "winners";
 export type SortBy = "rounds" | "picks" | "username";
 
-export function formatPrizePoolEur(eur: number): string {
-  if (eur === 0) return "€0";
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(eur);
-}
-
 export function filterByStatus(
   entries: LeaderboardEntry[],
   status: StatusFilter,

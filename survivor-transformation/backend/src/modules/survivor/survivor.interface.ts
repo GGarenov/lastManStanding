@@ -13,12 +13,6 @@ export interface Pool extends Document {
   startedAt?: Date;
   finishedAt?: Date;
   tournamentKey?: string;
-  /** Prize pool in EUR, set when pool is started (e.g. approved count × 40 when rake is on). */
-  prizePoolEur?: number;
-  /** House rake in EUR, set when pool is started with rake enabled. */
-  rakeEur?: number;
-  entryFeeEur?: number;
-  rakePerEntryEur?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

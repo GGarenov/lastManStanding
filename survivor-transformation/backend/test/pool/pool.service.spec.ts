@@ -11,7 +11,6 @@ describe('PoolService', () => {
     findOne: jest.Mock;
     countDocuments: jest.Mock;
   };
-  let rakeService: { getPrizePoolEur: jest.Mock };
 
   beforeEach(() => {
     poolModel = {
@@ -25,14 +24,7 @@ describe('PoolService', () => {
       findOne: jest.fn(),
       countDocuments: jest.fn(),
     };
-    rakeService = {
-      getPrizePoolEur: jest.fn((n: number) => n * 40),
-    };
-    service = new PoolService(
-      poolModel as any,
-      participantModel as any,
-      rakeService as any,
-    );
+    service = new PoolService(poolModel as any, participantModel as any);
   });
 
   describe('getMyPoolMemberships', () => {
@@ -80,7 +72,7 @@ describe('PoolService', () => {
   });
 
   describe('getOpenPools', () => {
-    it('returns open and active pools plus user pools not in open list, with counts and prizePoolEur', async () => {
+    it('returns open and active pools plus user pools not in open list, with counts', async () => {
       poolModel.find
         .mockReturnValueOnce({
           lean: jest.fn().mockResolvedValue([
@@ -111,24 +103,8 @@ describe('PoolService', () => {
         status: 'open',
         participants: 3,
         approvedParticipants: 2,
-        prizePoolEur: 2 * 40,
         tournamentKey: 'euro',
       });
-    });
-
-    it('uses pool.prizePoolEur when pool status is not open', async () => {
-      poolModel.find.mockReturnValue({
-        lean: jest.fn().mockResolvedValue([
-          { _id: 'p1', name: 'Active', status: 'active', prizePoolEur: 100 },
-        ]),
-      });
-      participantModel.distinct.mockResolvedValue([]);
-      participantModel.countDocuments.mockResolvedValue(5);
-      participantModel.countDocuments.mockResolvedValue(4);
-
-      const result = await service.getOpenPools('user1');
-
-      expect(result[0].prizePoolEur).toBe(100);
     });
   });
 
@@ -217,9 +193,7 @@ describe('PoolService', () => {
         }),
       });
       participantModel.findOne.mockResolvedValue(null);
-      participantModel.countDocuments
-        .mockResolvedValueOnce(5)
-        .mockResolvedValueOnce(4);
+      participantModel.countDocuments.mockResolvedValue(5);
 
       const result = await service.getMyStatus('p1', 'user1');
 
@@ -230,7 +204,6 @@ describe('PoolService', () => {
         tournamentKey: 'euro',
         poolStatus: 'open',
         playersRemaining: 5,
-        prizePoolEur: 4 * 40,
       });
     });
 
@@ -240,7 +213,6 @@ describe('PoolService', () => {
           _id: 'p1',
           name: 'Pool',
           status: 'active',
-          prizePoolEur: 100,
         }),
       });
       participantModel.findOne.mockResolvedValue({
@@ -248,9 +220,7 @@ describe('PoolService', () => {
         eliminated: true,
         eliminatedReason: 'team_lost',
       });
-      participantModel.countDocuments
-        .mockResolvedValueOnce(3)
-        .mockResolvedValueOnce(4);
+      participantModel.countDocuments.mockResolvedValue(3);
 
       const result = await service.getMyStatus('p1', 'user1');
 
@@ -261,7 +231,6 @@ describe('PoolService', () => {
         name: 'Pool',
         poolStatus: 'active',
         playersRemaining: 3,
-        prizePoolEur: 100,
       });
     });
   });

@@ -9,8 +9,6 @@ type FeaturedPool = {
   name: string;
   status: string;
   participants: number;
-  entryFeeEur?: number;
-  rakePerEntryEur?: number;
   myStatus?: string;
 };
 
@@ -22,9 +20,6 @@ type HomeFeaturedPoolProps = {
   poolsLoading: boolean;
   joiningId: string | null;
   onJoin: (poolId: string) => void;
-  formatEntryFeeCopy: (entryFeeEur: number, rakePerEntryEur: number) => string;
-  defaultEntryFeeEur: number;
-  defaultRakeEur: number;
 };
 
 export function HomeFeaturedPool({
@@ -35,9 +30,6 @@ export function HomeFeaturedPool({
   poolsLoading,
   joiningId,
   onJoin,
-  formatEntryFeeCopy,
-  defaultEntryFeeEur,
-  defaultRakeEur,
 }: HomeFeaturedPoolProps) {
   if (!activeTournament || !featuredPool) return null;
 
@@ -84,18 +76,14 @@ export function HomeFeaturedPool({
                     size="lg"
                     className={styles.featuredButtonFull}
                   >
-                    Log in to buy in
+                    Log in to join
                   </Button>
                 </Link>
               ) : myStatus === "none" ? (
                 <>
                   <p className={styles.buyInText}>
-                    {formatEntryFeeCopy(
-                      featuredPool.entryFeeEur ?? defaultEntryFeeEur,
-                      featuredPool.rakePerEntryEur ?? defaultRakeEur,
-                    )}
-                    . Pay to the admin to confirm your entry. You'll be approved
-                    once payment is received.
+                    Request to join this pool. Pay the admin to confirm your
+                    entry. You&apos;ll be approved once payment is received.
                   </p>
                   <Button
                     size="lg"
@@ -110,9 +98,7 @@ export function HomeFeaturedPool({
                         Joining…
                       </>
                     ) : (
-                      `Buy in €${
-                        featuredPool.entryFeeEur ?? defaultEntryFeeEur
-                      }`
+                      "Join pool"
                     )}
                   </Button>
                 </>
@@ -141,4 +127,3 @@ export function HomeFeaturedPool({
     </section>
   );
 }
-

@@ -5,14 +5,8 @@ export interface OpenPool {
   name: string;
   status: string;
   participants: number;
-  /** Approved participants (for open pools: prize pool = approvedParticipants × prize per entry). */
+  /** Approved participants in the pool. */
   approvedParticipants: number;
-  /** Prize pool in EUR (live for open pools, stored value for active/finished). */
-  prizePoolEur: number;
-  /** Entry fee in EUR per entry (default 50 when missing from API). */
-  entryFeeEur: number;
-  /** Rake in EUR per entry (default 10 when missing from API). */
-  rakePerEntryEur: number;
   /** Tournament key (e.g. 'euro-2024', 'world-cup-2026') for active tournament context. */
   tournamentKey?: string;
 }
@@ -25,14 +19,8 @@ interface RawPool {
   status?: string;
   participants?: number;
   approvedParticipants?: number;
-  prizePoolEur?: number;
-  entryFeeEur?: number;
-  rakePerEntryEur?: number;
   tournamentKey?: string;
 }
-
-const DEFAULT_ENTRY_FEE_EUR = 50;
-const DEFAULT_RAKE_PER_ENTRY_EUR = 10;
 
 function normalizePool(p: RawPool): OpenPool {
   return {
@@ -41,9 +29,6 @@ function normalizePool(p: RawPool): OpenPool {
     status: p.status ?? 'open',
     participants: Number(p.participants) || 0,
     approvedParticipants: Number(p.approvedParticipants) || 0,
-    prizePoolEur: Number(p.prizePoolEur) || 0,
-    entryFeeEur: Number(p.entryFeeEur) || DEFAULT_ENTRY_FEE_EUR,
-    rakePerEntryEur: Number(p.rakePerEntryEur) || DEFAULT_RAKE_PER_ENTRY_EUR,
     tournamentKey: p.tournamentKey ?? undefined,
   };
 }
@@ -86,12 +71,6 @@ export interface MyPoolStatusResponse {
   poolStatus?: string;
   /** Count of approved participants who are not eliminated */
   playersRemaining?: number;
-  /** Prize pool in EUR (live for open pools, stored value for active/finished) */
-  prizePoolEur?: number;
-  /** Entry fee in EUR per entry (default 50 when missing from API). */
-  entryFeeEur?: number;
-  /** Rake in EUR per entry (default 10 when missing from API). */
-  rakePerEntryEur?: number;
   /** Current user's eliminated status (only when approved) */
   eliminated?: boolean;
   /** Why the user was eliminated: 'team_lost' = picked team lost; 'no_pick' = did not pick in the round */
@@ -104,12 +83,7 @@ export interface MyPoolStatusResponse {
 
 export async function getMyPoolStatus(poolId: string): Promise<MyPoolStatusResponse> {
   const { data } = await apiClient.get<MyPoolStatusResponse>(`/pools/${poolId}/me`);
-  const base = data ?? { status: 'none' as const, name: '' };
-  return {
-    ...base,
-    entryFeeEur: Number(base.entryFeeEur) || DEFAULT_ENTRY_FEE_EUR,
-    rakePerEntryEur: Number(base.rakePerEntryEur) || DEFAULT_RAKE_PER_ENTRY_EUR,
-  };
+  return data ?? { status: 'none' as const, name: '' };
 }
 
 /** Match shape from participant rounds API (same as admin). */
@@ -179,7 +153,7 @@ export interface UserPick {
   userId: string;
   username: string;
   team: string;
-  createdAt: string; // ISO date string
+  createdAt: string;
 }
 
 /** Round statistics response */
@@ -194,12 +168,6 @@ export interface RoundStats {
   allPicks: UserPick[];
 }
 
-/**
- * Get statistics for a specific round
- * @param poolId - Pool ID
- * @param roundNumber - Round number
- * @returns Round statistics
- */
 export async function getRoundStats(
   poolId: string,
   roundNumber: number
@@ -208,8 +176,7 @@ export async function getRoundStats(
     const { data } = await apiClient.get<RoundStats>(
       `/pools/${poolId}/survivor/stats/${roundNumber}`
     );
-    
-    // Return data with defaults for missing fields
+
     return {
       roundNumber: data?.roundNumber ?? roundNumber,
       picksIn: data?.picksIn ?? 0,
@@ -220,8 +187,7 @@ export async function getRoundStats(
       recentPicks: data?.recentPicks ?? [],
       allPicks: data?.allPicks ?? [],
     };
-  } catch (error) {
-    // Return default values on error
+  } catch {
     return {
       roundNumber,
       picksIn: 0,
@@ -239,17 +205,16 @@ export async function getRoundStats(
 export interface LastPick {
   round: number;
   team: string;
-  createdAt: string; // ISO date string
+  createdAt: string;
 }
 
-/** Leaderboard entry */
 export interface LeaderboardEntry {
   userId: string;
   username: string;
   roundsSurvived: number;
   lastPick: LastPick | null;
   isEliminated: boolean;
-  eliminatedAt: string | null; // ISO date string
+  eliminatedAt: string | null;
   isWinner: boolean;
   totalPicks: number;
 }
@@ -259,8 +224,6 @@ export interface LeaderboardResponse {
   entries: LeaderboardEntry[];
   totalPlayers: number;
   alivePlayers: number;
-  /** Prize pool in EUR (from pool, set at start). */
-  prizePoolEur: number;
   /** Number of winners (entries with isWinner). */
   winnerCount: number;
 }
@@ -268,7 +231,7 @@ export interface LeaderboardResponse {
 /**
  * Get leaderboard data for a pool
  * @param poolId - Pool ID
- * @returns Leaderboard data with entries, total players, alive players, prize pool, and winner count
+ * @returns Leaderboard data with entries, total players, alive players, and winner count
  */
 export async function getLeaderboard(
   poolId: string
@@ -284,7 +247,6 @@ export async function getLeaderboard(
         entries: data.entries ?? [],
         totalPlayers: data.totalPlayers ?? data.entries?.length ?? 0,
         alivePlayers: data.alivePlayers ?? 0,
-        prizePoolEur: Number(data.prizePoolEur) || 0,
         winnerCount: Number(data.winnerCount) || 0,
       };
     }
@@ -296,7 +258,6 @@ export async function getLeaderboard(
       entries,
       totalPlayers,
       alivePlayers,
-      prizePoolEur: 0,
       winnerCount: entries.filter((e) => e.isWinner).length,
     };
   } catch (error) {
@@ -304,7 +265,6 @@ export async function getLeaderboard(
       entries: [],
       totalPlayers: 0,
       alivePlayers: 0,
-      prizePoolEur: 0,
       winnerCount: 0,
     };
   }

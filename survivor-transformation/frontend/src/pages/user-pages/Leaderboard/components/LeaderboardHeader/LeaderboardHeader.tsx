@@ -1,6 +1,5 @@
 import { Trophy, Download, Share2 } from "lucide-react";
 import { Button } from "~/components/Button/Button";
-import { formatPrizePoolEur } from "../../leaderboard.helpers";
 import type { LeaderboardResponse } from "~/api/pools.api";
 import styles from "./LeaderboardHeader.module.less";
 
@@ -26,6 +25,11 @@ export function LeaderboardHeader({
     leaderboardData.winnerCount != null &&
     leaderboardData.winnerCount > 0;
 
+  const winnerNames = leaderboardData.entries
+    .filter((e) => e.isWinner)
+    .map((e) => e.username)
+    .join(", ");
+
   return (
     <div className={styles.headerSection} aria-label="Leaderboard header">
       {showPoolName && (
@@ -37,31 +41,7 @@ export function LeaderboardHeader({
         <div className={styles.winnersBanner}>
           <p className={styles.winnersText}>
             The winners are{" "}
-            {leaderboardData.entries
-              .filter((e) => e.isWinner)
-              .map((e) => e.username)
-              .join(", ")}{" "}
-            and they split the prize pool of{" "}
-            <span className={styles.winnersHighlight}>
-              {formatPrizePoolEur(leaderboardData.prizePoolEur ?? 0)}
-            </span>
-            {leaderboardData.winnerCount > 1 && (
-              <>
-                {" "}
-                (
-                <span className={styles.winnersHighlight}>
-                  {formatPrizePoolEur(
-                    Math.floor(
-                      (leaderboardData.prizePoolEur ?? 0) /
-                        leaderboardData.winnerCount
-                    )
-                  )}{" "}
-                  each
-                </span>
-                )
-              </>
-            )}
-            .
+            <span className={styles.winnersHighlight}>{winnerNames}</span>.
           </p>
         </div>
       )}

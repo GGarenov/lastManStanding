@@ -41,7 +41,6 @@ describe('AdminService', () => {
     countAdmins: jest.Mock;
     deleteUser: jest.Mock;
   };
-  let rakeService: { getPrizePoolEur: jest.Mock; getRakeEur: jest.Mock };
 
   beforeEach(() => {
     poolModel = createMockModel();
@@ -56,20 +55,14 @@ describe('AdminService', () => {
       countAdmins: jest.fn(),
       deleteUser: jest.fn(),
     };
-    rakeService = {
-      getPrizePoolEur: jest.fn((n: number) => n * 40),
-      getRakeEur: jest.fn((n: number) => n * 10),
-    };
 
     service = new AdminService(
-      // order must match constructor in service
       poolModel as any,
       participantModel as any,
       roundModel as any,
       pickModel as any,
       survivorService as any,
       usersService as any,
-      rakeService as any,
     );
   });
 
@@ -146,7 +139,7 @@ describe('AdminService', () => {
       );
     });
 
-    it('should start pool and set prizePoolEur, rakeEur, status and startedAt', async () => {
+    it('should start pool and set status and startedAt', async () => {
       const pool = createMockDocument({ status: 'open' });
       poolModel.findById.mockResolvedValue(pool);
       participantModel.countDocuments.mockResolvedValue(2);
@@ -154,10 +147,8 @@ describe('AdminService', () => {
 
       const result = await service.startPool('pool1');
 
-      expect(rakeService.getPrizePoolEur).toHaveBeenCalledWith(2);
-      expect(rakeService.getRakeEur).toHaveBeenCalledWith(2);
-      expect(pool.prizePoolEur).toBe(2 * 40);
-      expect(pool.rakeEur).toBe(2 * 10);
+      expect(pool.prizePoolEur).toBeUndefined();
+      expect(pool.entryFeeEur).toBeUndefined();
       expect(pool.status).toBe('active');
       expect(pool.startedAt).toBeInstanceOf(Date);
       expect(pool.save).toHaveBeenCalled();

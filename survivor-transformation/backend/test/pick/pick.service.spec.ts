@@ -24,7 +24,7 @@ describe('PickService', () => {
     userModel = { find: jest.fn() };
     poolModel = {
       findById: jest.fn().mockReturnValue({
-        lean: jest.fn().mockResolvedValue({ prizePoolEur: 0 }),
+        lean: jest.fn().mockResolvedValue({}),
       }),
     };
     participantService = {
@@ -232,9 +232,6 @@ describe('PickService', () => {
 
   describe('getLeaderboard', () => {
     it('returns empty structure when no participants', async () => {
-      poolModel.findById.mockReturnValue({
-        lean: jest.fn().mockResolvedValue({ prizePoolEur: 100 }),
-      });
       participantModel.find.mockReturnValue({
         select: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
       });
@@ -245,28 +242,11 @@ describe('PickService', () => {
         entries: [],
         totalPlayers: 0,
         alivePlayers: 0,
-        prizePoolEur: 100,
         winnerCount: 0,
       });
     });
 
-    it('returns prizePoolEur 0 when pool not found', async () => {
-      poolModel.findById.mockReturnValue({
-        lean: jest.fn().mockResolvedValue(null),
-      });
-      participantModel.find.mockReturnValue({
-        select: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
-      });
-
-      const result = await service.getLeaderboard('pool1');
-
-      expect(result.prizePoolEur).toBe(0);
-    });
-
     it('returns entries with participants and picks', async () => {
-      poolModel.findById.mockReturnValue({
-        lean: jest.fn().mockResolvedValue({ prizePoolEur: 50 }),
-      });
       participantModel.find.mockReturnValue({
         select: jest.fn().mockReturnValue({
           lean: jest.fn().mockResolvedValue([
@@ -302,7 +282,6 @@ describe('PickService', () => {
       });
       expect(result.totalPlayers).toBe(1);
       expect(result.alivePlayers).toBe(1);
-      expect(result.prizePoolEur).toBe(50);
     });
   });
 });

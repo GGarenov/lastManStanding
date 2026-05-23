@@ -8,7 +8,6 @@ import { useActiveTournament } from '~/contexts/ActiveTournamentContext';
 import { Link } from 'react-router-dom';
 import * as poolsApi from '~/api/pools.api';
 import UserPoolPage from '../UserPoolPage/UserPoolPage';
-import { ENTRY_FEE_EUR, RAKE_EUR, formatEntryFeeCopy } from '~/config/rake';
 import styles from './MyPool.module.less';
 import tournamentCardImg from '~/assets/images/tournament-card.jpg';
 import tournamentLogoImg from '~/assets/images/tournament-logo.svg';
@@ -190,15 +189,13 @@ export default function MyPool() {
                       <span>{pool.participants} participant{pool.participants !== 1 ? 's' : ''}</span>
                     </div>
                     <p className={styles.poolBuyInText}>
-                      {formatEntryFeeCopy(
-                        pool.entryFeeEur ?? ENTRY_FEE_EUR,
-                        pool.rakePerEntryEur ?? RAKE_EUR
-                      )}. Pay to the admin to confirm your entry. You'll be approved once payment is received.
+                      Request to join this pool. Pay the admin to confirm your
+                      entry. You&apos;ll be approved once payment is received.
                     </p>
                     <div className={styles.poolActions}>
                       {!user ? (
                         <Button asChild variant="primary" className={styles.poolButtonFull}>
-                          <Link to="/login">Log in to buy in</Link>
+                          <Link to="/login">Log in to join</Link>
                         </Button>
                       ) : pool.myStatus === 'none' ? (
                         <Button
@@ -213,7 +210,7 @@ export default function MyPool() {
                             </>
                           ) : (
                             <>
-                              Buy in €{pool.entryFeeEur ?? ENTRY_FEE_EUR}
+                              Join pool
                               <ArrowRight className={styles.btnArrow} />
                             </>
                           )}

@@ -19,12 +19,3 @@ export function getFeaturedPool<T extends { id: string; status: string }>(
   return pools.find((p) => p.status === "open");
 }
 
-export function formatPrizePoolEur(eur: number): string {
-  if (eur === 0) return "€0";
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(eur);
-}
-
