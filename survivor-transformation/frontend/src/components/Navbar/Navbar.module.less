@@ -1,5 +1,5 @@
 /* Navbar: solid background and shadow using design tokens */
-@import '../../styles/variables.less';
+@import "../../styles/variables.less";
 
 .header {
   position: sticky;
@@ -10,7 +10,9 @@
   background: var(--card-bg);
   color: var(--app-text);
   border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .inner {
@@ -49,9 +51,10 @@
 }
 
 .logoImage {
-  height: 1.75rem;
+  height: 4.5rem;
   width: auto;
   object-fit: contain;
+  padding: 2px;
 }
 
 .nav {
@@ -74,7 +77,9 @@
   font-weight: 500;
   color: var(--app-text);
   text-decoration: none;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 
   &:hover {
     background: var(--accent-bg);
