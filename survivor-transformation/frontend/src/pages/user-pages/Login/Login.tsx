@@ -4,11 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Button } from '~/components/Button/Button';
 import { Input } from '~/components/Input/Input';
 import { Label } from '~/components/Label/Label';
+import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import style from './Login.module.less';
 
 export default function Login() {
   const navigate = useNavigate();
+  const appLocale = useAppLocale();
+  const localizedPath = useLocalizedPath();
   const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
   const isChecked = useAuthStore((s) => s.isChecked);
@@ -19,9 +22,11 @@ export default function Login() {
     if (hasRedirected.current) return;
     if (isChecked && user) {
       hasRedirected.current = true;
-      navigate(isAdminUser(user) ? '/admin' : '/', { replace: true });
+      navigate(isAdminUser(user) ? '/admin' : buildLocalizedPath(appLocale, '/'), {
+        replace: true,
+      });
     }
-  }, [isChecked, user, navigate]);
+  }, [isChecked, user, navigate, appLocale]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,7 +44,9 @@ export default function Login() {
     try {
       await login(email.trim(), password);
       const u = useAuthStore.getState().user;
-      navigate(u && isAdminUser(u) ? '/admin' : '/', { replace: true });
+      navigate(u && isAdminUser(u) ? '/admin' : buildLocalizedPath(appLocale, '/'), {
+        replace: true,
+      });
     } catch {
       setError('Login failed. Check your email and password.');
     } finally {
@@ -97,7 +104,7 @@ export default function Login() {
             </Button>
             <p className={style.registerText}>
               No account?{' '}
-              <Link to="/register" className={style.registerLink}>
+              <Link to={localizedPath('/register')} className={style.registerLink}>
                 Register
               </Link>
             </p>

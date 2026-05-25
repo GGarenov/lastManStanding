@@ -6,6 +6,7 @@ import { useAuthStore } from '~/store/authStore';
 import { useOpenPoolsStore } from '~/store/openPoolsStore';
 import { useActiveTournament } from '~/contexts/ActiveTournamentContext';
 import { Link } from 'react-router-dom';
+import { useLocalizedPath } from '~/i18n/routing';
 import * as poolsApi from '~/api/pools.api';
 import UserPoolPage from '../UserPoolPage/UserPoolPage';
 import styles from './MyPool.module.less';
@@ -13,6 +14,7 @@ import tournamentCardImg from '~/assets/images/tournament-card.jpg';
 import tournamentLogoImg from '~/assets/images/tournament-logo.svg';
 
 export default function MyPool() {
+  const localizedPath = useLocalizedPath();
   const user = useAuthStore((s) => s.user);
   const { activeTournament } = useActiveTournament();
   const {
@@ -195,7 +197,7 @@ export default function MyPool() {
                     <div className={styles.poolActions}>
                       {!user ? (
                         <Button asChild variant="primary" className={styles.poolButtonFull}>
-                          <Link to="/login">Log in to join</Link>
+                          <Link to={localizedPath("/login")}>Log in to join</Link>
                         </Button>
                       ) : pool.myStatus === 'none' ? (
                         <Button

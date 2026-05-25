@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useLocalizedPath } from '~/i18n/routing';
 import { AxiosError } from 'axios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/Tabs/Tabs';
 import { Button } from '~/components/Button/Button';
@@ -182,6 +183,7 @@ function UserPoolPageContent() {
  * Fetches pool info and rounds; provides tournamentConfig via context to tab content.
  */
 export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
+  const localizedPath = useLocalizedPath();
   const [poolInfo, setPoolInfo] = useState<poolsApi.MyPoolStatusResponse | null>(null);
   const [rounds, setRounds] = useState<poolsApi.ParticipantRound[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -271,7 +273,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
               <AlertCircle className={styles.errorIcon} />
               <p className={styles.errorText}>{error}</p>
               <Button variant="outline" asChild>
-                <Link to="/my-pool">Back to My Pool</Link>
+                <Link to={localizedPath("/my-pool")}>Back to My Pool</Link>
               </Button>
             </CardContent>
           </Card>
@@ -282,7 +284,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
                 You must join and be approved to view {poolName || 'this pool'}.
               </p>
               <Button asChild>
-                <Link to="/my-pool">Join a pool</Link>
+                <Link to={localizedPath("/my-pool")}>Join a pool</Link>
               </Button>
             </CardContent>
           </Card>

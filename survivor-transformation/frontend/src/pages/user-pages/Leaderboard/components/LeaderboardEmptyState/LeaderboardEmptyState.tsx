@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import { useLocalizedPath } from "~/i18n/routing";
 import { Card, CardContent } from "~/components/Card/Card";
 import { Button } from "~/components/Button/Button";
 import { AlertCircle } from "lucide-react";
@@ -14,6 +16,8 @@ type LeaderboardEmptyStateProps = {
 };
 
 export function LeaderboardEmptyState({ variant }: LeaderboardEmptyStateProps) {
+  const localizedPath = useLocalizedPath();
+
   if (variant === "no-pool") {
     return (
       <Card>
@@ -24,7 +28,7 @@ export function LeaderboardEmptyState({ variant }: LeaderboardEmptyStateProps) {
             You need to join a pool to view the leaderboard.
           </p>
           <Button asChild>
-            <a href="/my-pool">Go to My Pool</a>
+            <Link to={localizedPath("/my-pool")}>Go to My Pool</Link>
           </Button>
         </CardContent>
       </Card>

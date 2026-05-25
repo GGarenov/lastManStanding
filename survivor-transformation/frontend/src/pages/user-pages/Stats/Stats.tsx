@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { useLocalizedPath } from '~/i18n/routing';
 import { Card, CardContent } from '~/components/Card/Card';
 import { Skeleton } from '~/components/Skeleton/Skeleton';
 import {
@@ -47,6 +48,7 @@ function getActiveRound(rounds: poolsApi.ParticipantRound[]): poolsApi.Participa
 }
 
 export default function Stats() {
+  const localizedPath = useLocalizedPath();
   const { poolId: poolIdParam } = useParams<{ poolId?: string }>();
   const user = useAuthStore((s) => s.user);
   const { pools, fetchPools } = useOpenPoolsStore();
@@ -160,7 +162,7 @@ export default function Stats() {
                 You need to join a pool to view statistics.
               </p>
               <Button asChild>
-                <a href="/my-pool">Go to My Pool</a>
+                <Link to={localizedPath("/my-pool")}>Go to My Pool</Link>
               </Button>
             </CardContent>
           </Card>

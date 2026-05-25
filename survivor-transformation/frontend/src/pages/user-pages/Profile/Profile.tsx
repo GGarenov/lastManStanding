@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useLocalizedPath } from '~/i18n/routing';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import { getUserDisplayName, getAvatarInitials } from '~/lib/user-utils';
 import { getRoundLabel } from './profile.helpers';
@@ -18,6 +19,7 @@ export default function Profile() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
+  const localizedPath = useLocalizedPath();
 
   const { poolId } = useProfilePoolId();
   const { poolInfo, rounds, myPicks, leaderboard, profileLoading } =
@@ -32,7 +34,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login', { replace: true });
+    navigate(localizedPath('/login'), { replace: true });
   };
 
   if (!user) {

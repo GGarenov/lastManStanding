@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { buildLocalizedPath, useAppLocale } from '~/i18n/routing';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import { AuthGuard } from './AuthGuard';
 
@@ -13,15 +14,16 @@ interface AdminGuardProps {
  */
 export function AdminGuard({ children }: AdminGuardProps) {
   const navigate = useNavigate();
+  const appLocale = useAppLocale();
   const user = useAuthStore((s) => s.user);
   const isChecked = useAuthStore((s) => s.isChecked);
 
   useEffect(() => {
     if (!isChecked) return;
     if (user && !isAdminUser(user)) {
-      navigate('/', { replace: true });
+      navigate(buildLocalizedPath(appLocale, '/'), { replace: true });
     }
-  }, [user, isChecked, navigate]);
+  }, [user, isChecked, navigate, appLocale]);
 
   if (isChecked && user && !isAdminUser(user)) {
     return null;

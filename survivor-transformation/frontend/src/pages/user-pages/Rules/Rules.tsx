@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLocalizedPath } from "~/i18n/routing";
 import { Card, CardContent, CardHeader } from "~/components/Card/Card";
 import { Button } from "~/components/Button/Button";
 import {
@@ -23,6 +24,8 @@ import {
 import styles from "./Rules.module.less";
 
 export default function Rules() {
+  const localizedPath = useLocalizedPath();
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -251,13 +254,13 @@ export default function Rules() {
 
         <section className={styles.cta}>
           <Button asChild size="lg" className={styles.ctaButton}>
-            <Link to="/">
+            <Link to={localizedPath("/")}>
               Back to Home
               <ArrowRight className={`${styles.iconPrimary} ${styles.iconSm}`} />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className={styles.ctaButton}>
-            <Link to="/my-pool">
+            <Link to={localizedPath("/my-pool")}>
               <Users className={`${styles.iconPrimary} ${styles.iconSm}`} />
               My Pool
             </Link>

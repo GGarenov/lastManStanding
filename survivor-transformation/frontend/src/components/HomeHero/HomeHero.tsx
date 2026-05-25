@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLocalizedPath } from "~/i18n/routing";
 import { Trophy, Medal, ArrowRight } from "lucide-react";
 import { Button } from "@/components/Button/Button";
 import { CountdownBanner } from "@/components/CountdownBanner/CountdownBanner";
@@ -30,6 +31,8 @@ export function HomeHero({
   completedPoolName,
   winnerNames,
 }: HomeHeroProps) {
+  const localizedPath = useLocalizedPath();
+
   return (
     <section className={styles.hero}>
       {showCompletedView ? (
@@ -61,20 +64,20 @@ export function HomeHero({
           </div>
           <div className={styles.ctaRow}>
             <Link
-              to="/leaderboard"
+              to={localizedPath("/leaderboard")}
               className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
             >
               View Leaderboard
               <ArrowRight className={styles.iconSm} />
             </Link>
             <Link
-              to="/my-pool"
+              to={localizedPath("/my-pool")}
               className={`${styles.ctaButton} ${styles.ctaButtonPrimary}`}
             >
               My Pool
             </Link>
             <Link
-              to="/rules"
+              to={localizedPath("/rules")}
               className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
             >
               How It Works
@@ -121,19 +124,19 @@ export function HomeHero({
               standing takes the prize.
             </p>
             <div className={styles.ctaRow}>
-              <Link to={isLoggedIn ? "/my-pool" : "/login"}>
+              <Link to={localizedPath(isLoggedIn ? "/my-pool" : "/login")}>
                 <Button size="lg" className={styles.ctaButtonPrimary}>
                   {isLoggedIn && hasJoinedAnyPool ? "Go to Pool" : "Join"}
                   <ArrowRight className={styles.iconSm} />
                 </Button>
               </Link>
-              <Link to="/rules">
+              <Link to={localizedPath("/rules")}>
                 <Button size="lg" variant="outline">
                   How It Works
                 </Button>
               </Link>
               {!isLoggedIn && (
-                <Link to="/register">
+                <Link to={localizedPath("/register")}>
                   <Button size="lg" variant="outline">
                     Register
                   </Button>

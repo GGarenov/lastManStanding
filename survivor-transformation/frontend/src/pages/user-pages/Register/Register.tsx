@@ -4,15 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Button } from '~/components/Button/Button';
 import { Input } from '~/components/Input/Input';
 import { Label } from '~/components/Label/Label';
+import type { AppLocale } from '~/i18n/constants';
+import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import style from './Register.module.less';
 
-function getRedirectPath(user: { role?: string } | null): string {
-  return isAdminUser(user) ? '/admin' : '/';
+function getRedirectPath(
+  user: { role?: string } | null,
+  locale: AppLocale,
+): string {
+  return isAdminUser(user) ? '/admin' : buildLocalizedPath(locale, '/');
 }
 
 export default function Register() {
   const navigate = useNavigate();
+  const appLocale = useAppLocale();
+  const localizedPath = useLocalizedPath();
   const register = useAuthStore((s) => s.register);
   const user = useAuthStore((s) => s.user);
   const isChecked = useAuthStore((s) => s.isChecked);
@@ -23,9 +30,9 @@ export default function Register() {
     if (hasRedirected.current) return;
     if (isChecked && user) {
       hasRedirected.current = true;
-      navigate(getRedirectPath(user), { replace: true });
+      navigate(getRedirectPath(user, appLocale), { replace: true });
     }
-  }, [isChecked, user, navigate]);
+  }, [isChecked, user, navigate, appLocale]);
 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -77,7 +84,7 @@ export default function Register() {
     try {
       await register(email.trim(), username.trim(), password);
       const u = useAuthStore.getState().user;
-      navigate(getRedirectPath(u), { replace: true });
+      navigate(getRedirectPath(u, appLocale), { replace: true });
     } catch (err: any) {
       const errorMessage = err?.response?.data?.message || err?.message || 'Registration failed. Email or username may already be in use.';
       setError(errorMessage);
@@ -167,7 +174,7 @@ export default function Register() {
             </Button>
             <p className={style.footerText}>
               Already have an account?{' '}
-              <Link to="/login" className={style.loginLink}>
+              <Link to={localizedPath('/login')} className={style.loginLink}>
                 Log in
               </Link>
             </p>

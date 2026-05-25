@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLocalizedPath } from "~/i18n/routing";
 import { Card, CardContent, CardHeader } from "@/components/Card/Card";
 import { Button } from "@/components/Button/Button";
 import { Users, Loader2, Clock } from "lucide-react";
@@ -31,6 +32,8 @@ export function HomeFeaturedPool({
   joiningId,
   onJoin,
 }: HomeFeaturedPoolProps) {
+  const localizedPath = useLocalizedPath();
+
   if (!activeTournament || !featuredPool) return null;
 
   const myStatus = featuredPool.myStatus ?? "none";
@@ -70,7 +73,7 @@ export function HomeFeaturedPool({
             </div>
             <div className={styles.featuredActions}>
               {!isUserLoggedIn ? (
-                <Link to="/login">
+                <Link to={localizedPath("/login")}>
                   <Button
                     variant="primary"
                     size="lg"
@@ -108,7 +111,7 @@ export function HomeFeaturedPool({
                   Waiting for approval
                 </div>
               ) : myStatus === "approved" || myStatus === "winner" ? (
-                <Link to="/my-pool">
+                <Link to={localizedPath("/my-pool")}>
                   <Button
                     size="lg"
                     variant="primary"

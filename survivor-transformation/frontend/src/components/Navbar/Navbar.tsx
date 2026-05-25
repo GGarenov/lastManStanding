@@ -6,6 +6,7 @@ import { useActiveTournament } from "~/contexts/ActiveTournamentContext";
 import { cn } from "~/lib/utils";
 import { getUserDisplayName } from "~/lib/user-utils";
 import { useIsMobile } from "~/hooks/use-mobile";
+import { stripLocalePrefix, useLocalizedPath } from "~/i18n/routing";
 import {
   Sheet,
   SheetContent,
@@ -13,6 +14,7 @@ import {
   SheetTitle,
 } from "~/components/Sheet/Sheet";
 import { Button } from "~/components/Button/Button";
+import { LanguageSwitcher } from "~/components/LanguageSwitcher/LanguageSwitcher";
 import logoWhite from "~/assets/logo/logo-white.svg";
 import styles from "./Navbar.module.less";
 
@@ -34,6 +36,8 @@ function getNavItems(activeTournament: { label: string } | null): { to: string; 
 
 export function Navbar() {
   const location = useLocation();
+  const localizedPath = useLocalizedPath();
+  const pathWithoutLocale = stripLocalePrefix(location.pathname);
   const user = useAuthStore((s) => s.user);
   const { activeTournament } = useActiveTournament();
   const isMobile = useIsMobile();
@@ -46,7 +50,7 @@ export function Navbar() {
     <header className={styles.header}>
       <div className={styles.inner}>
         {/* Logo */}
-        <Link to="/" className={styles.logo}>
+        <Link to={localizedPath("/")} className={styles.logo}>
           <img src={logoWhite} alt={logoLabel} className={styles.logoImage} />
         </Link>
 
@@ -55,7 +59,7 @@ export function Navbar() {
           {navItems.map(({ to, label }) => (
             <NavLink
               key={to}
-              to={to}
+              to={localizedPath(to)}
               className={({ isActive: active }) =>
                 cn(styles.navLink, active && styles.active)
               }
@@ -67,6 +71,7 @@ export function Navbar() {
 
         {/* Mobile: hamburger + profile. Desktop: profile only in header */}
         <div className={styles.actions}>
+          <LanguageSwitcher className={styles.languageSwitcher} />
           {isMobile && (
             <Button
               variant="ghost"
@@ -78,7 +83,10 @@ export function Navbar() {
               <Menu className={styles.menuIcon} />
             </Button>
           )}
-          <Link to={user ? "/profile" : "/login"} className={styles.profileLink}>
+          <Link
+            to={localizedPath(user ? "/profile" : "/login")}
+            className={styles.profileLink}
+          >
             <div className={styles.profileIconWrap}>
               <User className={styles.profileIconSvg} />
             </div>
@@ -98,10 +106,13 @@ export function Navbar() {
             <SheetTitle className={styles.sheetTitleLeft}>Menu</SheetTitle>
           </SheetHeader>
           <nav className={styles.mobileNav} aria-label="Main navigation">
+            <div className={styles.mobileLangRow}>
+              <LanguageSwitcher />
+            </div>
             {navItems.map(({ to, label }) => (
               <NavLink
                 key={to}
-                to={to}
+                to={localizedPath(to)}
                 className={({ isActive: active }) =>
                   cn(styles.mobileNavLink, active && styles.active)
                 }
@@ -111,10 +122,11 @@ export function Navbar() {
               </NavLink>
             ))}
             <Link
-              to={user ? "/profile" : "/login"}
+              to={localizedPath(user ? "/profile" : "/login")}
               className={cn(
                 styles.mobileNavLink,
-                (location.pathname === "/profile" || location.pathname === "/login") && styles.active,
+                (pathWithoutLocale === "/profile" || pathWithoutLocale === "/login") &&
+                  styles.active,
               )}
               onClick={() => setMenuOpen(false)}
             >
