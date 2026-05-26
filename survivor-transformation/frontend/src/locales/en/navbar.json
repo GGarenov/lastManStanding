@@ -1,1 +1,22 @@
-{}
+{
+  "nav": {
+    "home": "Home",
+    "rules": "Rules",
+    "stats": "Stats",
+    "leaderboard": "Leaderboard"
+  },
+  "profile": {
+    "label": "Profile",
+    "login": "Log in"
+  },
+  "menu": {
+    "title": "Menu",
+    "openAria": "Open menu",
+    "navAria": "Main navigation",
+    "sheetAria": "Navigation"
+  },
+  "logo": {
+    "survivor": "Survivor",
+    "survivorWithTournament": "{{tournament}} Survivor"
+  }
+}

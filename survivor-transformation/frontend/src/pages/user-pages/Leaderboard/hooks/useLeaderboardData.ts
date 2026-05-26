@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useLabels } from "~/hooks/useLabels";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import * as poolsApi from "~/api/pools.api";
 
 type UseLeaderboardDataArgs = {
@@ -17,6 +19,8 @@ type UseLeaderboardDataResult = {
 export function useLeaderboardData({
   poolId,
 }: UseLeaderboardDataArgs): UseLeaderboardDataResult {
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
   const prevTopRef = useRef<string[]>([]);
 
   const {
@@ -42,12 +46,12 @@ export function useLeaderboardData({
       prevTopRef.current.length &&
       prevTopRef.current.join() !== top3.join()
     ) {
-      toast.info("Leaderboard updated", {
-        description: "Top rankings have changed.",
+      toast.info(labels.export.updatedTitle, {
+        description: labels.export.updatedDescription,
       });
     }
     prevTopRef.current = top3;
-  }, [leaderboardData?.entries]);
+  }, [leaderboardData?.entries, labels.export]);
 
   return {
     leaderboardData,

@@ -1,6 +1,9 @@
-import { ShieldCheck, TrendingUp, Clock, Target } from 'lucide-react';
-import { Card, CardContent } from '~/components/Card/Card';
-import styles from './ProfileStatsGrid.module.less';
+import { useMemo } from "react";
+import { ShieldCheck, TrendingUp, Clock, Target } from "lucide-react";
+import { Card, CardContent } from "~/components/Card/Card";
+import { useLabels } from "~/hooks/useLabels";
+import { buildProfileLabels } from "~/locales/labels/profile.labels";
+import styles from "./ProfileStatsGrid.module.less";
 
 export interface ProfileStatsGridProps {
   roundsSurvived: number;
@@ -19,6 +22,9 @@ export function ProfileStatsGrid({
   currentRound,
   teamsAvailable,
 }: ProfileStatsGridProps) {
+  const { t } = useLabels("profile");
+  const labels = useMemo(() => buildProfileLabels(t), [t]);
+
   return (
     <div className={styles.statsGrid}>
       <Card className={`${styles.card} ${styles.statCard}`}>
@@ -26,8 +32,10 @@ export function ProfileStatsGrid({
           <div className={styles.statIconWrap}>
             <ShieldCheck className={styles.statIcon} />
           </div>
-          <p className={styles.statValue}>{roundsSurvived}/{maxRounds}</p>
-          <p className={styles.statLabel}>Rounds Survived</p>
+          <p className={styles.statValue}>
+            {roundsSurvived}/{maxRounds}
+          </p>
+          <p className={styles.statLabel}>{labels.statsGrid.roundsSurvived}</p>
         </CardContent>
       </Card>
       <Card className={`${styles.card} ${styles.statCard}`}>
@@ -35,8 +43,10 @@ export function ProfileStatsGrid({
           <div className={styles.statIconWrap}>
             <TrendingUp className={styles.statIcon} />
           </div>
-          <p className={styles.statValue}>{isEliminated ? '0%' : `${survivalRate}%`}</p>
-          <p className={styles.statLabel}>Survival Rate</p>
+          <p className={styles.statValue}>
+            {isEliminated ? "0%" : `${survivalRate}%`}
+          </p>
+          <p className={styles.statLabel}>{labels.statsGrid.survivalRate}</p>
         </CardContent>
       </Card>
       <Card className={`${styles.card} ${styles.statCard}`}>
@@ -45,7 +55,7 @@ export function ProfileStatsGrid({
             <Clock className={styles.statIcon} />
           </div>
           <p className={styles.statValue}>{currentRound}</p>
-          <p className={styles.statLabel}>Current Round</p>
+          <p className={styles.statLabel}>{labels.statsGrid.currentRound}</p>
         </CardContent>
       </Card>
       <Card className={`${styles.card} ${styles.statCard}`}>
@@ -54,7 +64,7 @@ export function ProfileStatsGrid({
             <Target className={styles.statIcon} />
           </div>
           <p className={styles.statValue}>{teamsAvailable}</p>
-          <p className={styles.statLabel}>Teams Available</p>
+          <p className={styles.statLabel}>{labels.statsGrid.teamsAvailable}</p>
         </CardContent>
       </Card>
     </div>

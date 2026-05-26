@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './Dialog.module.less';
 import type {
   DialogProps,
@@ -118,8 +119,9 @@ export const DialogDescription = forwardRef<HTMLParagraphElement, DialogDescript
 DialogDescription.displayName = 'DialogDescription';
 
 export const DialogClose = forwardRef<HTMLButtonElement, DialogCloseProps>(
-  ({ className, children, onClick, ...props }, ref) => {
+  ({ className, children, onClick, 'aria-label': ariaLabel, ...props }, ref) => {
     const { onOpenChange } = useDialog();
+    const { t } = useTranslation('common');
     return (
       <button
         ref={ref}
@@ -129,7 +131,7 @@ export const DialogClose = forwardRef<HTMLButtonElement, DialogCloseProps>(
           onOpenChange(false);
           onClick?.(e);
         }}
-        aria-label="Close"
+        aria-label={ariaLabel ?? t('a11y.close')}
         {...props}
       >
         {children ?? '\u00D7'}

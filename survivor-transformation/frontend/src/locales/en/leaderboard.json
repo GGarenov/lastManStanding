@@ -1,1 +1,100 @@
-{}
+{
+  "page": {
+    "title": "Leaderboard",
+    "ariaLabel": "Leaderboard"
+  },
+  "empty": {
+    "noPool": {
+      "title": "No Pool Available",
+      "description": "You need to join a pool to view the leaderboard.",
+      "goToMyPool": "Go to My Pool"
+    },
+    "selectPool": "Please select a pool to view the leaderboard.",
+    "noParticipants": "No participants yet",
+    "noMatch": "No entries match your filters or search."
+  },
+  "header": {
+    "poolLabel": "Pool: {{name}}",
+    "poolFallback": "…",
+    "winnersAre": "The winners are",
+    "winnersEnd": ".",
+    "subtitle": "{{total}} players entered – {{alive}} still alive",
+    "exportCsv": "Export CSV",
+    "shareLink": "Share link",
+    "exportAria": "Export leaderboard as CSV",
+    "shareAria": "Copy leaderboard link to clipboard",
+    "actionsAria": "Export and share"
+  },
+  "poolSelector": {
+    "label": "Select Pool:",
+    "placeholder": "Select a pool",
+    "winnerSuffix": " (Winner)",
+    "finishedSuffix": " (Finished)"
+  },
+  "filters": {
+    "filterLabel": "Filter:",
+    "sortLabel": "Sort by:",
+    "searchPlaceholder": "Search by username...",
+    "searchAria": "Search leaderboard by username",
+    "status": {
+      "all": "All",
+      "alive": "Alive",
+      "eliminated": "Eliminated",
+      "winners": "Winners"
+    },
+    "sort": {
+      "rounds": "Rounds",
+      "picks": "Total Picks",
+      "username": "Username"
+    }
+  },
+  "entry": {
+    "you": "(You)",
+    "lastPick": "Last pick:",
+    "noPick": "No pick",
+    "rounds": "{{count}} ROUNDS",
+    "rowAria": "Rank {{rank}}: {{username}}, {{rounds}} rounds, {{status}}",
+    "status": {
+      "alive": "Alive",
+      "eliminated": "Eliminated",
+      "winner": "Winner"
+    }
+  },
+  "pagination": {
+    "ariaLabel": "Leaderboard pagination",
+    "showing": "Showing {{start}}–{{end}} of {{total}}",
+    "pageCurrent": "Page {{page}}, current",
+    "goToPage": "Go to page {{page}}"
+  },
+  "error": {
+    "loadFailed": "Failed to load leaderboard",
+    "ariaLabel": "Leaderboard error",
+    "retryAria": "Retry loading leaderboard"
+  },
+  "loading": {
+    "ariaLabel": "Leaderboard loading"
+  },
+  "list": {
+    "ariaLabel": "Leaderboard: {{count}} entries"
+  },
+  "export": {
+    "updatedTitle": "Leaderboard updated",
+    "updatedDescription": "Top rankings have changed.",
+    "csvSuccess": "Leaderboard exported as CSV",
+    "linkCopied": "Link copied to clipboard",
+    "csvHeaders": {
+      "rank": "Rank",
+      "username": "Username",
+      "roundsSurvived": "Rounds Survived",
+      "totalPicks": "Total Picks",
+      "lastPick": "Last Pick",
+      "status": "Status"
+    },
+    "csvStatus": {
+      "noPick": "No pick",
+      "winner": "Winner",
+      "eliminated": "Eliminated",
+      "alive": "Alive"
+    }
+  }
+}

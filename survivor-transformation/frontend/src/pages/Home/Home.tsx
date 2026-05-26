@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { useAuthStore, isAdminUser } from "@/store/authStore";
 import { useOpenPoolsStore } from "@/store/openPoolsStore";
 import { useActiveTournament } from "@/contexts/ActiveTournamentContext";
@@ -13,7 +12,6 @@ import { getFeaturedPool, type PoolWithMyStatus } from "./home.helpers";
 import styles from "./Home.module.less";
 
 export default function Home() {
-  const { t } = useTranslation(["home", "common"]);
   const user = useAuthStore((s) => s.user);
   const isAdmin = user && isAdminUser(user);
   const { activeTournament } = useActiveTournament();
@@ -79,9 +77,6 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <p className={styles.i18nSmoke} data-testid="home-i18n-smoke">
-          {t("common:appName")} — {t("home:tagline")}
-        </p>
         {activeTournament && (
           <HomeStatsBanner
             playersDisplay={playersDisplay}

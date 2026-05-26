@@ -1,6 +1,9 @@
+import { useMemo } from "react";
 import { Search } from "lucide-react";
 import { Card, CardContent } from "~/components/Card/Card";
 import { Input } from "~/components/Input/Input";
+import { useLabels } from "~/hooks/useLabels";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import {
   Select,
   SelectContent,
@@ -28,13 +31,16 @@ export function LeaderboardFilters({
   searchQuery,
   onSearchQueryChange,
 }: LeaderboardFiltersProps) {
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
+
   return (
     <Card className={styles.filtersCard}>
       <CardContent className={styles.filtersContent}>
         <div className={styles.filtersRow}>
           <div className={styles.filterGroup}>
             <label htmlFor="status-filter" className={styles.filterLabel}>
-              Filter:
+              {labels.filters.filterLabel}
             </label>
             <Select
               value={statusFilter}
@@ -44,16 +50,22 @@ export function LeaderboardFilters({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="alive">Alive</SelectItem>
-                <SelectItem value="eliminated">Eliminated</SelectItem>
-                <SelectItem value="winners">Winners</SelectItem>
+                <SelectItem value="all">{labels.filters.status.all}</SelectItem>
+                <SelectItem value="alive">
+                  {labels.filters.status.alive}
+                </SelectItem>
+                <SelectItem value="eliminated">
+                  {labels.filters.status.eliminated}
+                </SelectItem>
+                <SelectItem value="winners">
+                  {labels.filters.status.winners}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className={styles.filterGroup}>
             <label htmlFor="sort-by" className={styles.filterLabel}>
-              Sort by:
+              {labels.filters.sortLabel}
             </label>
             <Select
               value={sortBy}
@@ -63,9 +75,15 @@ export function LeaderboardFilters({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="rounds">Rounds</SelectItem>
-                <SelectItem value="picks">Total Picks</SelectItem>
-                <SelectItem value="username">Username</SelectItem>
+                <SelectItem value="rounds">
+                  {labels.filters.sort.rounds}
+                </SelectItem>
+                <SelectItem value="picks">
+                  {labels.filters.sort.picks}
+                </SelectItem>
+                <SelectItem value="username">
+                  {labels.filters.sort.username}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -74,11 +92,11 @@ export function LeaderboardFilters({
             <Input
               id="leaderboard-search"
               type="text"
-              placeholder="Search by username..."
+              placeholder={labels.filters.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
               className={styles.searchInput}
-              aria-label="Search leaderboard by username"
+              aria-label={labels.filters.searchAria}
             />
           </div>
         </div>

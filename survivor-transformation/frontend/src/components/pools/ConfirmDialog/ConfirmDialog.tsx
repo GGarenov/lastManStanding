@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -7,8 +8,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '~/components/AlertDialog/AlertDialog';
-import styles from './ConfirmDialog.module.less';
+} from "~/components/AlertDialog/AlertDialog";
+import { useLabels } from "~/hooks/useLabels";
+import styles from "./ConfirmDialog.module.less";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -17,7 +19,7 @@ interface ConfirmDialogProps {
   description: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  variant?: 'default' | 'destructive';
+  variant?: "default" | "destructive";
   onConfirm: () => void;
 }
 
@@ -26,11 +28,21 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  variant = 'default',
+  confirmLabel,
+  cancelLabel,
+  variant = "default",
   onConfirm,
 }: ConfirmDialogProps) {
+  const { t } = useLabels("pool");
+  const resolvedConfirm = useMemo(
+    () => confirmLabel ?? t("confirm.defaultConfirm"),
+    [confirmLabel, t],
+  );
+  const resolvedCancel = useMemo(
+    () => cancelLabel ?? t("confirm.defaultCancel"),
+    [cancelLabel, t],
+  );
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className={styles.content}>
@@ -40,13 +52,13 @@ export function ConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className={styles.cancelButton}>
-            {cancelLabel}
+            {resolvedCancel}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className={variant === 'destructive' ? styles.destructiveAction : ''}
+            className={variant === "destructive" ? styles.destructiveAction : ""}
           >
-            {confirmLabel}
+            {resolvedConfirm}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

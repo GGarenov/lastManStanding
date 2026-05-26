@@ -39,4 +39,4 @@ export const resources = {
     profile: bgProfile,
     auth: bgAuth,
   },
-} satisfies Record<AppLocale, Record<string, Record<string, string>>>;
+} satisfies Record<AppLocale, Record<string, Record<string, unknown>>>;

@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "i18n:extract": "i18next -c i18next-parser.config.cjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.83.0",
@@ -47,6 +48,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "fs-extra": "^11.2.0",
     "globals": "^15.15.0",
+    "i18next-parser": "^9.3.0",
     "jsdom": "^20.0.3",
     "less": "^4.3.0",
     "typescript": "^5.8.3",

@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
-import { usePoolPage } from '~/contexts/PoolPageContext';
-import { TeamFlag } from '~/components/TeamFlag/TeamFlag';
-import { Card, CardContent } from '~/components/Card/Card';
+import { useState, useEffect, useMemo } from "react";
+import { formatAppDate } from "~/i18n/dateLocale";
+import { Check, Clock } from "lucide-react";
+import { toast } from "sonner";
+import { useLabels } from "~/hooks/useLabels";
+import { usePoolPage } from "~/contexts/PoolPageContext";
+import { TeamFlag } from "~/components/TeamFlag/TeamFlag";
+import { Card, CardContent } from "~/components/Card/Card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,31 +15,21 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '~/components/AlertDialog/AlertDialog';
-import { Check, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import type { TournamentConfig } from '~/config/tournaments/types';
-import type { ParticipantRound, ParticipantMatch } from '~/api/pools.api';
-import * as poolsApi from '~/api/pools.api';
-import { toast } from 'sonner';
-import styles from './PickTeamTab.module.less';
+} from "~/components/AlertDialog/AlertDialog";
+import type { TournamentConfig } from "~/config/tournaments/types";
+import type { ParticipantRound, ParticipantMatch } from "~/api/pools.api";
+import * as poolsApi from "~/api/pools.api";
+import { buildPoolLabels, type PoolLabels } from "~/locales/labels/pool.labels";
+import styles from "./PickTeamTab.module.less";
 
-/** Derives stage label from round number (hardcoded for common tournament structure). */
-function getStageLabel(roundNumber: number): string {
-  const labels: Record<number, string> = {
-    1: 'Group Stage',
-    2: 'Round of 16',
-    3: 'Quarter-finals',
-    4: 'Semi-finals',
-    5: 'Final',
-  };
-  return labels[roundNumber] ?? `Round ${roundNumber}`;
-}
-
-/** Returns the active round (first with isClosed: false), or undefined if none. */
-function getActiveRound(rounds: ParticipantRound[]): ParticipantRound | undefined {
+function getActiveRound(
+  rounds: ParticipantRound[],
+): ParticipantRound | undefined {
   return rounds.find((r) => !r.isClosed);
 }
+
+type PickTeamLabels = PoolLabels["pickTeam"];
+type ConfirmLabels = PoolLabels["confirm"];
 
 interface MatchCardProps {
   match: ParticipantMatch;
@@ -43,46 +37,52 @@ interface MatchCardProps {
   onSelectTeam: (team: string) => void;
   isDisabled: boolean;
   isSubmitting: boolean;
-  /** Set of team names the user has already picked in any previous round */
   usedTeamNames: Set<string>;
+  labels: PickTeamLabels;
 }
 
-function MatchCard({ match, tournamentConfig, onSelectTeam, isDisabled, isSubmitting, usedTeamNames }: MatchCardProps) {
+function MatchCard({
+  match,
+  tournamentConfig,
+  onSelectTeam,
+  isDisabled,
+  isSubmitting,
+  usedTeamNames,
+  labels,
+}: MatchCardProps) {
   const TeamSlot = ({
     team,
     align,
     children,
   }: {
     team: string;
-    align: 'left' | 'right';
+    align: "left" | "right";
     children: React.ReactNode;
   }) => {
     const isUsed = usedTeamNames.has(team);
     const baseClasses = [
       styles.teamSlot,
-      align === 'right' ? styles.teamSlotRight : styles.teamSlotLeft,
+      align === "right" ? styles.teamSlotRight : styles.teamSlotLeft,
       isUsed && styles.teamSlotUsed,
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
     const innerClasses = [
       styles.teamSlotInner,
-      align === 'right' ? styles.teamSlotInnerRight : '',
+      align === "right" ? styles.teamSlotInnerRight : "",
     ]
       .filter(Boolean)
-      .join(' ');
+      .join(" ");
 
     if (isUsed) {
       return (
         <div
           className={baseClasses}
           role="group"
-          aria-label={`${team}, used`}
+          aria-label={labels.teamUsedAria(team)}
         >
-          <div className={innerClasses}>
-            {children}
-          </div>
-          <span className={styles.usedBadge}>USED</span>
+          <div className={innerClasses}>{children}</div>
+          <span className={styles.usedBadge}>{labels.usedBadge}</span>
         </div>
       );
     }
@@ -92,14 +92,16 @@ function MatchCard({ match, tournamentConfig, onSelectTeam, isDisabled, isSubmit
         type="button"
         onClick={() => onSelectTeam(team)}
         disabled={isDisabled || isSubmitting}
-        aria-label={`${team}, select`}
+        aria-label={labels.teamSelectAria(team)}
         className={[
           baseClasses,
           styles.teamSlotButton,
-          !(isDisabled || isSubmitting) ? styles.teamSlotButtonEnabled : styles.teamSlotButtonDisabled,
+          !(isDisabled || isSubmitting)
+            ? styles.teamSlotButtonEnabled
+            : styles.teamSlotButtonDisabled,
         ]
           .filter(Boolean)
-          .join(' ')}
+          .join(" ")}
       >
         <div className={innerClasses}>{children}</div>
       </button>
@@ -116,26 +118,30 @@ function MatchCard({ match, tournamentConfig, onSelectTeam, isDisabled, isSubmit
             height={32}
             className={[
               styles.flag,
-              usedTeamNames.has(match.homeTeam) ? styles.flagUsed : '',
+              usedTeamNames.has(match.homeTeam) ? styles.flagUsed : "",
             ]
               .filter(Boolean)
-              .join(' ')}
+              .join(" ")}
           />
-          <span className={styles.teamName} title={match.homeTeam}>{match.homeTeam}</span>
+          <span className={styles.teamName} title={match.homeTeam}>
+            {match.homeTeam}
+          </span>
         </TeamSlot>
-        <span className={styles.vsLabel}>VS</span>
+        <span className={styles.vsLabel}>{labels.vs}</span>
         <TeamSlot team={match.awayTeam} align="right">
-          <span className={styles.teamName} title={match.awayTeam}>{match.awayTeam}</span>
+          <span className={styles.teamName} title={match.awayTeam}>
+            {match.awayTeam}
+          </span>
           <TeamFlag
             teamName={match.awayTeam}
             tournamentConfig={tournamentConfig}
             height={32}
             className={[
               styles.flag,
-              usedTeamNames.has(match.awayTeam) ? styles.flagUsed : '',
+              usedTeamNames.has(match.awayTeam) ? styles.flagUsed : "",
             ]
               .filter(Boolean)
-              .join(' ')}
+              .join(" ")}
           />
         </TeamSlot>
       </CardContent>
@@ -143,27 +149,36 @@ function MatchCard({ match, tournamentConfig, onSelectTeam, isDisabled, isSubmit
   );
 }
 
-function getErrorMessage(e: unknown): string {
-  if (e && typeof e === 'object' && 'response' in e) {
-    const res = (e as { response?: { data?: { message?: string | string[] } } }).response;
+function getErrorMessage(e: unknown, fallback: string): string {
+  if (e && typeof e === "object" && "response" in e) {
+    const res = (e as { response?: { data?: { message?: string | string[] } } })
+      .response;
     const msg = res?.data?.message;
-    if (typeof msg === 'string') return msg;
-    if (Array.isArray(msg)) return msg.join(', ');
+    if (typeof msg === "string") return msg;
+    if (Array.isArray(msg)) return msg.join(", ");
   }
-  return e instanceof Error ? e.message : 'Failed to submit pick.';
+  return e instanceof Error ? e.message : fallback;
 }
 
 export function PickTeamTab() {
   const { poolId, rounds, tournamentConfig, poolInfo } = usePoolPage();
+  const { t } = useLabels("pool");
+  const { t: tCommon } = useLabels("common");
+  const { pickTeam: pickLabels, confirm: confirmLabels } = useMemo(
+    () => buildPoolLabels(t, tCommon),
+    [t, tCommon],
+  );
+
   const [myPicks, setMyPicks] = useState<poolsApi.MyPick[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingPickTeam, setPendingPickTeam] = useState<string | null>(null);
 
   const activeRound = getActiveRound(rounds);
   const deadlinePassed =
-    !!activeRound?.pickDeadline && new Date() >= new Date(activeRound.pickDeadline);
+    !!activeRound?.pickDeadline &&
+    new Date() >= new Date(activeRound.pickDeadline);
   const myPickForRound = activeRound
-    ? myPicks.find((p) => p.round === activeRound.roundNumber)?.team ?? null
+    ? (myPicks.find((p) => p.round === activeRound.roundNumber)?.team ?? null)
     : null;
   const usedTeamNames = new Set(myPicks.map((p) => p.team));
   const isPickingDisabled =
@@ -187,12 +202,12 @@ export function PickTeamTab() {
     setIsSubmitting(true);
     try {
       await poolsApi.submitPick(poolId, pendingPickTeam);
-      toast.success(`You picked ${pendingPickTeam}`);
+      toast.success(pickLabels.pickSuccess(pendingPickTeam));
       const updated = await poolsApi.getMyPicks(poolId);
       setMyPicks(updated);
       setPendingPickTeam(null);
     } catch (e) {
-      toast.error(getErrorMessage(e));
+      toast.error(getErrorMessage(e, pickLabels.submitFailed));
     } finally {
       setIsSubmitting(false);
     }
@@ -202,32 +217,33 @@ export function PickTeamTab() {
     return (
       <Card>
         <CardContent className={styles.matchesEmptyCard}>
-          No active round. Check back when the next round opens for picks.
+          {pickLabels.noActiveRound}
         </CardContent>
       </Card>
     );
   }
 
-  const stageLabel = getStageLabel(activeRound.roundNumber);
-  const heading = `Round ${activeRound.roundNumber} – ${stageLabel}`;
+  const stageLabel = pickLabels.getStageLabel(activeRound.roundNumber);
+  const heading = pickLabels.roundHeading(activeRound.roundNumber, stageLabel);
 
   return (
     <div className={styles.page}>
       <div className={styles.headingBlock}>
         <h2 className={styles.heading}>{heading}</h2>
         {deadlinePassed ? (
-          <p className={styles.headingNote}>
-            Picks are locked for this round.
-          </p>
+          <p className={styles.headingNote}>{pickLabels.picksLocked}</p>
         ) : !myPickForRound ? (
-          <p className={styles.headingNote}>
-            You must pick a team this round. If you don&apos;t pick before results are recorded, you will be eliminated.
-          </p>
+          <p className={styles.headingNote}>{pickLabels.mustPick}</p>
         ) : null}
         {!deadlinePassed && activeRound.pickDeadline && (
           <p className={styles.deadlineRow}>
             <Clock className="h-4 w-4" aria-hidden />
-            Picks close at {format(new Date(activeRound.pickDeadline), "EEEE, d MMM yyyy 'at' HH:mm")}
+            {pickLabels.picksCloseAt(
+              formatAppDate(
+                new Date(activeRound.pickDeadline),
+                "EEEE, d MMM yyyy 'at' HH:mm",
+              ),
+            )}
           </p>
         )}
       </div>
@@ -235,42 +251,37 @@ export function PickTeamTab() {
       {myPickForRound && (
         <Card className={styles.highlightCard}>
           <CardContent className={styles.highlightContent}>
-          <span className={styles.highlightLabel}>Your pick:</span>
-          <TeamFlag
-            teamName={myPickForRound}
-            tournamentConfig={tournamentConfig}
-            height={24}
-          />
-          <span className={styles.highlightTeam}>{myPickForRound}</span>
+            <span className={styles.highlightLabel}>{pickLabels.yourPick}</span>
+            <TeamFlag
+              teamName={myPickForRound}
+              tournamentConfig={tournamentConfig}
+              height={24}
+            />
+            <span className={styles.highlightTeam}>{myPickForRound}</span>
           </CardContent>
         </Card>
       )}
 
       {myPicks.length > 0 && (
-        <section aria-label="Teams already used" className={styles.usedSection}>
-          <h3 className={styles.usedTitle}>
-            × Teams already used (cannot pick again)
-          </h3>
+        <section
+          aria-label={pickLabels.teamsUsedSectionAria}
+          className={styles.usedSection}
+        >
+          <h3 className={styles.usedTitle}>{pickLabels.teamsUsedTitle}</h3>
           <div
             className={styles.usedChips}
             role="list"
-            aria-label="Teams you have already picked"
+            aria-label={pickLabels.teamsUsedListAria}
           >
             {myPicks.map((pick) => (
-              <div
-                key={pick.team}
-                role="listitem"
-                className={styles.usedChip}
-              >
+              <div key={pick.team} role="listitem" className={styles.usedChip}>
                 <TeamFlag
                   teamName={pick.team}
                   tournamentConfig={tournamentConfig}
                   height={20}
                   className={styles.flag}
                 />
-                <span className={styles.usedChipName}>
-                  {pick.team}
-                </span>
+                <span className={styles.usedChipName}>{pick.team}</span>
               </div>
             ))}
           </div>
@@ -280,7 +291,7 @@ export function PickTeamTab() {
       {activeRound.matches.length === 0 ? (
         <Card>
           <CardContent className={styles.matchesEmptyCard}>
-            No matches in this round yet.
+            {pickLabels.noMatches}
           </CardContent>
         </Card>
       ) : (
@@ -294,47 +305,71 @@ export function PickTeamTab() {
               isDisabled={isPickingDisabled}
               isSubmitting={isSubmitting}
               usedTeamNames={usedTeamNames}
+              labels={pickLabels}
             />
           ))}
         </div>
       )}
 
-      <AlertDialog
+      <PickConfirmDialog
         open={pendingPickTeam !== null}
+        team={pendingPickTeam}
+        isSubmitting={isSubmitting}
+        labels={confirmLabels}
         onOpenChange={(open) => !open && setPendingPickTeam(null)}
-      >
-        <AlertDialogContent className={styles.confirmContent}>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Your pick for this round</AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingPickTeam &&
-                `Do you confirm that you pick ${pendingPickTeam}? You will not be able to pick ${pendingPickTeam} again.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className={styles.confirmFooter}>
-            <AlertDialogCancel disabled={isSubmitting}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleConfirmPick();
-              }}
-              disabled={isSubmitting}
-              className={styles.confirmButton}
-            >
-              {isSubmitting ? (
-                'Confirming…'
-              ) : (
-                <>
-                  <Check className={styles.confirmIcon} />
-                  Confirm Pick
-                </>
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={handleConfirmPick}
+      />
     </div>
+  );
+}
+
+function PickConfirmDialog({
+  open,
+  team,
+  isSubmitting,
+  labels,
+  onOpenChange,
+  onConfirm,
+}: {
+  open: boolean;
+  team: string | null;
+  isSubmitting: boolean;
+  labels: ConfirmLabels;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className={styles.confirmContent}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{labels.pickTitle}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {team && labels.pickMessage(team)}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className={styles.confirmFooter}>
+          <AlertDialogCancel disabled={isSubmitting}>
+            {labels.cancel}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
+            disabled={isSubmitting}
+            className={styles.confirmButton}
+          >
+            {isSubmitting ? (
+              labels.confirming
+            ) : (
+              <>
+                <Check className={styles.confirmIcon} />
+                {labels.confirm}
+              </>
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

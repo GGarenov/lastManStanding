@@ -1,6 +1,14 @@
+import { useMemo } from "react";
 import { toast } from "sonner";
+import { useLabels } from "~/hooks/useLabels";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import type { LeaderboardResponse } from "~/api/pools.api";
-import { filterByStatus, sortEntries, type SortBy, type StatusFilter } from "../leaderboard.helpers";
+import {
+  filterByStatus,
+  sortEntries,
+  type SortBy,
+  type StatusFilter,
+} from "../leaderboard.helpers";
 
 type UseLeaderboardActionsArgs = {
   leaderboardData: LeaderboardResponse | undefined;
@@ -24,37 +32,38 @@ export function useLeaderboardActions({
   poolName,
   poolId,
 }: UseLeaderboardActionsArgs): UseLeaderboardActionsResult {
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
+
   const handleExportCsv = () => {
     if (!leaderboardData?.entries?.length) return;
-    const headers = [
-      "Rank",
-      "Username",
-      "Rounds Survived",
-      "Total Picks",
-      "Last Pick",
-      "Status",
-    ];
+    const headers = labels.export.csvHeaders;
     const sorted = sortEntries(
       filterByStatus(leaderboardData.entries, statusFilter),
-      sortBy
+      sortBy,
     );
     const filtered = searchQuery.trim()
       ? sorted.filter((e) =>
-          e.username.toLowerCase().includes(searchQuery.trim().toLowerCase())
+          e.username.toLowerCase().includes(searchQuery.trim().toLowerCase()),
         )
       : sorted;
+    const { csvStatus } = labels.export;
     const rows = filtered.map((e, i) => [
       i + 1,
       e.username,
       e.roundsSurvived,
       e.totalPicks,
-      e.lastPick?.team ?? "No pick",
-      e.isWinner ? "Winner" : e.isEliminated ? "Eliminated" : "Alive",
+      e.lastPick?.team ?? csvStatus.noPick,
+      e.isWinner
+        ? csvStatus.winner
+        : e.isEliminated
+          ? csvStatus.eliminated
+          : csvStatus.alive,
     ]);
     const csv = [
       headers.join(","),
       ...rows.map((r) =>
-        r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")
+        r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","),
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -64,14 +73,14 @@ export function useLeaderboardActions({
     a.download = `leaderboard-${poolName.replace(/\s+/g, "-") || poolId || "export"}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Leaderboard exported as CSV");
+    toast.success(labels.export.csvSuccess);
   };
 
   const handleCopyShareLink = () => {
     const url = window.location.origin + window.location.pathname;
     void navigator.clipboard
       .writeText(url)
-      .then(() => toast.success("Link copied to clipboard"));
+      .then(() => toast.success(labels.export.linkCopied));
   };
 
   return { handleExportCsv, handleCopyShareLink };

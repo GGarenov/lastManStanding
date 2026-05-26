@@ -1,5 +1,8 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useLabels } from "~/hooks/useLabels";
 import { useLocalizedPath } from "~/i18n/routing";
+import { buildHomeLabels } from "~/locales/labels/home.labels";
 import { Trophy, Medal, ArrowRight } from "lucide-react";
 import { Button } from "@/components/Button/Button";
 import { CountdownBanner } from "@/components/CountdownBanner/CountdownBanner";
@@ -32,6 +35,12 @@ export function HomeHero({
   winnerNames,
 }: HomeHeroProps) {
   const localizedPath = useLocalizedPath();
+  const { t } = useLabels("home");
+  const { t: tCommon } = useLabels("common");
+  const labels = useMemo(
+    () => buildHomeLabels(t, tCommon),
+    [t, tCommon],
+  );
 
   return (
     <section className={styles.hero}>
@@ -39,21 +48,17 @@ export function HomeHero({
         <>
           <img
             src={logoWhite}
-            alt="Last Man Standing"
+            alt={labels.hero.logoAlt}
             className={styles.heroLogo}
           />
           <div className={`${styles.badge} ${styles.badgeAmber}`}>
             <Trophy className={styles.iconSm} />
-            Game completed
+            {labels.completed.badge}
           </div>
           <h1 className={styles.heroTitle}>
-            The{" "}
-            <span className={styles.heroTitleAmber}>
-              {completedPoolName ?? "Pool"}
-            </span>{" "}
-            game is completed
+            {labels.completed.title(completedPoolName)}
           </h1>
-          <p className={styles.heroText}>and the winners are:</p>
+          <p className={styles.heroText}>{labels.completed.winnersIntro}</p>
           <div className={styles.winnerChips}>
             {winnerNames.map((name) => (
               <span key={name} className={styles.winnerChip}>
@@ -67,20 +72,20 @@ export function HomeHero({
               to={localizedPath("/leaderboard")}
               className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
             >
-              View Leaderboard
+              {labels.hero.ctaViewLeaderboard}
               <ArrowRight className={styles.iconSm} />
             </Link>
             <Link
               to={localizedPath("/my-pool")}
               className={`${styles.ctaButton} ${styles.ctaButtonPrimary}`}
             >
-              My Pool
+              {labels.hero.ctaMyPool}
             </Link>
             <Link
               to={localizedPath("/rules")}
               className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
             >
-              How It Works
+              {labels.hero.ctaHowItWorks}
             </Link>
           </div>
           {isAdmin && (
@@ -88,57 +93,54 @@ export function HomeHero({
               to="/admin"
               className={`${styles.ctaButton} ${styles.ctaButtonOutline} ${styles.adminButton}`}
             >
-              Admin panel
+              {labels.hero.ctaAdminPanel}
             </Link>
           )}
         </>
       ) : (
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>
-           
-            <div className={styles.heroEyebrow}>Last man standing - World Cup Edition</div>
+            <div className={styles.heroEyebrow}>{labels.hero.eyebrow}</div>
             {activeTournamentLabel && (
               <div className={styles.heroPill}>
                 <Trophy className={styles.iconSm} />
-                {activeTournamentLabel} Edition
+                {labels.hero.editionPill(activeTournamentLabel)}
               </div>
             )}
             {!hasActivePool && (
               <div className={styles.heroCountdownRow}>
                 <span className={styles.heroCountdownLabel}>
-                  Registation close after
+                  {labels.hero.countdownLabel}
                 </span>
                 <CountdownBanner endDate={COMING_SOON_END_DATE} variant="inline" />
               </div>
             )}
             <h1 className={styles.heroHeading}>
-              <span>Pick One Team Per Round.</span>
+              <span>{labels.hero.headingLine1}</span>
               <br />
               <span className={styles.heroHeadingHighlight}>
-              Last Man Standing Wins It All.
+                {labels.hero.headingLine2}
               </span>
             </h1>
-            <p className={styles.heroLead}>
-              Join a pool, pick a winner each round, and never use the same
-              team twice. If your team loses or draws, you&apos;re out. Last one
-              standing takes the prize.
-            </p>
+            <p className={styles.heroLead}>{labels.hero.lead}</p>
             <div className={styles.ctaRow}>
               <Link to={localizedPath(isLoggedIn ? "/my-pool" : "/login")}>
                 <Button size="lg" className={styles.ctaButtonPrimary}>
-                  {isLoggedIn && hasJoinedAnyPool ? "Go to Pool" : "Join"}
+                  {isLoggedIn && hasJoinedAnyPool
+                    ? labels.hero.ctaGoToPool
+                    : labels.hero.ctaJoin}
                   <ArrowRight className={styles.iconSm} />
                 </Button>
               </Link>
               <Link to={localizedPath("/rules")}>
                 <Button size="lg" variant="outline">
-                  How It Works
+                  {labels.hero.ctaHowItWorks}
                 </Button>
               </Link>
               {!isLoggedIn && (
                 <Link to={localizedPath("/register")}>
                   <Button size="lg" variant="outline">
-                    Register
+                    {labels.hero.ctaRegister}
                   </Button>
                 </Link>
               )}
@@ -152,4 +154,3 @@ export function HomeHero({
     </section>
   );
 }
-

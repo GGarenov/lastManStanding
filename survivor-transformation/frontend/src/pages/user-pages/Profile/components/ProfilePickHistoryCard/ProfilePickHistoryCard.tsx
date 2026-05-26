@@ -1,11 +1,17 @@
-import { Target, Check, HelpCircle } from 'lucide-react';
-import { Card, CardContent } from '~/components/Card/Card';
-import { TeamFlag } from '~/components/TeamFlag/TeamFlag';
-import type { MyPick } from '~/api/pools.api';
-import type { TournamentConfig } from '~/config/tournaments';
-import styles from './ProfilePickHistoryCard.module.less';
+import { useMemo } from "react";
+import { Target, Check, HelpCircle } from "lucide-react";
+import { Card, CardContent } from "~/components/Card/Card";
+import { TeamFlag } from "~/components/TeamFlag/TeamFlag";
+import { useLabels } from "~/hooks/useLabels";
+import { buildProfileLabels } from "~/locales/labels/profile.labels";
+import type { MyPick } from "~/api/pools.api";
+import type { TournamentConfig } from "~/config/tournaments";
+import styles from "./ProfilePickHistoryCard.module.less";
 
-export type GetRoundLabelFn = (tournamentKey: string | null, roundNumber: number) => string;
+export type GetRoundLabelFn = (
+  tournamentKey: string | null,
+  roundNumber: number,
+) => string;
 
 export interface ProfilePickHistoryCardProps {
   pickHistoryRounds: number[];
@@ -22,12 +28,15 @@ export function ProfilePickHistoryCard({
   tournamentConfig,
   getRoundLabel,
 }: ProfilePickHistoryCardProps) {
+  const { t } = useLabels("profile");
+  const labels = useMemo(() => buildProfileLabels(t), [t]);
+
   return (
     <Card className={`${styles.card} ${styles.pickHistoryCard}`}>
       <CardContent className={styles.pickHistoryContent}>
         <div className={styles.pickHistoryHeader}>
           <Target className={styles.progressIcon} />
-          <h2 className={styles.pickHistoryTitle}>Pick History</h2>
+          <h2 className={styles.pickHistoryTitle}>{labels.pickHistory.title}</h2>
         </div>
         <ul className={styles.pickList}>
           {pickHistoryRounds.map((roundNum) => {
@@ -35,7 +44,9 @@ export function ProfilePickHistoryCard({
             const roundLabel = getRoundLabel(tournamentKey, roundNum);
             return (
               <li key={roundNum} className={styles.pickItem}>
-                <span className={styles.roundLabel}>R{roundNum}</span>
+                <span className={styles.roundLabel}>
+                  {labels.pickHistory.roundShort(roundNum)}
+                </span>
                 {pick ? (
                   <>
                     <TeamFlag
@@ -55,7 +66,9 @@ export function ProfilePickHistoryCard({
                       <HelpCircle className={styles.pickPlaceholderIcon} />
                     </div>
                     <div className={styles.pickTeamInfo}>
-                      <p className={styles.pickPlaceholderText}>Awaiting your pick…</p>
+                      <p className={styles.pickPlaceholderText}>
+                        {labels.pickHistory.awaitingPick}
+                      </p>
                       <p className={styles.pickRoundLabel}>{roundLabel}</p>
                     </div>
                   </>

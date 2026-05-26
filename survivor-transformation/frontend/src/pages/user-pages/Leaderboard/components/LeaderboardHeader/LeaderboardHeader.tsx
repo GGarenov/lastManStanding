@@ -1,5 +1,8 @@
+import { useMemo } from "react";
 import { Trophy, Download, Share2 } from "lucide-react";
 import { Button } from "~/components/Button/Button";
+import { useLabels } from "~/hooks/useLabels";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import type { LeaderboardResponse } from "~/api/pools.api";
 import styles from "./LeaderboardHeader.module.less";
 
@@ -20,6 +23,9 @@ export function LeaderboardHeader({
   onExportCsv,
   onCopyShareLink,
 }: LeaderboardHeaderProps) {
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
+
   const showWinnersBanner =
     poolStatus === "finished" &&
     leaderboardData.winnerCount != null &&
@@ -31,17 +37,18 @@ export function LeaderboardHeader({
     .join(", ");
 
   return (
-    <div className={styles.headerSection} aria-label="Leaderboard header">
+    <div className={styles.headerSection} aria-label={labels.page.ariaLabel}>
       {showPoolName && (
         <p className={styles.poolName} data-testid="leaderboard-pool-name">
-          Pool: {poolName || "…"}
+          {labels.header.poolLabel(poolName)}
         </p>
       )}
       {showWinnersBanner && (
         <div className={styles.winnersBanner}>
           <p className={styles.winnersText}>
-            The winners are{" "}
-            <span className={styles.winnersHighlight}>{winnerNames}</span>.
+            {labels.header.winnersAre}{" "}
+            <span className={styles.winnersHighlight}>{winnerNames}</span>
+            {labels.header.winnersEnd}
           </p>
         </div>
       )}
@@ -49,34 +56,40 @@ export function LeaderboardHeader({
         <div className={styles.headerLeft}>
           <div className={styles.titleRow}>
             <Trophy className={styles.titleIcon} aria-hidden />
-            <h1 className={styles.title}>Leaderboard</h1>
+            <h1 className={styles.title}>{labels.page.title}</h1>
           </div>
           <p className={styles.subtitle}>
-            {leaderboardData.totalPlayers} players entered –{" "}
-            {leaderboardData.alivePlayers} still alive
+            {labels.header.subtitle(
+              leaderboardData.totalPlayers,
+              leaderboardData.alivePlayers,
+            )}
           </p>
         </div>
         {leaderboardData.entries.length > 0 && (
-          <div className={styles.actions} role="group" aria-label="Export and share">
+          <div
+            className={styles.actions}
+            role="group"
+            aria-label={labels.header.actionsAria}
+          >
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={onExportCsv}
-              aria-label="Export leaderboard as CSV"
+              aria-label={labels.header.exportAria}
             >
               <Download className={styles.exportBtnIcon} aria-hidden />
-              Export CSV
+              {labels.header.exportCsv}
             </Button>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={onCopyShareLink}
-              aria-label="Copy leaderboard link to clipboard"
+              aria-label={labels.header.shareAria}
             >
               <Share2 className={styles.exportBtnIcon} aria-hidden />
-              Share link
+              {labels.header.shareLink}
             </Button>
           </div>
         )}

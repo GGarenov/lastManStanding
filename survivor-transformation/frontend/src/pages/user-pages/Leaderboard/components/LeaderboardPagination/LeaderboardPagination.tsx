@@ -1,3 +1,6 @@
+import { useMemo } from "react";
+import { useLabels } from "~/hooks/useLabels";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import {
   Pagination,
   PaginationContent,
@@ -26,12 +29,14 @@ export function LeaderboardPagination({
   totalPages,
   onPageChange,
 }: LeaderboardPaginationProps) {
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
   const endRank = Math.min(startRank + pageSize - 1, totalFiltered);
 
   return (
-    <nav className={styles.pagination} aria-label="Leaderboard pagination">
+    <nav className={styles.pagination} aria-label={labels.pagination.ariaLabel}>
       <p className={styles.paginationText} aria-live="polite">
-        Showing {startRank}–{endRank} of {totalFiltered}
+        {labels.pagination.showing(startRank, endRank, totalFiltered)}
       </p>
       <Pagination>
         <PaginationContent>
@@ -75,8 +80,8 @@ export function LeaderboardPagination({
                     isActive={currentPage === p}
                     aria-label={
                       currentPage === p
-                        ? `Page ${p}, current`
-                        : `Go to page ${p}`
+                        ? labels.pagination.pageCurrent(p)
+                        : labels.pagination.goToPage(p)
                     }
                     aria-current={currentPage === p ? "page" : undefined}
                   >

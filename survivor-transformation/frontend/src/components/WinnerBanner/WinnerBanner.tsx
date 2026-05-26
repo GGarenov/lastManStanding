@@ -1,6 +1,9 @@
-import { Trophy } from 'lucide-react';
-import { cn } from '~/lib/utils';
-import styles from './WinnerBanner.module.less';
+import { useMemo } from "react";
+import { Trophy } from "lucide-react";
+import { useLabels } from "~/hooks/useLabels";
+import { buildPoolLabels } from "~/locales/labels/pool.labels";
+import { cn } from "~/lib/utils";
+import styles from "./WinnerBanner.module.less";
 
 export interface WinnerBannerProps {
   poolName?: string;
@@ -9,6 +12,13 @@ export interface WinnerBannerProps {
 }
 
 export function WinnerBanner({ poolName, compact, className }: WinnerBannerProps) {
+  const { t } = useLabels("pool");
+  const { t: tCommon } = useLabels("common");
+  const labels = useMemo(
+    () => buildPoolLabels(t, tCommon).winnerBanner,
+    [t, tCommon],
+  );
+
   if (compact) {
     return (
       <div
@@ -17,7 +27,7 @@ export function WinnerBanner({ poolName, compact, className }: WinnerBannerProps
         aria-live="polite"
       >
         <Trophy className={styles.compactIcon} aria-hidden />
-        <span className={styles.compactTitle}>You are the winner</span>
+        <span className={styles.compactTitle}>{labels.compactTitle}</span>
         {poolName && <span className={styles.compactPool}>— {poolName}</span>}
       </div>
     );
@@ -32,11 +42,11 @@ export function WinnerBanner({ poolName, compact, className }: WinnerBannerProps
       <div className={styles.fullIconWrap}>
         <Trophy className={styles.fullIcon} aria-hidden />
       </div>
-      <h2 className={styles.fullTitle}>You are the winner</h2>
+      <h2 className={styles.fullTitle}>{labels.fullTitle}</h2>
       {poolName ? (
-        <p className={styles.fullText}>Congratulations! You won {poolName}.</p>
+        <p className={styles.fullText}>{labels.congratsWithPool(poolName)}</p>
       ) : (
-        <p className={styles.fullText}>Congratulations!</p>
+        <p className={styles.fullText}>{labels.congrats}</p>
       )}
     </div>
   );

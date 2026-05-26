@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLabels } from '~/hooks/useLabels';
 import { useLocalizedPath } from '~/i18n/routing';
+import { buildProfileLabels } from '~/locales/labels/profile.labels';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import { getUserDisplayName, getAvatarInitials } from '~/lib/user-utils';
 import { getRoundLabel } from './profile.helpers';
@@ -16,6 +19,8 @@ import { ProfileFooter } from './components/ProfileFooter/ProfileFooter';
 import styles from './Profile.module.less';
 
 export default function Profile() {
+  const { t } = useLabels('profile');
+  const labels = useMemo(() => buildProfileLabels(t), [t]);
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
@@ -67,7 +72,7 @@ export default function Profile() {
         />
 
         {profileLoading && !poolId ? (
-          <div className={styles.loading}>Loading…</div>
+          <div className={styles.loading}>{labels.page.loading}</div>
         ) : !poolId ? (
           <ProfileEmptyState />
         ) : (

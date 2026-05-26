@@ -1,4 +1,7 @@
+import { useMemo } from "react";
 import { Card, CardContent } from "~/components/Card/Card";
+import { useLabels } from "~/hooks/useLabels";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import {
   Select,
   SelectContent,
@@ -26,29 +29,32 @@ export function LeaderboardPoolSelector({
   pools,
   onPoolChange,
 }: LeaderboardPoolSelectorProps) {
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
+
   return (
     <Card className={styles.selectorCard}>
       <CardContent className={styles.selectorContent}>
         <div className={styles.selectorRow}>
           <label htmlFor="pool-select" className={styles.selectorLabel}>
-            Select Pool:
+            {labels.poolSelector.label}
           </label>
           <Select value={poolId || ""} onValueChange={onPoolChange}>
             <SelectTrigger id="pool-select" className={styles.selectTrigger}>
-              <SelectValue placeholder="Select a pool" />
+              <SelectValue placeholder={labels.poolSelector.placeholder} />
             </SelectTrigger>
             <SelectContent>
               {pools
                 .filter(
-                  (p) => p.myStatus === "approved" || p.myStatus === "winner"
+                  (p) => p.myStatus === "approved" || p.myStatus === "winner",
                 )
                 .map((pool) => (
                   <SelectItem key={pool.id} value={pool.id}>
                     {pool.name}
                     {pool.myStatus === "winner"
-                      ? " (Winner)"
+                      ? labels.poolSelector.winnerSuffix
                       : pool.status === "finished"
-                        ? " (Finished)"
+                        ? labels.poolSelector.finishedSuffix
                         : ""}
                   </SelectItem>
                 ))}

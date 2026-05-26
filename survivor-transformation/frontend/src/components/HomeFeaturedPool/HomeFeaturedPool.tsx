@@ -1,5 +1,8 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useLabels } from "~/hooks/useLabels";
 import { useLocalizedPath } from "~/i18n/routing";
+import { buildHomeLabels } from "~/locales/labels/home.labels";
 import { Card, CardContent, CardHeader } from "@/components/Card/Card";
 import { Button } from "@/components/Button/Button";
 import { Users, Loader2, Clock } from "lucide-react";
@@ -33,6 +36,12 @@ export function HomeFeaturedPool({
   onJoin,
 }: HomeFeaturedPoolProps) {
   const localizedPath = useLocalizedPath();
+  const { t } = useLabels("home");
+  const { t: tCommon } = useLabels("common");
+  const labels = useMemo(
+    () => buildHomeLabels(t, tCommon),
+    [t, tCommon],
+  );
 
   if (!activeTournament || !featuredPool) return null;
 
@@ -67,8 +76,7 @@ export function HomeFeaturedPool({
             <div className={styles.featuredMeta}>
               <Users className={styles.featuredMetaIcon} />
               <span>
-                {featuredPool.participants} participant
-                {featuredPool.participants !== 1 ? "s" : ""}
+                {labels.featuredPool.participants(featuredPool.participants)}
               </span>
             </div>
             <div className={styles.featuredActions}>
@@ -79,14 +87,13 @@ export function HomeFeaturedPool({
                     size="lg"
                     className={styles.featuredButtonFull}
                   >
-                    Log in to join
+                    {labels.featuredPool.loginToJoin}
                   </Button>
                 </Link>
               ) : myStatus === "none" ? (
                 <>
                   <p className={styles.buyInText}>
-                    Request to join this pool. Pay the admin to confirm your
-                    entry. You&apos;ll be approved once payment is received.
+                    {labels.featuredPool.buyInText}
                   </p>
                   <Button
                     size="lg"
@@ -98,17 +105,17 @@ export function HomeFeaturedPool({
                     {joiningId === featuredPool.id ? (
                       <>
                         <Loader2 className={styles.waitingIcon} />
-                        Joining…
+                        {labels.featuredPool.joining}
                       </>
                     ) : (
-                      "Join pool"
+                      labels.featuredPool.joinPool
                     )}
                   </Button>
                 </>
               ) : myStatus === "pending" ? (
                 <div className={styles.waitingBox}>
                   <Clock className={styles.waitingIcon} />
-                  Waiting for approval
+                  {labels.featuredPool.waitingApproval}
                 </div>
               ) : myStatus === "approved" || myStatus === "winner" ? (
                 <Link to={localizedPath("/my-pool")}>
@@ -117,7 +124,7 @@ export function HomeFeaturedPool({
                     variant="primary"
                     className={styles.featuredButtonFull}
                   >
-                    Go to my pool
+                    {labels.featuredPool.goToMyPool}
                   </Button>
                 </Link>
               ) : (

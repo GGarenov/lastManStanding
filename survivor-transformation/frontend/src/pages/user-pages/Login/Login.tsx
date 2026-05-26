@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/Card/Card';
 import { Button } from '~/components/Button/Button';
 import { Input } from '~/components/Input/Input';
 import { Label } from '~/components/Label/Label';
+import { useLabels } from '~/hooks/useLabels';
 import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
+import { buildAuthLabels } from '~/locales/labels/auth.labels';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import style from './Login.module.less';
 
@@ -12,12 +14,13 @@ export default function Login() {
   const navigate = useNavigate();
   const appLocale = useAppLocale();
   const localizedPath = useLocalizedPath();
+  const { t } = useLabels('auth');
+  const labels = useMemo(() => buildAuthLabels(t), [t]);
   const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
   const isChecked = useAuthStore((s) => s.isChecked);
   const hasRedirected = useRef(false);
 
-  // Redirect if already logged in: admin -> /admin, else -> / (once per mount)
   useEffect(() => {
     if (hasRedirected.current) return;
     if (isChecked && user) {
@@ -37,7 +40,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     if (!email.trim() || !password) {
-      setError('Email and password are required');
+      setError(labels.login.errors.required);
       return;
     }
     setIsLoading(true);
@@ -48,7 +51,7 @@ export default function Login() {
         replace: true,
       });
     } catch {
-      setError('Login failed. Check your email and password.');
+      setError(labels.login.errors.failed);
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +60,7 @@ export default function Login() {
   if (isChecked && user) {
     return (
       <div className={style.fullscreenCenter}>
-        <p className={style.redirectText}>Redirecting...</p>
+        <p className={style.redirectText}>{labels.login.redirecting}</p>
       </div>
     );
   }
@@ -66,29 +69,27 @@ export default function Login() {
     <div className={style.page}>
       <Card className={style.card}>
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>
-            Sign in to play or manage survivor pools
-          </CardDescription>
+          <CardTitle>{labels.login.title}</CardTitle>
+          <CardDescription>{labels.login.description}</CardDescription>
         </CardHeader>
           <CardContent>
           <form onSubmit={handleSubmit} className={style.form}>
             {error && <p className={style.errorText}>{error}</p>}
             <div className={style.field}>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{labels.login.emailLabel}</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
+                placeholder={labels.login.emailPlaceholder}
                 autoComplete="email"
                 disabled={isLoading}
                 className={style.input}
               />
             </div>
             <div className={style.field}>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{labels.login.passwordLabel}</Label>
               <Input
                 id="password"
                 type="password"
@@ -100,12 +101,12 @@ export default function Login() {
               />
             </div>
             <Button type="submit" className={style.submitButton} disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? labels.login.submitting : labels.login.submit}
             </Button>
             <p className={style.registerText}>
-              No account?{' '}
+              {labels.login.noAccount}{' '}
               <Link to={localizedPath('/register')} className={style.registerLink}>
-                Register
+                {labels.login.registerLink}
               </Link>
             </p>
           </form>
