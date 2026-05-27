@@ -2,6 +2,7 @@ import { Controller, Get, Post, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PoolService } from './pool.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('pools')
 @Controller('pools')
@@ -14,8 +15,9 @@ export class PoolController {
   }
 
   /** Returns open/active pools; each item includes entryFeeEur, rakePerEntryEur (do not strip). */
+  @Public()
   @Get('survivor')
-  getOpenPools(@CurrentUser('sub') userId: string) {
+  getOpenPools(@CurrentUser('sub') userId?: string) {
     return this.poolService.getOpenPools(userId);
   }
 

@@ -6,6 +6,7 @@ import { buildHomeLabels } from "~/locales/labels/home.labels";
 import { Trophy, Medal, ArrowRight } from "lucide-react";
 import { Button } from "@/components/Button/Button";
 import { CountdownBanner } from "@/components/CountdownBanner/CountdownBanner";
+import { formatEntryFeeCopy } from "@/config/rake";
 import logoWhite from "~/assets/logo/logo-white.svg";
 import heroBanner from "~/assets/images/banner1.png";
 import styles from "./HomeHero.module.less";
@@ -25,6 +26,8 @@ type HomeHeroProps = {
   hasMultipleWinners: boolean;
   prizeTotalDisplay?: string;
   prizeEachDisplay?: string | null;
+  entryFeeEur?: number;
+  rakePerEntryEur?: number;
 };
 
 export function HomeHero({
@@ -39,6 +42,8 @@ export function HomeHero({
   hasMultipleWinners,
   prizeTotalDisplay,
   prizeEachDisplay,
+  entryFeeEur,
+  rakePerEntryEur,
 }: HomeHeroProps) {
   const localizedPath = useLocalizedPath();
   const { t } = useLabels("home");
@@ -47,6 +52,19 @@ export function HomeHero({
     () => buildHomeLabels(t, tCommon),
     [t, tCommon],
   );
+  const hasPoolFeeConfig =
+    typeof entryFeeEur === "number" && typeof rakePerEntryEur === "number";
+  const buyInCopy = hasPoolFeeConfig
+    ? formatEntryFeeCopy(entryFeeEur, rakePerEntryEur)
+    : null;
+  const prizePoolEur =
+    hasPoolFeeConfig && entryFeeEur !== undefined && rakePerEntryEur !== undefined
+      ? `€${entryFeeEur - rakePerEntryEur}`
+      : null;
+  const rakeEur =
+    hasPoolFeeConfig && rakePerEntryEur !== undefined
+      ? `€${rakePerEntryEur}`
+      : null;
 
   return (
     <section className={styles.hero}>
@@ -144,6 +162,17 @@ export function HomeHero({
               </span>
             </h1>
             <p className={styles.heroLead}>{labels.hero.lead}</p>
+            {hasPoolFeeConfig && buyInCopy && prizePoolEur && rakeEur && (
+              <div className={styles.buyInInfoBox}>
+                <p className={styles.buyInValue}>
+                  <span className={styles.buyInLabel}>{labels.hero.buyInLabel}:</span>{" "}
+                  {buyInCopy}
+                </p>
+                <p className={styles.buyInSubtext}>
+                  {labels.hero.rakeExplanation(prizePoolEur, rakeEur)}
+                </p>
+              </div>
+            )}
             <div className={styles.ctaRow}>
               <Link to={localizedPath(isLoggedIn ? "/my-pool" : "/login")}>
                 <Button size="lg" className={styles.ctaButtonPrimary}>

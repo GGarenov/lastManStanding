@@ -6,6 +6,7 @@ export function buildHomeLabels(
 ) {
   return {
     statsBanner: {
+      prizePool: t("statsBanner.prizePool"),
       totalPlayers: t("statsBanner.totalPlayers"),
       playersLeft: t("statsBanner.playersLeft"),
       currentRound: t("statsBanner.currentRound"),
@@ -19,6 +20,9 @@ export function buildHomeLabels(
       headingLine1: t("hero.headingLine1"),
       headingLine2: t("hero.headingLine2"),
       lead: t("hero.lead"),
+      buyInLabel: t("hero.buyInLabel"),
+      rakeExplanation: (prizePoolEur: string, rakeEur: string) =>
+        t("hero.rakeExplanation", { prizePoolEur, rakeEur }),
       ctaJoin: t("hero.ctaJoin"),
       ctaGoToPool: t("hero.ctaGoToPool"),
       ctaHowItWorks: t("hero.ctaHowItWorks"),

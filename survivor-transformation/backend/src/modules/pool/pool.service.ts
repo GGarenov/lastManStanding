@@ -39,16 +39,16 @@ export class PoolService {
     });
   }
 
-  async getOpenPools(userId: string) {
+  async getOpenPools(userId?: string) {
     const openPools = await this.poolModel
       .find({
         status: { $in: ['open', 'active'] },
       })
       .lean();
 
-    const myPoolIds = await this.participantModel.distinct('poolId', {
-      userId,
-    });
+    const myPoolIds = userId
+      ? await this.participantModel.distinct('poolId', { userId })
+      : [];
     const myPools = myPoolIds.length
       ? await this.poolModel.find({ _id: { $in: myPoolIds } }).lean()
       : [];

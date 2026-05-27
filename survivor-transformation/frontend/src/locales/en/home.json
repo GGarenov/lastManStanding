@@ -5,6 +5,7 @@
   "winners_one": "{{count}} winner",
   "winners_other": "{{count}} winners",
   "statsBanner": {
+    "prizePool": "Prize Pool",
     "totalPlayers": "Total Players",
     "playersLeft": "Players Left",
     "currentRound": "Current round"
@@ -17,6 +18,8 @@
     "headingLine1": "Pick One Team Per Round.",
     "headingLine2": "Last Man Standing Wins It All.",
     "lead": "Join a pool, pick a winner each round, and never use the same team twice. If your team loses or draws, you're out. Last one standing takes the prize.",
+    "buyInLabel": "Buy-in",
+    "rakeExplanation": "{{prizePoolEur}} goes to prize pool, {{rakeEur}} is admin rake.",
     "ctaJoin": "Join",
     "ctaGoToPool": "Go to Pool",
     "ctaHowItWorks": "How It Works",

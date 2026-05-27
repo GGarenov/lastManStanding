@@ -5,12 +5,14 @@ import { buildHomeLabels } from "~/locales/labels/home.labels";
 import styles from "./HomeStatsBanner.module.less";
 
 export type HomeStatsBannerProps = {
+  prizeDisplay: string;
   playersDisplay: string;
   survivorsDisplay: string;
   currentRoundDisplay: string;
 };
 
 export function HomeStatsBanner({
+  prizeDisplay,
   playersDisplay,
   survivorsDisplay,
   currentRoundDisplay,
@@ -27,6 +29,12 @@ export function HomeStatsBanner({
       <Card className={styles.statsBannerCard}>
         <CardContent className={styles.statsBannerContent}>
           <div className={styles.statsBannerGrid}>
+            <div className={styles.statsBannerItem}>
+              <p className={styles.statsBannerItemLabel}>
+                {labels.statsBanner.prizePool}
+              </p>
+              <p className={styles.statsBannerItemValue}>{prizeDisplay}</p>
+            </div>
             <div className={styles.statsBannerItem}>
               <p className={styles.statsBannerItemLabel}>
                 {labels.statsBanner.totalPlayers}

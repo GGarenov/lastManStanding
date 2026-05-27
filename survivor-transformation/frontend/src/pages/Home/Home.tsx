@@ -2,12 +2,10 @@ import { useMemo } from "react";
 import { useAuthStore, isAdminUser } from "@/store/authStore";
 import { useOpenPoolsStore } from "@/store/openPoolsStore";
 import { useActiveTournament } from "@/contexts/ActiveTournamentContext";
-import { HomeStatsBanner } from "@/components/HomeStatsBanner/HomeStatsBanner";
 import { HomeHero } from "@/components/HomeHero/HomeHero";
 import { HomeHowItWorks } from "@/components/HomeHowItWorks/HomeHowItWorks";
 import { HomeFeaturedPool } from "@/components/HomeFeaturedPool/HomeFeaturedPool";
 import { useCompletedPool } from "./hooks/useCompletedPool";
-import { useHomeStats } from "./hooks/useHomeStats";
 import {
   getFeaturedPool,
   formatPrizePoolEur,
@@ -51,13 +49,10 @@ export default function Home() {
 
   const featuredPool = getFeaturedPool(pools);
   const hasActivePool = pools.some((p) => p.status === "active");
+  const heroEntryFeeEur = featuredPool?.entryFeeEur;
+  const heroRakePerEntryEur = featuredPool?.rakePerEntryEur;
 
   const { completedPool, completedPoolLoading } = useCompletedPool({
-    user,
-    pools,
-    fetchPools,
-  });
-  const { homeStats, homeStatsLoading } = useHomeStats({
     user,
     pools,
     fetchPools,
@@ -65,22 +60,6 @@ export default function Home() {
 
   const showCompletedView = !completedPoolLoading && completedPool !== null;
 
-  const prizeDisplay =
-    homeStatsLoading || homeStats === null
-      ? "—"
-      : formatPrizePoolEur(homeStats.prizePoolEur);
-  const playersDisplay =
-    homeStatsLoading || homeStats === null
-      ? "—"
-      : String(homeStats.activePlayers);
-  const survivorsDisplay =
-    homeStatsLoading || homeStats === null
-      ? "—"
-      : String(homeStats.survivorsLeft);
-  const currentRoundDisplay =
-    homeStatsLoading || homeStats === null
-      ? "—"
-      : homeStats.currentRoundLabel;
   const isLoggedIn = Boolean(user);
 
   const completedPrizeTotalDisplay =
@@ -102,14 +81,6 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        {activeTournament && (
-          <HomeStatsBanner
-            prizeDisplay={prizeDisplay}
-            playersDisplay={playersDisplay}
-            survivorsDisplay={survivorsDisplay}
-            currentRoundDisplay={currentRoundDisplay}
-          />
-        )}
         <HomeHero
           showCompletedView={showCompletedView}
           isAdmin={Boolean(isAdmin)}
@@ -122,6 +93,8 @@ export default function Home() {
           hasMultipleWinners={hasMultipleWinners}
           prizeTotalDisplay={completedPrizeTotalDisplay}
           prizeEachDisplay={completedPrizeEachDisplay}
+          entryFeeEur={heroEntryFeeEur}
+          rakePerEntryEur={heroRakePerEntryEur}
         />
 
         <HomeHowItWorks show={!showCompletedView} />

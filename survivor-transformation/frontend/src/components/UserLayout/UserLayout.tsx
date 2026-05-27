@@ -3,8 +3,13 @@ import { Outlet, useParams, useLocation } from 'react-router-dom';
 import { Navbar } from '~/components/Navbar/Navbar';
 import { RoundCountdownBanner } from '~/components/RoundCountdownBanner/RoundCountdownBanner';
 import { PrizePoolBanner } from '~/components/PrizePoolBanner/PrizePoolBanner';
+import { HomeStatsBanner } from '~/components/HomeStatsBanner/HomeStatsBanner';
 import { ActiveTournamentProvider } from '~/contexts/ActiveTournamentContext';
+import { useActiveTournament } from '~/contexts/ActiveTournamentContext';
 import { stripLocalePrefix } from '~/i18n/routing';
+import { useAuthStore } from '~/store/authStore';
+import { useOpenPoolsStore } from '~/store/openPoolsStore';
+import { useLivePoolSummary } from '~/hooks/useLivePoolSummary';
 import { getMyPoolMemberships, getMyPoolStatus } from '~/api/pools.api';
 import styles from './UserLayout.module.less';
 
@@ -68,12 +73,49 @@ export function UserLayout() {
 
   return (
     <ActiveTournamentProvider>
-      <div className={styles.wrapper}>
-        <Navbar />
-        <RoundCountdownBanner poolId={poolId} tournamentKey={tournamentKey} />
-        <PrizePoolBanner poolId={poolId} />
-        <Outlet />
-      </div>
+      <UserLayoutContent poolId={poolId} tournamentKey={tournamentKey} />
     </ActiveTournamentProvider>
+  );
+}
+
+type UserLayoutContentProps = {
+  poolId: string | null;
+  tournamentKey: string | null;
+};
+
+function UserLayoutContent({ poolId, tournamentKey }: UserLayoutContentProps) {
+  const user = useAuthStore((state) => state.user);
+  const { pools, fetchPools } = useOpenPoolsStore();
+  const { activeTournament } = useActiveTournament();
+  const { summary, isLoading } = useLivePoolSummary({
+    user,
+    pools,
+    fetchPools,
+  });
+
+  const prizeDisplay =
+    isLoading || summary === null ? '—' : summary.prizeDisplay;
+  const playersDisplay =
+    isLoading || summary === null ? '—' : summary.playersDisplay;
+  const survivorsDisplay =
+    isLoading || summary === null ? '—' : summary.survivorsDisplay;
+  const currentRoundDisplay =
+    isLoading || summary === null ? '—' : summary.currentRoundDisplay;
+
+  return (
+    <div className={styles.wrapper}>
+      <Navbar />
+      {activeTournament && (
+        <HomeStatsBanner
+          prizeDisplay={prizeDisplay}
+          playersDisplay={playersDisplay}
+          survivorsDisplay={survivorsDisplay}
+          currentRoundDisplay={currentRoundDisplay}
+        />
+      )}
+      <RoundCountdownBanner poolId={poolId} tournamentKey={tournamentKey} />
+      <PrizePoolBanner poolId={poolId} />
+      <Outlet />
+    </div>
   );
 }
