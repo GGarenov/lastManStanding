@@ -16,7 +16,7 @@
     "sheetAria": "Навигация"
   },
   "logo": {
-    "survivor": "Survivor",
-    "survivorWithTournament": "{{tournament}} Survivor"
+    "survivor": "Last man standing",
+    "survivorWithTournament": "{{tournament}} Last Man Standing"
   }
 }
