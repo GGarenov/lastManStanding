@@ -1,0 +1,44 @@
+{
+  "page": {
+    "title": "Профил",
+    "loading": "Зареждане…"
+  },
+  "guest": {
+    "message": "Влез, за да видиш и управляваш профила си.",
+    "login": "Вход",
+    "register": "Регистрация"
+  },
+  "empty": {
+    "joinPool": "Включи се в турнира, за да видиш статистиката и историята на изборите си.",
+    "myPool": "Моят пул"
+  },
+  "summary": {
+    "rank": "Място #{{rank}} от {{total}}",
+    "status": {
+      "eliminated": "Отпаднал",
+      "winner": "Победител",
+      "alive": "В игра"
+    },
+    "admin": "Админ"
+  },
+  "statsGrid": {
+    "roundsSurvived": "Оцелели кръгове",
+    "survivalRate": "Процент оцеляване",
+    "currentRound": "Текущ кръг",
+    "teamsAvailable": "Налични отбори"
+  },
+  "progress": {
+    "title": "Напредък в турнира",
+    "roundOf": "Кръг {{current}} от {{max}}",
+    "percentComplete": "{{percent}}% завършено"
+  },
+  "pickHistory": {
+    "title": "История на изборите",
+    "roundShort": "К{{round}}",
+    "awaitingPick": "Още не си избрал"
+  },
+  "footer": {
+    "adminPanel": "Админ панел",
+    "logout": "Изход"
+  }
+}

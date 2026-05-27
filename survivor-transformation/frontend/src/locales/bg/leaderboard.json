@@ -1,0 +1,100 @@
+{
+  "page": {
+    "title": "Класиране",
+    "ariaLabel": "Класиране"
+  },
+  "empty": {
+    "noPool": {
+      "title": "Няма наличен турнир",
+      "description": "Трябва да се присъединиш към турнир, за да видиш класирането.",
+      "goToMyPool": "Към турнира"
+    },
+    "selectPool": "Моля, избери турнир, за да видиш класирането.",
+    "noParticipants": "Все още няма участници",
+    "noMatch": "Няма резултати за филтрите или търсенето."
+  },
+  "header": {
+    "poolLabel": "Турнир: {{name}}",
+    "poolFallback": "…",
+    "winnersAre": "Победителите са",
+    "winnersEnd": ".",
+    "subtitle": "{{total}} играчи – {{alive}} все още в игра",
+    "exportCsv": "Експорт CSV",
+    "shareLink": "Сподели линк",
+    "exportAria": "Експорт на класирането като CSV",
+    "shareAria": "Копирай линка към класирането",
+    "actionsAria": "Експорт и споделяне"
+  },
+  "poolSelector": {
+    "label": "Избери пул:",
+    "placeholder": "Избери пул",
+    "winnerSuffix": " (Победител)",
+    "finishedSuffix": " (Приключил)"
+  },
+  "filters": {
+    "filterLabel": "Филтър:",
+    "sortLabel": "Подреди по:",
+    "searchPlaceholder": "Търси по потребителско име...",
+    "searchAria": "Търсене в класирането по потребителско име",
+    "status": {
+      "all": "Всички",
+      "alive": "В игра",
+      "eliminated": "Отпаднали",
+      "winners": "Победители"
+    },
+    "sort": {
+      "rounds": "Кръгове",
+      "picks": "Общо избори",
+      "username": "Потребител"
+    }
+  },
+  "entry": {
+    "you": "(Ти)",
+    "lastPick": "Последен избор:",
+    "noPick": "Без избор",
+    "rounds": "{{count}} КРЪГА",
+    "rowAria": "Място {{rank}}: {{username}}, {{rounds}} кръга, {{status}}",
+    "status": {
+      "alive": "В игра",
+      "eliminated": "Отпаднал",
+      "winner": "Победител"
+    }
+  },
+  "pagination": {
+    "ariaLabel": "Странициране на класирането",
+    "showing": "Показани {{start}}–{{end}} от {{total}}",
+    "pageCurrent": "Страница {{page}}, текуща",
+    "goToPage": "Към страница {{page}}"
+  },
+  "error": {
+    "loadFailed": "Класирането не се зареди",
+    "ariaLabel": "Грешка при класирането",
+    "retryAria": "Опитай отново да заредиш класирането"
+  },
+  "loading": {
+    "ariaLabel": "Зареждане на класирането"
+  },
+  "list": {
+    "ariaLabel": "Класиране: {{count}} записа"
+  },
+  "export": {
+    "updatedTitle": "Класирането е обновено",
+    "updatedDescription": "Топ позициите са променени.",
+    "csvSuccess": "Класирането е експортирано като CSV",
+    "linkCopied": "Линкът е копиран",
+    "csvHeaders": {
+      "rank": "Място",
+      "username": "Потребител",
+      "roundsSurvived": "Оцелели кръгове",
+      "totalPicks": "Общо избори",
+      "lastPick": "Последен избор",
+      "status": "Статус"
+    },
+    "csvStatus": {
+      "noPick": "Без избор",
+      "winner": "Победител",
+      "eliminated": "Отпаднал",
+      "alive": "В игра"
+    }
+  }
+}

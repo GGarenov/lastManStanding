@@ -1,0 +1,40 @@
+{
+  "app": {
+    "name": "Последният оцелял"
+  },
+  "language": {
+    "switcher": "Език",
+    "en": "EN",
+    "bg": "БГ"
+  },
+  "actions": {
+    "save": "Запази",
+    "cancel": "Отказ",
+    "confirm": "Потвърди",
+    "loading": "Зареждане…",
+    "retry": "Опитай отново",
+    "redirecting": "Пренасочване..."
+  },
+  "errors": {
+    "errorGeneric": "Нещо се обърка. Моля, опитайте отново."
+  },
+  "counts": {
+    "participants_one": "{{count}} участник",
+    "participants_other": "{{count}} участници",
+    "playersRemaining_one": "{{count}} играч остана",
+    "playersRemaining_other": "{{count}} играчи останаха"
+  },
+  "notFound": {
+    "code": "404",
+    "message": "Страницата не е намерена",
+    "backHome": "Обратно към началото"
+  },
+  "guest": {
+    "displayName": "Гост"
+  },
+  "a11y": {
+    "close": "Затвори",
+    "pagination": "Странициране",
+    "errorIcon": "Икона за грешка"
+  }
+}

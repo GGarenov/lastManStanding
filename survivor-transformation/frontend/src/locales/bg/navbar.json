@@ -1,0 +1,22 @@
+{
+  "nav": {
+    "home": "Начало",
+    "rules": "Правила",
+    "stats": "Статистика",
+    "leaderboard": "Класиране"
+  },
+  "profile": {
+    "label": "Профил",
+    "login": "Вход"
+  },
+  "menu": {
+    "title": "Меню",
+    "openAria": "Отвори менюто",
+    "navAria": "Основна навигация",
+    "sheetAria": "Навигация"
+  },
+  "logo": {
+    "survivor": "Last man standing",
+    "survivorWithTournament": "{{tournament}} Last Man Standing"
+  }
+}
