@@ -4,6 +4,8 @@ import * as poolsApi from "@/api/pools.api";
 export type CompletedPoolState = {
   poolName: string;
   winnerNames: string[];
+  prizePoolEur?: number;
+  winnerCount?: number;
 } | null;
 
 type PoolLike = { id?: string; status?: string; name?: string };
@@ -64,6 +66,8 @@ export function useCompletedPool({
         setCompletedPool({
           poolName: finished.name ?? "Pool",
           winnerNames: winnerNames.length > 0 ? winnerNames : ["—"],
+          prizePoolEur: leaderboard.prizePoolEur ?? 0,
+          winnerCount: leaderboard.winnerCount ?? 0,
         });
       } catch {
         if (!cancelled) setCompletedPool(null);
@@ -80,3 +84,4 @@ export function useCompletedPool({
 
   return { completedPool, completedPoolLoading };
 }
+

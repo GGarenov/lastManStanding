@@ -28,6 +28,8 @@ export default function CreatePool() {
     name: '',
     description: '',
     tournamentKey: '',
+    entryFeeEur: 50,
+    rakePerEntryEur: 10,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,12 +46,27 @@ export default function CreatePool() {
       return;
     }
 
+    if (formData.entryFeeEur <= 0) {
+      toast.error('Entry fee must be greater than 0');
+      return;
+    }
+    if (formData.rakePerEntryEur < 0) {
+      toast.error('Rake per entry must be 0 or more');
+      return;
+    }
+    if (formData.rakePerEntryEur >= formData.entryFeeEur) {
+      toast.error('Rake per entry must be less than entry fee');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const pool = await adminApi.createPool({
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         tournamentKey: formData.tournamentKey.trim() || undefined,
+        entryFeeEur: formData.entryFeeEur,
+        rakePerEntryEur: formData.rakePerEntryEur,
       });
       toast.success('Pool created successfully!');
       await fetchPools();
@@ -128,6 +145,37 @@ export default function CreatePool() {
                 </Select>
                 <p className={styles.helperText}>
                   Links the pool to a tournament config for team flags and Add match dropdowns.
+                </p>
+              </div>
+
+              <div className={styles.field}>
+                <Label htmlFor="entryFeeEur">Entry fee (€)</Label>
+                <Input
+                  id="entryFeeEur"
+                  type="number"
+                  min={1}
+                  value={formData.entryFeeEur}
+                  onChange={(e) =>
+                    setFormData({ ...formData, entryFeeEur: Number(e.target.value) || 0 })
+                  }
+                  className={styles.control}
+                />
+              </div>
+
+              <div className={styles.field}>
+                <Label htmlFor="rakePerEntryEur">Rake per entry (€)</Label>
+                <Input
+                  id="rakePerEntryEur"
+                  type="number"
+                  min={0}
+                  value={formData.rakePerEntryEur}
+                  onChange={(e) =>
+                    setFormData({ ...formData, rakePerEntryEur: Number(e.target.value) || 0 })
+                  }
+                  className={styles.control}
+                />
+                <p className={styles.helperText}>
+                  Prize per entry = Entry fee − Rake (e.g. 40€).
                 </p>
               </div>
 

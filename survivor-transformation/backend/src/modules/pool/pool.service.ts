@@ -1,7 +1,12 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { POOLS_MODEL } from './pool.providers';
 import { POOL_PARTICIPANTS_MODEL } from '../participant/participant.providers';
+import {
+  ENTRY_FEE_EUR,
+  RAKE_PER_ENTRY_EUR,
+} from '../rake/rake.constants';
+import { RakeService } from '../rake/rake.service';
 import { Pool } from './pool.interface';
 
 @Injectable()
@@ -12,6 +17,9 @@ export class PoolService {
 
     @Inject(POOL_PARTICIPANTS_MODEL)
     private readonly participantModel: Model<any>,
+
+    @Inject(forwardRef(() => RakeService))
+    private readonly rakeService: RakeService,
   ) {}
 
   async getMyPoolMemberships(userId: string) {
@@ -58,6 +66,21 @@ export class PoolService {
           poolId: pool._id,
           status: 'approved',
         });
+        const prizePoolEur =
+          pool.status === 'open'
+            ? (() => {
+                const prizePerEntry =
+                  (pool.entryFeeEur ?? ENTRY_FEE_EUR) -
+                  (pool.rakePerEntryEur ?? RAKE_PER_ENTRY_EUR);
+                return this.rakeService.getPrizePoolEur(
+                  approvedCount,
+                  prizePerEntry,
+                );
+              })()
+            : (pool.prizePoolEur ?? 0);
+
+        const entryFeeEur = pool.entryFeeEur ?? ENTRY_FEE_EUR;
+        const rakePerEntryEur = pool.rakePerEntryEur ?? RAKE_PER_ENTRY_EUR;
 
         return {
           id: String(pool._id),
@@ -65,6 +88,9 @@ export class PoolService {
           status: pool.status,
           participants: count,
           approvedParticipants: approvedCount,
+          prizePoolEur,
+          entryFeeEur,
+          rakePerEntryEur,
           tournamentKey: pool.tournamentKey ?? undefined,
         };
       }),
@@ -108,11 +134,34 @@ export class PoolService {
       eliminated: { $ne: true },
     });
 
+    const approvedCount = await this.participantModel.countDocuments({
+      poolId,
+      status: 'approved',
+    });
+    const prizePoolEur =
+      pool.status === 'open'
+        ? (() => {
+            const prizePerEntry =
+              (pool.entryFeeEur ?? ENTRY_FEE_EUR) -
+              (pool.rakePerEntryEur ?? RAKE_PER_ENTRY_EUR);
+            return this.rakeService.getPrizePoolEur(
+              approvedCount,
+              prizePerEntry,
+            );
+          })()
+        : (pool.prizePoolEur ?? 0);
+
+    const entryFeeEur = pool.entryFeeEur ?? ENTRY_FEE_EUR;
+    const rakePerEntryEur = pool.rakePerEntryEur ?? RAKE_PER_ENTRY_EUR;
+
     const base = {
       name: pool.name ?? '',
       tournamentKey: pool.tournamentKey ?? undefined,
       poolStatus: pool.status,
       playersRemaining,
+      prizePoolEur,
+      entryFeeEur,
+      rakePerEntryEur,
     };
 
     if (!participant) return { status: 'none', eliminated: false, ...base };

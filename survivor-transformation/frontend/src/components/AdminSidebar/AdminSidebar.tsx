@@ -1,4 +1,4 @@
-import { Home, Trophy, Plus, Archive, Users, LogOut, User } from 'lucide-react';
+import { Home, Trophy, Plus, Archive, Users, LogOut, User, CircleDollarSign } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '~/store/authStore';
 import {
@@ -20,6 +20,7 @@ const mainNavItems = [
   { title: 'Dashboard', url: '/admin', icon: Home },
   { title: 'Create Pool', url: '/admin/create', icon: Plus },
   { title: 'Users', url: '/admin/users', icon: Users },
+  { title: 'House earnings', url: '/admin/house-earnings', icon: CircleDollarSign },
 ];
 
 const poolNavItems = [

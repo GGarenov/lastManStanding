@@ -11,6 +11,10 @@ export interface CreatePoolPayload {
   name: string;
   description?: string;
   tournamentKey?: string;
+  /** Entry fee in EUR per entry. When omitted, backend uses default constants (e.g. 50). */
+  entryFeeEur?: number;
+  /** Rake in EUR per entry. When omitted, backend uses default constants (e.g. 10). */
+  rakePerEntryEur?: number;
 }
 
 export async function createPool(payload: CreatePoolPayload) {
@@ -155,4 +159,36 @@ export async function recordRoundResults(
 
 export async function deleteUser(userId: string) {
   await apiClient.delete(`/admin/user/${userId}`);
+}
+
+// --- Rake (house earnings) ---
+
+export interface RakeSummaryPoolEntry {
+  poolId: string;
+  poolName: string;
+  rakeEur: number;
+}
+
+export interface RakeSummaryResponse {
+  totalRakeEur: number;
+  byPool: RakeSummaryPoolEntry[];
+}
+
+export async function getRakeSummary(): Promise<RakeSummaryResponse> {
+  const { data } = await apiClient.get<RakeSummaryResponse>(
+    '/admin/rake/summary'
+  );
+  if (!data) {
+    return { totalRakeEur: 0, byPool: [] };
+  }
+  return {
+    totalRakeEur: Number(data.totalRakeEur) || 0,
+    byPool: Array.isArray(data.byPool)
+      ? data.byPool.map((p) => ({
+          poolId: String(p.poolId ?? ''),
+          poolName: String(p.poolName ?? ''),
+          rakeEur: Number(p.rakeEur) || 0,
+        }))
+      : [],
+  };
 }

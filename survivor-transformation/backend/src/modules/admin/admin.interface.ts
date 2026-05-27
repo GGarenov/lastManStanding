@@ -10,7 +10,11 @@ import {
   IsString,
   Length,
   Min,
+  Validate,
   ValidateNested,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
@@ -54,6 +58,18 @@ export interface AdminMatch {
 }
 
 /** ---------------- Request / Response DTOs ---------------- */
+
+@ValidatorConstraint({ name: 'RakeLessThanEntryFee', async: false })
+export class RakeLessThanEntryFeeConstraint implements ValidatorConstraintInterface {
+  validate(rakePerEntryEur: number, args: ValidationArguments): boolean {
+    const obj = args.object as CreatePoolDto;
+    if (obj.entryFeeEur == null || rakePerEntryEur == null) return true;
+    return rakePerEntryEur < obj.entryFeeEur;
+  }
+  defaultMessage(): string {
+    return 'rakePerEntryEur must be less than entryFeeEur';
+  }
+}
 
 export class MatchDto {
   @ApiProperty({ description: 'Home team name (must match tournament config)' })
@@ -102,6 +118,27 @@ export class CreatePoolDto {
   @IsString()
   @Length(1, 50)
   tournamentKey?: string;
+
+  /** Entry fee in EUR per participant. When omitted, backend uses app default (e.g. 50). */
+  @ApiPropertyOptional({
+    description: 'Entry fee in EUR per entry (min 1). Defaults to app constant when omitted.',
+    minimum: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  entryFeeEur?: number;
+
+  /** Rake in EUR per entry. When omitted, backend uses app default (e.g. 10). Must be < entryFeeEur when both provided. */
+  @ApiPropertyOptional({
+    description: 'Rake in EUR per entry (min 0). Must be less than entryFeeEur. Defaults to app constant when omitted.',
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Validate(RakeLessThanEntryFeeConstraint)
+  rakePerEntryEur?: number;
 }
 
 export class UpdatePoolDto {

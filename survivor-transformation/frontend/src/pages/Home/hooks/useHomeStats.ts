@@ -5,6 +5,7 @@ import { getFeaturedPoolId } from "../home.helpers";
 
 export type HomeStats = {
   activePlayers: number;
+  prizePoolEur: number;
   currentRoundLabel: string;
   survivorsLeft: number;
 } | null;
@@ -15,6 +16,7 @@ type UseHomeStatsArgs = {
     id: string;
     status: string;
     approvedParticipants?: number;
+    prizePoolEur?: number;
   }[];
   fetchPools: () => Promise<void> | void;
 };
@@ -52,6 +54,7 @@ export function useHomeStats({
     (async () => {
       try {
         const activePlayers = featuredPool?.approvedParticipants ?? 0;
+        const prizePoolEur = featuredPool?.prizePoolEur ?? 0;
         let survivorsLeft = 0;
         let currentRoundLabel = "—";
         if (user && featuredPool) {
@@ -73,6 +76,7 @@ export function useHomeStats({
         if (cancelled) return;
         setHomeStats({
           activePlayers,
+          prizePoolEur,
           currentRoundLabel,
           survivorsLeft,
         });
@@ -89,3 +93,4 @@ export function useHomeStats({
 
   return { homeStats, homeStatsLoading };
 }
+

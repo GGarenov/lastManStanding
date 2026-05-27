@@ -20,6 +20,11 @@ import {
 } from './admin.interface';
 import { SurvivorService } from '../survivor';
 import { UsersService } from '../users/users.service';
+import {
+  ENTRY_FEE_EUR,
+  RAKE_PER_ENTRY_EUR,
+} from '../rake/rake.constants';
+import { RakeService } from '../rake/rake.service';
 
 @Injectable()
 export class AdminService {
@@ -38,13 +43,17 @@ export class AdminService {
 
     private readonly survivorService: SurvivorService,
     private readonly usersService: UsersService,
+    private readonly rakeService: RakeService,
   ) {}
 
   /** ---------------- POOL ---------------- */
   async createPool(dto: CreatePoolDto) {
+    const { entryFeeEur, rakePerEntryEur, ...rest } = dto;
     return this.poolModel.create({
-      ...dto,
+      ...rest,
       status: 'open',
+      ...(entryFeeEur != null && { entryFeeEur }),
+      ...(rakePerEntryEur != null && { rakePerEntryEur }),
     });
   }
 
@@ -87,6 +96,21 @@ export class AdminService {
       );
     }
 
+    const prizePerEntry =
+      (pool.entryFeeEur ?? ENTRY_FEE_EUR) -
+      (pool.rakePerEntryEur ?? RAKE_PER_ENTRY_EUR);
+    const rakePerEntry = pool.rakePerEntryEur ?? RAKE_PER_ENTRY_EUR;
+    pool.prizePoolEur = this.rakeService.getPrizePoolEur(
+      participantsCount,
+      prizePerEntry,
+    );
+    pool.rakeEur = this.rakeService.getRakeEur(
+      participantsCount,
+      rakePerEntry,
+    );
+    if (pool.entryFeeEur == null) {
+      pool.entryFeeEur = ENTRY_FEE_EUR;
+    }
     pool.status = 'active';
     pool.startedAt = new Date();
     await pool.save();

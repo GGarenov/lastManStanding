@@ -13,7 +13,7 @@ export class PoolController {
     return this.poolService.getMyPoolMemberships(userId);
   }
 
-  /** Returns open/active pools with participant counts. */
+  /** Returns open/active pools; each item includes entryFeeEur, rakePerEntryEur (do not strip). */
   @Get('survivor')
   getOpenPools(@CurrentUser('sub') userId: string) {
     return this.poolService.getOpenPools(userId);
@@ -27,7 +27,7 @@ export class PoolController {
     return this.poolService.joinPool(poolId, userId);
   }
 
-  /** Returns my status for the pool. */
+  /** Returns my status for the pool; includes entryFeeEur, rakePerEntryEur (do not strip). */
   @Get(':poolId/me')
   myStatus(
     @Param('poolId') poolId: string,

@@ -131,3 +131,61 @@
   }
 }
 
+/* House earnings / Rake summary (Option A: Dashboard section for business demo) */
+.rakeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  padding: 1rem;
+  max-width: 28rem;
+}
+
+.rakeTotalWrap {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rakeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.rakeListItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.rakePoolName {
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 0.5rem;
+}
+
+.rakeAmount {
+  color: var(--app-text);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.rakeViewAll {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--primary-bg);
+  margin-top: 0.25rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+

@@ -8,6 +8,7 @@ import {
   ParticipantModule,
   PickModule,
   PoolModule,
+  RakeModule,
   RoundModule,
   SurvivorModule,
   UsersModule,
@@ -30,6 +31,7 @@ import { GuardsModule } from './guards/guards.module';
     PickModule,
     SurvivorModule,
     AdminModule,
+    RakeModule,
   ],
   providers: [
     {

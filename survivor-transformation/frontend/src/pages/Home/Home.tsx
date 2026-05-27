@@ -8,7 +8,12 @@ import { HomeHowItWorks } from "@/components/HomeHowItWorks/HomeHowItWorks";
 import { HomeFeaturedPool } from "@/components/HomeFeaturedPool/HomeFeaturedPool";
 import { useCompletedPool } from "./hooks/useCompletedPool";
 import { useHomeStats } from "./hooks/useHomeStats";
-import { getFeaturedPool, type PoolWithMyStatus } from "./home.helpers";
+import {
+  getFeaturedPool,
+  formatPrizePoolEur,
+  type PoolWithMyStatus,
+} from "./home.helpers";
+import { ENTRY_FEE_EUR, RAKE_EUR, formatEntryFeeCopy } from "@/config/rake";
 import styles from "./Home.module.less";
 
 export default function Home() {
@@ -60,6 +65,10 @@ export default function Home() {
 
   const showCompletedView = !completedPoolLoading && completedPool !== null;
 
+  const prizeDisplay =
+    homeStatsLoading || homeStats === null
+      ? "—"
+      : formatPrizePoolEur(homeStats.prizePoolEur);
   const playersDisplay =
     homeStatsLoading || homeStats === null
       ? "—"
@@ -74,11 +83,28 @@ export default function Home() {
       : homeStats.currentRoundLabel;
   const isLoggedIn = Boolean(user);
 
+  const completedPrizeTotalDisplay =
+    completedPool !== null
+      ? formatPrizePoolEur(completedPool.prizePoolEur ?? 0)
+      : undefined;
+  const hasMultipleWinners =
+    (completedPool?.winnerCount ?? 0) > 1 &&
+    (completedPool?.prizePoolEur ?? 0) > 0;
+  const completedPrizeEachDisplay =
+    completedPool !== null && hasMultipleWinners
+      ? formatPrizePoolEur(
+          Math.floor(
+            (completedPool.prizePoolEur ?? 0) / (completedPool.winnerCount ?? 1),
+          ),
+        )
+      : undefined;
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         {activeTournament && (
           <HomeStatsBanner
+            prizeDisplay={prizeDisplay}
             playersDisplay={playersDisplay}
             survivorsDisplay={survivorsDisplay}
             currentRoundDisplay={currentRoundDisplay}
@@ -93,6 +119,9 @@ export default function Home() {
           activeTournamentLabel={activeTournament?.label ?? null}
           completedPoolName={completedPool?.poolName}
           winnerNames={completedPool?.winnerNames ?? []}
+          hasMultipleWinners={hasMultipleWinners}
+          prizeTotalDisplay={completedPrizeTotalDisplay}
+          prizeEachDisplay={completedPrizeEachDisplay}
         />
 
         <HomeHowItWorks show={!showCompletedView} />
@@ -105,6 +134,9 @@ export default function Home() {
           poolsLoading={poolsLoading}
           joiningId={joiningId}
           onJoin={handleJoin}
+          formatEntryFeeCopy={formatEntryFeeCopy}
+          defaultEntryFeeEur={ENTRY_FEE_EUR}
+          defaultRakeEur={RAKE_EUR}
         />
       </main>
     </div>

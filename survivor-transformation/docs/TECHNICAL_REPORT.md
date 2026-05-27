@@ -73,10 +73,10 @@ The user is **eliminated** because they have already used all three available te
 ### Admin Rules
 
 1. **Pool Management**
-   - Create pools with name, description, and tournament key
+   - Create pools with name, description, tournament key, and optionally **entry fee (€)** and **rake per entry (€)**. When omitted, backend uses default constants (e.g. 50€ entry, 10€ rake → 40€ to prize pool per entry). Validation: entry fee > 0, rake ≥ 0, rake < entry fee.
    - Edit pools (only when status allows)
    - Delete pools (cascades to participants, rounds, and picks)
-   - Start pools (requires ≥1 approved participant and ≥1 round). On start, pool status becomes `active` and `startedAt` is set (no entry fee, rake, or prize pool amounts in the application)
+   - Start pools (requires ≥1 approved participant and ≥1 round). On start, prize pool and house rake are computed from the pool’s entry fee and rake (or defaults) and stored on the pool.
 
 2. **Round Management**
    - Create rounds with matches (all matches for a round in one request)
@@ -248,6 +248,13 @@ survivor-transformation/
 │   │   │   │   ├── pick.interface.ts
 │   │   │   │   └── index.ts
 │   │   │   │
+│   │   │   ├── rake/                        # Rake (house fee) constants, formulas, admin summary
+│   │   │   │   ├── rake.module.ts
+│   │   │   │   ├── rake.controller.ts       # GET /admin/rake/summary
+│   │   │   │   ├── rake.service.ts          # getPrizePoolEur, getRakeEur, getHouseEarningsSummary
+│   │   │   │   ├── rake.constants.ts        # ENTRY_FEE_EUR, RAKE_PER_ENTRY_EUR (defaults)
+│   │   │   │   └── index.ts
+│   │   │   │
 │   │   │   └── survivor/                    # Orchestrator-only module
 │   │   │       ├── survivor.module.ts
 │   │   │       ├── survivor.service.ts      # recordRoundResults, resolveRound, eliminatePlayersWithNoValidPick, checkPoolEnd
@@ -310,7 +317,7 @@ survivor-transformation/
 │   │   │   ├── pools/                  # Pool-related (PoolCard, PickTeamTab, RoundsTab, StatusBadge, etc.)
 │   │   │   ├── Button/, Card/, Dialog/, Input/, Label/, Select/, Tabs/, Table/, etc.  # Shared UI (each: .tsx, .module.less, .interface.ts)
 │   │   │   ├── WinnerBanner/           # "You are the winner" banner
-│   │   │   ├── CountdownBanner/, RoundCountdownBanner/, HomeStatsBanner/
+│   │   │   ├── CountdownBanner/, RoundCountdownBanner/, PrizePoolBanner/
 │   │   │   ├── TeamFlag/               # Team flag display
 │   │   │   ├── ConfirmDialog/, RecordResultsDialog/
 │   │   │   ├── AuthGuard.tsx, AdminGuard.tsx, NavLink.tsx
@@ -370,10 +377,17 @@ survivor-transformation/
 - **Purpose:** Admin-only operations for pool, round, participant, and user management
 - **Endpoints:** See [API Endpoints](#api-endpoints) section
 - **Access:** Protected by `@Roles('admin')` decorator
-- **Create pool:** Body: `name` (required), optional `description`, `tournamentKey`
-- **Start pool:** Sets pool status to `active` and `startedAt` (requires ≥1 approved participant and ≥1 round with a match)
+- **Create pool:** Accepts optional `entryFeeEur` and `rakePerEntryEur` in the body; when provided, stored on the pool. When omitted, pool has no custom fee/rake and start/list logic uses default constants (50, 10).
+- **Start pool:** Uses pool’s `entryFeeEur` and `rakePerEntryEur` (or constants) to compute and set `prizePoolEur` and `rakeEur` via RakeService.
 
-#### 4. Survivor Module (`modules/survivor/`)
+#### 4. Rake Module (`modules/rake/`)
+- **Purpose:** Rake (house fee) constants, prize/rake formulas, and admin house-earnings summary
+- **Constants:** `ENTRY_FEE_EUR`, `PRIZE_POOL_PER_ENTRY_EUR`, `RAKE_PER_ENTRY_EUR` (defaults when pool has no custom config)
+- **RakeService:** `getPrizePoolEur(approvedCount, prizePerEntryEur?)`, `getRakeEur(approvedCount, rakePerEntryEur?)` (optional second arg for per-pool config), `getHouseEarningsSummary(pools)`
+- **Endpoint:** `GET /admin/rake/summary` — total house earnings and per-pool rake (admin only)
+- **Used by:** AdminService (startPool, createPool pass-through), PoolService (getOpenPools, getMyStatus for prize and response fields)
+
+#### 5. Survivor Module (`modules/survivor/`)
 - **Purpose:** Core game logic and participant-facing operations
 - **Sub-modules:**
   - **Pool Service:** Pool listing, joining, status
@@ -443,8 +457,9 @@ Manages round state:
 ### Component Structure
 
 #### Admin Pages
-- **Dashboard:** Overview with stats (Total Users, All Pools, Total Participants), admin action cards, and pool list
-- **CreatePool:** Pool creation form with name, description, and tournament key
+- **Dashboard:** Overview with stats (Total Users, All Pools, Total Participants, **House earnings**), admin action cards, and pool list
+- **CreatePool:** Pool creation form with name, description, tournament, and optional **Entry fee (€)** and **Rake per entry (€)** (defaults 50 and 10; validation: entry fee > 0, rake ≥ 0, rake < entry fee). Submits these to the create-pool API when set.
+- **HouseEarnings:** Dedicated admin page for total house earnings and per-pool rake table (route: `/admin/house-earnings`)
 - **PoolManagement:** Pool details with tabs (Overview, Participants, Rounds)
 - **UsersManagement:** User list and management
 
@@ -671,6 +686,10 @@ apiClient (Axios instance)
   finishedAt: Date,
   description: string,
   tournamentKey: string, // e.g., 'euro-2024'
+  prizePoolEur: number,      // Set when pool is started (approvedCount × prize per entry)
+  rakeEur: number,           // House earnings; set when pool is started (approvedCount × rake per entry)
+  entryFeeEur: number,       // Optional; set at creation or at start (default 50)
+  rakePerEntryEur: number,   // Optional; set at creation (default 10). Prize per entry = entryFeeEur - rakePerEntryEur
   createdAt: Date,
   updatedAt: Date
 }
@@ -794,10 +813,10 @@ apiClient (Axios instance)
 - `POST /api/auth/login` - Login and get JWT token
 
 ### User Endpoints (Authenticated)
-- `GET /api/pools/survivor` - Get open/active pools for user (id, name, status, participant counts, optional `tournamentKey`)
+- `GET /api/pools/survivor` - Get open/active pools for user. Each pool includes `entryFeeEur`, `rakePerEntryEur` (per-pool or defaults), and `prizePoolEur` (computed for open pools).
 - `GET /api/pools/survivor/me` - Get user's pool memberships
 - `POST /api/pools/:poolId/join` - Join a pool
-- `GET /api/pools/:poolId/me` - Get user's status in pool (status, `playersRemaining`, `poolStatus`, `tournamentKey`, elimination fields)
+- `GET /api/pools/:poolId/me` - Get user's status in pool. Response includes `entryFeeEur`, `rakePerEntryEur`, and `prizePoolEur` for display (e.g. "€50 entry (€40 prize pool + €10 fee)").
 - `POST /api/pools/:poolId/survivor/pick` - Pick a team for current round
 - `GET /api/pools/:poolId/survivor/me` - Get user's picks
 - `GET /api/pools/:poolId/survivor/status` - Get all participants' picks (for standings)
@@ -806,11 +825,14 @@ apiClient (Axios instance)
 ### Admin Endpoints (Admin Only)
 
 #### Pool Management
-- `POST /api/admin/pool` - Create pool. Body: `name` (required), optional `description`, `tournamentKey`
+- `POST /api/admin/pool` - Create pool. Body: `name` (required), optional `description`, `tournamentKey`, **`entryFeeEur`** (number, min 1), **`rakePerEntryEur`** (number, min 0, must be < entryFeeEur when both provided). When omitted, backend uses default constants (50€ entry, 10€ rake) at start/list time.
 - `PATCH /api/admin/pool/:poolId` - Update pool
 - `DELETE /api/admin/pool/:poolId` - Delete pool (cascades)
 - `GET /api/admin/pools` - List all pools
-- `POST /api/admin/pool/:poolId/start` - Start pool (sets status `active` and `startedAt`)
+- `POST /api/admin/pool/:poolId/start` - Start pool (sets `prizePoolEur` and `rakeEur` from pool’s entry fee/rake or defaults)
+
+#### Rake (House Earnings)
+- `GET /api/admin/rake/summary` - Total house earnings and per-pool rake (admin only). Used by Dashboard and House earnings page.
 
 #### Round Management
 - `GET /api/admin/pool/:poolId/rounds` - Get all rounds for pool
@@ -836,7 +858,7 @@ apiClient (Axios instance)
 ### Pool Lifecycle
 
 1. **Creation (Admin)**
-   - Admin creates pool with name, description, and tournament key
+   - Admin creates pool with name, description, tournament key, and optionally entry fee (€) and rake per entry (€). When omitted, pool has no custom fee/rake; backend uses default constants (e.g. 50€, 10€) when starting the pool or when listing open pools.
    - Pool status: `'open'`
 
 2. **Joining (Users)**
@@ -852,7 +874,7 @@ apiClient (Axios instance)
    - Each round has `roundNumber` and matches array
 
 5. **Starting (Admin)**
-   - Admin starts pool (requires ≥1 approved participant, ≥1 round with at least one match)
+   - Admin starts pool (requires ≥1 approved participant, ≥1 round). System computes prize pool and house rake from the pool’s `entryFeeEur` and `rakePerEntryEur` (or default constants), and sets `pool.prizePoolEur` and `pool.rakeEur`.
    - Pool status: `'active'`
    - `startedAt` timestamp set
 
@@ -919,11 +941,14 @@ When user picks a team:
 ### Admin Features
 
 1. **Pool Management**
-   - Create, edit, delete pools (name, description, tournament key only)
+   - Create, edit, delete pools. **Create pool** supports optional **entry fee (€)** and **rake per entry (€)** (form defaults 50 and 10; validation: entry fee > 0, rake ≥ 0, rake < entry fee). When set, they are sent in the create-pool payload and stored on the pool; when omitted, backend uses default constants at start/list time.
    - View all pools with status; pool cards show real round count, participant count, and active count
-   - Start pools with validation (requires ≥1 approved participant and ≥1 round with a match; if start fails, pool remains visible to users)
+   - Start pools with validation (requires ≥1 approved participant and ≥1 round; if start fails, pool remains visible to users). On start, prize pool and house rake are computed from the pool’s entry fee and rake (or defaults).
+2. **House earnings (rake)**
+   - **Dashboard:** "House earnings" stat card shows total house earnings from `GET /admin/rake/summary`.
+   - **House earnings page** (`/admin/house-earnings`): Full rake summary — total and per-pool table (pool name, rake €). Sidebar link "House earnings" for admins.
 
-2. **Round & Match Management**
+3. **Round & Match Management**
    - Create rounds with multiple matches
    - Edit/delete rounds (if not closed)
    - Prevent duplicate teams in same round
@@ -999,6 +1024,10 @@ When user picks a team:
    - Team flags and display names
    - Support for multiple tournaments
 
+6. **Rake and entry fee (per-pool)**
+   - **Backend:** Pool schema has optional `entryFeeEur` and `rakePerEntryEur` (set at creation). Rake module provides constants (defaults 50€, 10€) and RakeService methods that accept optional per-entry amounts. Start pool and list/open-pool APIs use per-pool values when present, otherwise defaults. Responses include `entryFeeEur` and `rakePerEntryEur` so the frontend can show correct copy per pool.
+   - **Frontend:** `config/rake` has constants and `formatEntryFeeCopy(entryFeeEur, rakePerEntryEur)` for the sentence "€X entry (€Y prize pool + €Z fee)". Create Pool form sends entry fee and rake; API normalizers default missing values to 50 and 10. MyPool and Home show per-pool entry/rake (buy-in label and payment note); Rules page uses generic `ENTRY_FEE_COPY` only. See also `backend/src/modules/rake/README.md` and `ADMIN_RAKE_AND_FEE.md`.
+
 ---
 
 ## Environment Configuration
@@ -1065,7 +1094,7 @@ npm run dev  # Vite dev server on port 3001
 - **No Pick Elimination:** Happens automatically when round results are recorded
 - **Cascade Deletes:** Deleting pool/user removes related data (participants, picks, rounds)
 - **Finished Pools:** Leaderboard and participant read APIs include `status: 'winner'` so winners and eliminated users can still view Leaderboard and Stats; frontend treats `myStatus === 'approved' || myStatus === 'winner'` for pool selection and routing
-- **Financial metadata removed (2026-05-23):** Rake, entry fee, and prize pool fields were removed from the application. Join flows use generic copy (pay admin to confirm entry). Legacy MongoDB documents may still contain `entryFeeEur`, `rakePerEntryEur`, `prizePoolEur`, or `rakeEur`; the app no longer reads or writes them. See `rake_logic.md` for the removal checklist.
+- **Rake defaults:** When a pool has no `entryFeeEur` or `rakePerEntryEur`, backend and frontend use default constants (50€ entry, 10€ rake). Backend: `backend/src/modules/rake/rake.constants.ts`; frontend: `frontend/src/config/rake/constants.ts` and normalizers in `pools.api.ts` (default 50, 10 so UI always has numbers)
 
 ---
 

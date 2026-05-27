@@ -8,6 +8,10 @@ export interface Pool extends Document {
   startedAt?: Date;
   finishedAt?: Date;
   tournamentKey?: string;
+  prizePoolEur?: number;
+  rakeEur?: number;
+  entryFeeEur?: number;
+  rakePerEntryEur?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
