@@ -1,0 +1,44 @@
+{
+  "page": {
+    "title": "Profile",
+    "loading": "Loading…"
+  },
+  "guest": {
+    "message": "Log in to view and manage your profile.",
+    "login": "Log in",
+    "register": "Register"
+  },
+  "empty": {
+    "joinPool": "Join a pool to see your stats and pick history.",
+    "myPool": "My Pool"
+  },
+  "summary": {
+    "rank": "Rank #{{rank}} of {{total}}",
+    "status": {
+      "eliminated": "Eliminated",
+      "winner": "Winner",
+      "alive": "Alive"
+    },
+    "admin": "Admin"
+  },
+  "statsGrid": {
+    "roundsSurvived": "Rounds Survived",
+    "survivalRate": "Survival Rate",
+    "currentRound": "Current Round",
+    "teamsAvailable": "Teams Available"
+  },
+  "progress": {
+    "title": "Tournament Progress",
+    "roundOf": "Round {{current}} of {{max}}",
+    "percentComplete": "{{percent}}% complete"
+  },
+  "pickHistory": {
+    "title": "Pick History",
+    "roundShort": "R{{round}}",
+    "awaitingPick": "Awaiting your pick…"
+  },
+  "footer": {
+    "adminPanel": "Admin panel",
+    "logout": "Log out"
+  }
+}

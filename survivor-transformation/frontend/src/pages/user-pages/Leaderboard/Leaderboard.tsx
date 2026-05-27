@@ -1,4 +1,7 @@
+import { useMemo } from "react";
 import { useAuthStore } from "~/store/authStore";
+import { useLabels } from "~/hooks/useLabels";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import { getTournamentConfig } from "~/config/tournaments";
 import { useLeaderboardPoolId } from "./hooks/useLeaderboardPoolId";
 import { useLeaderboardPoolInfo } from "./hooks/useLeaderboardPoolInfo";
@@ -16,6 +19,8 @@ import { LeaderboardError } from "./components/LeaderboardError/LeaderboardError
 import styles from "./Leaderboard.module.less";
 
 export default function Leaderboard() {
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
   const user = useAuthStore((s) => s.user);
   const { poolId, setPoolId, pools } = useLeaderboardPoolId();
   const { poolInfo } = useLeaderboardPoolInfo({ poolId, user });
@@ -71,7 +76,7 @@ export default function Leaderboard() {
 
   return (
     <div className={styles.page}>
-      <main className={styles.main} role="main" aria-label="Leaderboard">
+      <main className={styles.main} role="main" aria-label={labels.page.ariaLabel}>
         {pools.length > 1 && (
           <LeaderboardPoolSelector
             poolId={poolId}
@@ -89,7 +94,7 @@ export default function Leaderboard() {
             message={
               leaderboardError instanceof Error
                 ? leaderboardError.message
-                : "Failed to load leaderboard"
+                : labels.error.loadFailed
             }
             onRetry={() => refetchLeaderboard()}
           />

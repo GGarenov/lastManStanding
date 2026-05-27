@@ -1,0 +1,70 @@
+{
+  "page": {
+    "title": "How It Works",
+    "subtitle": "Everything you need to know about the Last Man Standing Tournament"
+  },
+  "whatIs": {
+    "title": "What is Last Man Standing?",
+    "body": "This is a prediction game tied to the tournament - World Cup 2026. You join a pool and pay the admin to confirm your entry. Each round, you pick one team you think will win. If your team wins, you stay in. If they draw or lose, you're out. You can never pick the same team twice. The last player/s left standing wins (or splits) the prize pool."
+  },
+  "howToPlay": {
+    "title": "How to Play",
+    "step1Title": "Pick one team per round.",
+    "step1Desc": "Before each round's deadline, choose one team that you think will win their match. Your pick is locked when the deadline passes.",
+    "step2Title": "Never pick the same team twice.",
+    "step2Desc": "Once you've used a team, you cannot pick them again for the rest of the pool. Plan ahead—saving strong teams for later rounds can be a valid strategy.",
+    "step3Title": "Win = survive. Draw or lose = eliminated.",
+    "step3Desc": "If your picked team wins their match, you advance to the next round. If the match is a draw or your team loses, you are eliminated from the pool.",
+    "step4Title": "Last one standing wins.",
+    "step4Desc": "If you're the only player left after a round, you win the prize pool. If multiple players survive until the end, the prize is split between them."
+  },
+  "keyRules": {
+    "title": "Key Rules at a Glance",
+    "onePickTitle": "One pick per round",
+    "onePickDesc": "Choose exactly one team to win before the deadline.",
+    "noRepeatTitle": "No repeat picks",
+    "noRepeatDesc": "Each team can only be used once in the whole tournament.",
+    "drawsTitle": "Draws eliminate you",
+    "drawsDesc": "Your team must win; a draw counts as a wrong pick. (Valid only for the group stage)",
+    "deadlineTitle": "Respect the deadline",
+    "deadlineDesc": "Picks lock when the round's pick deadline passes."
+  },
+  "gettingStarted": {
+    "title": "Getting Started",
+    "step1Title": "Register and log in",
+    "step1Desc": "Create an account if you don't have one.",
+    "step2Title": "Join a pool",
+    "step2Desc": "From the home page, choose an open pool and request to join (buy in).",
+    "step3Title": "Get approved",
+    "step3Desc": "Pay the pool admin to confirm your entry. Once they approve you, you're in.",
+    "step4Title": "Make your picks",
+    "step4Desc": "Before each round's deadline, go to My Pool and lock in your pick."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": "What happens if I miss the pick deadline?",
+    "a1": "If you don't submit a pick before the round's deadline, you are typically eliminated—same as if your pick had lost. Always check the countdown on the site and make your pick in time.",
+    "q2": "Can I change my pick after submitting?",
+    "a2": "No. Once you've submitted your pick for a round, it's locked. Make sure you're happy with your choice before confirming.",
+    "q3": "What if my team's match is postponed or cancelled?",
+    "a3": "This depends on the pool admin and tournament rules. Usually the round results are based on official match outcomes. If in doubt, check with your pool administrator.",
+    "q4": "How is the winner decided if multiple players survive to the end?",
+    "a4": "If more than one player is still in the pool when the tournament (or the pool's final round) ends, the prize pool is split equally between all remaining players.",
+    "q5": "What happens if the last remaining players all lose their pick?",
+    "a5": "If everyone still in the pool is eliminated in the same round—meaning all of their picks lose or draw—there is no single survivor. In that case, the prize pool is split equally among those last players. So even if your pick didn't win, you still share in the winnings.",
+    "q6": "Do I need to pick in every round?",
+    "a6": "Yes. As long as you're still in the pool, you must make one pick per round before the deadline. Failing to pick counts as elimination.",
+    "q7": "Where do I see the current round and deadline?",
+    "a7": "When you're in a pool, the home page and My Pool page show the current round and a countdown to the pick deadline. Use \"My Pool\" to make your pick and see the list of matches for the round."
+  },
+  "quickRef": {
+    "title": "Quick reference",
+    "line1": "• One team per round. If they win → you survive. Draw or lose → you're out.",
+    "line2": "• Never pick the same team twice.",
+    "line3": "• Last player(s) standing win (or split) the prize pool."
+  },
+  "cta": {
+    "backHome": "Back to Home",
+    "myPool": "My Pool"
+  }
+}

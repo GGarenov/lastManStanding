@@ -1,31 +1,41 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/Card/Card';
 import { Button } from '~/components/Button/Button';
 import { Input } from '~/components/Input/Input';
 import { Label } from '~/components/Label/Label';
+import type { AppLocale } from '~/i18n/constants';
+import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
+import { useLabels } from '~/hooks/useLabels';
+import { buildAuthLabels } from '~/locales/labels/auth.labels';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import style from './Register.module.less';
 
-function getRedirectPath(user: { role?: string } | null): string {
-  return isAdminUser(user) ? '/admin' : '/';
+function getRedirectPath(
+  user: { role?: string } | null,
+  locale: AppLocale,
+): string {
+  return isAdminUser(user) ? '/admin' : buildLocalizedPath(locale, '/');
 }
 
 export default function Register() {
   const navigate = useNavigate();
+  const appLocale = useAppLocale();
+  const localizedPath = useLocalizedPath();
+  const { t } = useLabels('auth');
+  const labels = useMemo(() => buildAuthLabels(t), [t]);
   const register = useAuthStore((s) => s.register);
   const user = useAuthStore((s) => s.user);
   const isChecked = useAuthStore((s) => s.isChecked);
   const hasRedirected = useRef(false);
 
-  // Redirect if already logged in (once per mount)
   useEffect(() => {
     if (hasRedirected.current) return;
     if (isChecked && user) {
       hasRedirected.current = true;
-      navigate(getRedirectPath(user), { replace: true });
+      navigate(getRedirectPath(user, appLocale), { replace: true });
     }
-  }, [isChecked, user, navigate]);
+  }, [isChecked, user, navigate, appLocale]);
 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -34,53 +44,50 @@ export default function Register() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const validateUsername = (value: string): string | null => {
-    if (!value.trim()) {
-      return 'Username is required';
-    }
-    if (value.length < 3) {
-      return 'Username must be at least 3 characters';
-    }
-    if (value.length > 30) {
-      return 'Username must be at most 30 characters';
-    }
-    if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-      return 'Username can only contain letters, numbers, underscores, and hyphens';
-    }
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    // Validate username
-    const usernameError = validateUsername(username);
+
+    const usernameError = labels.register.validateUsername(username);
     if (usernameError) {
       setError(usernameError);
       return;
     }
-    
+
     if (!email.trim() || !password) {
-      setError('Email and password are required');
+      setError(labels.register.errors.required);
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(labels.register.errors.passwordMismatch);
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(labels.register.errors.passwordMin);
       return;
     }
     setIsLoading(true);
     try {
       await register(email.trim(), username.trim(), password);
       const u = useAuthStore.getState().user;
-      navigate(getRedirectPath(u), { replace: true });
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Registration failed. Email or username may already be in use.';
-      setError(errorMessage);
+      navigate(getRedirectPath(u, appLocale), { replace: true });
+    } catch (err: unknown) {
+      const apiMessage =
+        err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        err.response &&
+        typeof err.response === 'object' &&
+        'data' in err.response &&
+        err.response.data &&
+        typeof err.response.data === 'object' &&
+        'message' in err.response.data &&
+        typeof err.response.data.message === 'string'
+          ? err.response.data.message
+          : err instanceof Error
+            ? err.message
+            : null;
+      setError(apiMessage ?? labels.register.errors.failed);
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +96,7 @@ export default function Register() {
   if (isChecked && user) {
     return (
       <div className={style.fullscreenCenter}>
-        <p className={style.redirectText}>Redirecting...</p>
+        <p className={style.redirectText}>{labels.register.redirecting}</p>
       </div>
     );
   }
@@ -98,35 +105,33 @@ export default function Register() {
     <div className={style.page}>
       <Card className={style.card}>
         <CardHeader>
-          <CardTitle>Create account</CardTitle>
-          <CardDescription>
-            Register to play survivor pools
-          </CardDescription>
+          <CardTitle>{labels.register.title}</CardTitle>
+          <CardDescription>{labels.register.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className={style.form}>
             {error && <p className={style.errorText}>{error}</p>}
             <div className={style.field}>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{labels.register.emailLabel}</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={labels.register.emailPlaceholder}
                 autoComplete="email"
                 disabled={isLoading}
                 className={style.input}
               />
             </div>
             <div className={style.field}>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{labels.register.usernameLabel}</Label>
               <Input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="username"
+                placeholder={labels.register.usernamePlaceholder}
                 autoComplete="username"
                 disabled={isLoading}
                 minLength={3}
@@ -134,12 +139,10 @@ export default function Register() {
                 pattern="[a-zA-Z0-9_-]+"
                 className={style.input}
               />
-              <p className={style.hintText}>
-                3-30 characters, letters, numbers, underscores, and hyphens only
-              </p>
+              <p className={style.hintText}>{labels.register.usernameHint}</p>
             </div>
             <div className={style.field}>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{labels.register.passwordLabel}</Label>
               <Input
                 id="password"
                 type="password"
@@ -151,7 +154,9 @@ export default function Register() {
               />
             </div>
             <div className={style.field}>
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">
+                {labels.register.confirmPasswordLabel}
+              </Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -163,12 +168,12 @@ export default function Register() {
               />
             </div>
             <Button type="submit" className={style.submitButton} disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Register'}
+              {isLoading ? labels.register.submitting : labels.register.submit}
             </Button>
             <p className={style.footerText}>
-              Already have an account?{' '}
-              <Link to="/login" className={style.loginLink}>
-                Log in
+              {labels.register.hasAccount}{' '}
+              <Link to={localizedPath('/login')} className={style.loginLink}>
+                {labels.register.loginLink}
               </Link>
             </p>
           </form>

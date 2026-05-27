@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './Pagination.module.less';
 import type {
   PaginationProps,
@@ -9,9 +10,18 @@ import type {
 } from './Pagination.interface';
 
 export const Pagination = forwardRef<HTMLElement, PaginationProps>(
-  ({ className, ...props }, ref) => (
-    <nav ref={ref} role="navigation" aria-label="Pagination" className={`${styles.root} ${className ?? ''}`.trim()} {...props} />
-  )
+  ({ className, 'aria-label': ariaLabel, ...props }, ref) => {
+    const { t } = useTranslation('common');
+    return (
+      <nav
+        ref={ref}
+        role="navigation"
+        aria-label={ariaLabel ?? t('a11y.pagination')}
+        className={`${styles.root} ${className ?? ''}`.trim()}
+        {...props}
+      />
+    );
+  },
 );
 Pagination.displayName = 'Pagination';
 

@@ -1,5 +1,7 @@
 import { Home, Trophy, Plus, Archive, Users, LogOut, User, CircleDollarSign } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { DEFAULT_LOCALE } from '~/i18n/constants';
+import { buildLocalizedPath } from '~/i18n/routing';
 import { useAuthStore } from '~/store/authStore';
 import {
   Sidebar,
@@ -35,7 +37,7 @@ export function AdminSidebar() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login', { replace: true });
+    navigate(buildLocalizedPath(DEFAULT_LOCALE, '/login'), { replace: true });
   };
 
   const isActive = (path: string) => {
@@ -103,7 +105,7 @@ export function AdminSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink to="/">
+              <NavLink to={buildLocalizedPath(DEFAULT_LOCALE, "/")}>
                 <User className={styles.navIcon} />
                 <span>User view</span>
               </NavLink>

@@ -4,6 +4,7 @@ import { Navbar } from '~/components/Navbar/Navbar';
 import { RoundCountdownBanner } from '~/components/RoundCountdownBanner/RoundCountdownBanner';
 import { PrizePoolBanner } from '~/components/PrizePoolBanner/PrizePoolBanner';
 import { ActiveTournamentProvider } from '~/contexts/ActiveTournamentContext';
+import { stripLocalePrefix } from '~/i18n/routing';
 import { getMyPoolMemberships, getMyPoolStatus } from '~/api/pools.api';
 import styles from './UserLayout.module.less';
 
@@ -21,8 +22,9 @@ export function UserLayout() {
   const [memberships, setMemberships] = useState<Awaited<ReturnType<typeof getMyPoolMemberships>>>([]);
   const [poolStatus, setPoolStatus] = useState<Awaited<ReturnType<typeof getMyPoolStatus>> | null>(null);
 
+  const pathWithoutLocale = stripLocalePrefix(location.pathname);
   const isStatsOrLeaderboard =
-    location.pathname.startsWith('/stats') || location.pathname.startsWith('/leaderboard');
+    pathWithoutLocale.startsWith('/stats') || pathWithoutLocale.startsWith('/leaderboard');
 
   const poolId = useMemo(() => {
     if (isStatsOrLeaderboard && poolIdParam) return poolIdParam;

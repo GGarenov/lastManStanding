@@ -1,19 +1,32 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { AxiosError } from 'axios';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/Tabs/Tabs';
-import { Button } from '~/components/Button/Button';
-import { Card, CardContent } from '~/components/Card/Card';
-import { Target, ListTodo, Trophy, GitBranch, Loader2, AlertCircle, Users, Heart, AlertTriangle } from 'lucide-react';
-import { getTournamentConfig } from '~/config/tournaments';
-import * as poolsApi from '~/api/pools.api';
-import { PoolPageProvider, usePoolPage } from '~/contexts/PoolPageContext';
-import { PickTeamTab } from '~/components/pools/PickTeamTab/PickTeamTab';
-import { ResultsTab } from '~/components/pools/ResultsTab/ResultsTab';
-import { StandingsTab } from '~/components/pools/StandingsTab/StandingsTab';
-import { PlayoffsTab } from '~/components/pools/PlayoffsTab/PlayoffsTab';
-import { WinnerBanner } from '~/components/WinnerBanner/WinnerBanner';
-import styles from './UserPoolPage.module.less';
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { AxiosError } from "axios";
+import {
+  Target,
+  ListTodo,
+  Trophy,
+  GitBranch,
+  Loader2,
+  AlertCircle,
+  Users,
+  Heart,
+  AlertTriangle,
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/Tabs/Tabs";
+import { Button } from "~/components/Button/Button";
+import { Card, CardContent } from "~/components/Card/Card";
+import { getTournamentConfig } from "~/config/tournaments";
+import * as poolsApi from "~/api/pools.api";
+import { PoolPageProvider, usePoolPage } from "~/contexts/PoolPageContext";
+import { PickTeamTab } from "~/components/pools/PickTeamTab/PickTeamTab";
+import { ResultsTab } from "~/components/pools/ResultsTab/ResultsTab";
+import { StandingsTab } from "~/components/pools/StandingsTab/StandingsTab";
+import { PlayoffsTab } from "~/components/pools/PlayoffsTab/PlayoffsTab";
+import { WinnerBanner } from "~/components/WinnerBanner/WinnerBanner";
+import { useLabels } from "~/hooks/useLabels";
+import { useLocalizedPath } from "~/i18n/routing";
+import { buildPoolLabels } from "~/locales/labels/pool.labels";
+import styles from "./UserPoolPage.module.less";
 
 interface UserPoolPageProps {
   poolId: string;
@@ -23,30 +36,37 @@ interface UserPoolPageProps {
 function getErrorMessage(e: unknown, fallback: string): string {
   if (e instanceof AxiosError && e.response?.data) {
     const data = e.response.data as { message?: string | string[] };
-    if (typeof data.message === 'string') return data.message;
-    if (Array.isArray(data.message)) return data.message.join(', ');
+    if (typeof data.message === "string") return data.message;
+    if (Array.isArray(data.message)) return data.message.join(", ");
   }
   return e instanceof Error ? e.message : fallback;
 }
 
-const DATA_TABS = ['results', 'standings', 'playoffs'] as const;
+const DATA_TABS = ["results", "standings", "playoffs"] as const;
 
 function UserPoolPageContent() {
   const { poolInfo, refreshPoolData } = usePoolPage();
+  const { t } = useLabels("pool");
+  const { t: tCommon } = useLabels("common");
+  const labels = useMemo(
+    () => buildPoolLabels(t, tCommon).userPool,
+    [t, tCommon],
+  );
+
   const isEliminated = poolInfo?.eliminated ?? false;
-  const poolStatus = poolInfo?.poolStatus ?? '';
+  const poolStatus = poolInfo?.poolStatus ?? "";
 
   const isPickTabRelevant =
     !isEliminated &&
-    poolStatus !== 'closed' &&
-    poolStatus !== 'finished';
+    poolStatus !== "closed" &&
+    poolStatus !== "finished";
 
-  const defaultTab = isPickTabRelevant ? 'pick' : 'results';
+  const defaultTab = isPickTabRelevant ? "pick" : "results";
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   useEffect(() => {
-    if (!isPickTabRelevant && activeTab === 'pick') {
-      setActiveTab('results');
+    if (!isPickTabRelevant && activeTab === "pick") {
+      setActiveTab("results");
     }
   }, [isPickTabRelevant, activeTab]);
 
@@ -55,54 +75,68 @@ function UserPoolPageContent() {
     const prev = prevTabRef.current;
     prevTabRef.current = activeTab;
     if (prev === null) return;
-    if ((DATA_TABS as readonly string[]).includes(activeTab) && prev !== activeTab) {
+    if (
+      (DATA_TABS as readonly string[]).includes(activeTab) &&
+      prev !== activeTab
+    ) {
       void refreshPoolData();
     }
   }, [activeTab, refreshPoolData]);
 
   useEffect(() => {
     const onVisible = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible") {
         void refreshPoolData();
       }
     };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => document.removeEventListener('visibilitychange', onVisible);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [refreshPoolData]);
 
-  const displayName = poolInfo?.name ?? 'Pool';
-  const displaySubtitle = 'Survivor Pool';
+  const displayName = poolInfo?.name ?? labels.poolFallback;
   const playersRemaining = poolInfo?.playersRemaining ?? 0;
-  const showWinnerBanner = poolInfo?.status === 'winner' && poolStatus === 'finished';
+  const showWinnerBanner =
+    poolInfo?.status === "winner" && poolStatus === "finished";
 
   const statusBadgeClass = isEliminated
     ? styles.statusBadgeEliminated
-    : poolInfo?.status === 'winner'
+    : poolInfo?.status === "winner"
       ? styles.statusBadgeWinner
       : styles.statusBadgeAlive;
+
+  const statusLabel = isEliminated
+    ? labels.status.eliminated
+    : poolInfo?.status === "winner"
+      ? labels.status.winner
+      : labels.status.alive;
 
   return (
     <div className={styles.page}>
       {showWinnerBanner && <WinnerBanner poolName={displayName} />}
       <div className={styles.header}>
         <div className={styles.headerInfo}>
-          <h1 className={styles.title} title={displayName}>{displayName}</h1>
-          <p className={styles.subtitle}>{displaySubtitle}</p>
+          <h1 className={styles.title} title={displayName}>
+            {displayName}
+          </h1>
+          <p className={styles.subtitle}>{labels.subtitle}</p>
         </div>
-        {(playersRemaining > 0 || poolInfo?.status === 'approved' || poolInfo?.status === 'winner') && (
+        {(playersRemaining > 0 ||
+          poolInfo?.status === "approved" ||
+          poolInfo?.status === "winner") && (
           <div className={styles.badges}>
             {playersRemaining > 0 && (
               <div className={styles.playersBadge}>
                 <Users className={styles.playersBadgeIcon} />
-                <span>{playersRemaining} player{playersRemaining !== 1 ? 's' : ''} remaining</span>
+                <span>{labels.playersRemaining(playersRemaining)}</span>
               </div>
             )}
-            {(poolInfo?.status === 'approved' || poolInfo?.status === 'winner') && (
+            {(poolInfo?.status === "approved" ||
+              poolInfo?.status === "winner") && (
               <div className={`${styles.statusBadge} ${statusBadgeClass}`}>
-                <Heart className={`${styles.statusBadgeIcon} ${isEliminated ? styles.statusBadgeIconDim : ''}`} />
-                <span>
-                  {isEliminated ? 'Eliminated' : poolInfo?.status === 'winner' ? 'Winner' : 'Alive'}
-                </span>
+                <Heart
+                  className={`${styles.statusBadgeIcon} ${isEliminated ? styles.statusBadgeIconDim : ""}`}
+                />
+                <span>{statusLabel}</span>
               </div>
             )}
           </div>
@@ -117,13 +151,19 @@ function UserPoolPageContent() {
                 <AlertTriangle className={styles.eliminatedIcon} />
               </div>
               <div>
-                <p className={styles.eliminatedTitle}>Eliminated</p>
+                <p className={styles.eliminatedTitle}>
+                  {labels.eliminatedTitle}
+                </p>
                 <p className={styles.eliminatedDesc}>
-                  {poolInfo?.eliminatedReason === 'no_pick'
-                    ? 'You were eliminated because you did not pick a team in a previous round. You must pick a team every round.'
-                    : poolInfo?.eliminatedRound != null && poolInfo?.eliminatedTeam
-                      ? `You were eliminated in Round ${poolInfo.eliminatedRound} because ${poolInfo.eliminatedTeam} lost.`
-                      : 'You were eliminated in this pool. Your picked team lost in a previous round.'}
+                  {poolInfo?.eliminatedReason === "no_pick"
+                    ? labels.eliminatedNoPick
+                    : poolInfo?.eliminatedRound != null &&
+                        poolInfo?.eliminatedTeam
+                      ? labels.eliminatedRound(
+                          poolInfo.eliminatedRound,
+                          poolInfo.eliminatedTeam,
+                        )
+                      : labels.eliminatedGeneric}
                 </p>
               </div>
             </div>
@@ -133,56 +173,60 @@ function UserPoolPageContent() {
 
       <div className={styles.tabsWrap}>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className={styles.tabsList}>
-          {isPickTabRelevant && (
-            <TabsTrigger value="pick" className={styles.tabTrigger}>
-              <Target className={styles.tabTriggerIcon} />
-              Pick team
+          <TabsList className={styles.tabsList}>
+            {isPickTabRelevant && (
+              <TabsTrigger value="pick" className={styles.tabTrigger}>
+                <Target className={styles.tabTriggerIcon} />
+                {labels.tabs.pick}
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="results" className={styles.tabTrigger}>
+              <ListTodo className={styles.tabTriggerIcon} />
+              {labels.tabs.results}
             </TabsTrigger>
+            <TabsTrigger value="standings" className={styles.tabTrigger}>
+              <Trophy className={styles.tabTriggerIcon} />
+              {labels.tabs.standings}
+            </TabsTrigger>
+            <TabsTrigger value="playoffs" className={styles.tabTrigger}>
+              <GitBranch className={styles.tabTriggerIcon} />
+              {labels.tabs.playoffs}
+            </TabsTrigger>
+          </TabsList>
+
+          {isPickTabRelevant && (
+            <TabsContent value="pick" className={styles.tabContent}>
+              <PickTeamTab />
+            </TabsContent>
           )}
-          <TabsTrigger value="results" className={styles.tabTrigger}>
-            <ListTodo className={styles.tabTriggerIcon} />
-            Results
-          </TabsTrigger>
-          <TabsTrigger value="standings" className={styles.tabTrigger}>
-            <Trophy className={styles.tabTriggerIcon} />
-            Standings
-          </TabsTrigger>
-          <TabsTrigger value="playoffs" className={styles.tabTrigger}>
-            <GitBranch className={styles.tabTriggerIcon} />
-            Play-offs
-          </TabsTrigger>
-        </TabsList>
 
-        {isPickTabRelevant && (
-          <TabsContent value="pick" className={styles.tabContent}>
-            <PickTeamTab />
+          <TabsContent value="results" className={styles.tabContent}>
+            <ResultsTab />
           </TabsContent>
-        )}
 
-        <TabsContent value="results" className={styles.tabContent}>
-          <ResultsTab />
-        </TabsContent>
+          <TabsContent value="standings" className={styles.tabContent}>
+            <StandingsTab />
+          </TabsContent>
 
-        <TabsContent value="standings" className={styles.tabContent}>
-          <StandingsTab />
-        </TabsContent>
-
-        <TabsContent value="playoffs" className={styles.tabContent}>
-          <PlayoffsTab />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="playoffs" className={styles.tabContent}>
+            <PlayoffsTab />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
 }
 
-/**
- * User pool page — main place where an approved participant interacts with their pool.
- * Fetches pool info and rounds; provides tournamentConfig via context to tab content.
- */
 export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
-  const [poolInfo, setPoolInfo] = useState<poolsApi.MyPoolStatusResponse | null>(null);
+  const localizedPath = useLocalizedPath();
+  const { t } = useLabels("pool");
+  const { t: tCommon } = useLabels("common");
+  const poolLabels = useMemo(() => buildPoolLabels(t, tCommon), [t, tCommon]);
+  const labels = poolLabels.myPool;
+
+  const [poolInfo, setPoolInfo] = useState<poolsApi.MyPoolStatusResponse | null>(
+    null,
+  );
   const [rounds, setRounds] = useState<poolsApi.ParticipantRound[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -207,7 +251,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
         if (myGen !== fetchGenerationRef.current) return;
         setPoolInfo(statusRes);
 
-        if (statusRes.status !== 'approved' && statusRes.status !== 'winner') {
+        if (statusRes.status !== "approved" && statusRes.status !== "winner") {
           setRounds([]);
           return;
         }
@@ -218,7 +262,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
       } catch (e) {
         if (myGen !== fetchGenerationRef.current) return;
         if (!silent) {
-          setError(getErrorMessage(e, 'Failed to load pool. Please try again.'));
+          setError(getErrorMessage(e, poolLabels.userPool.loadFailed));
           setPoolInfo(null);
           setRounds([]);
         }
@@ -228,10 +272,13 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
         }
       }
     },
-    [poolId],
+    [poolId, poolLabels.userPool.loadFailed],
   );
 
-  const refreshPoolData = useCallback(() => loadPoolPage({ silent: true }), [loadPoolPage]);
+  const refreshPoolData = useCallback(
+    () => loadPoolPage({ silent: true }),
+    [loadPoolPage],
+  );
 
   useEffect(() => {
     void loadPoolPage({ silent: false });
@@ -243,8 +290,8 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
 
   const isNotApproved =
     poolInfo != null &&
-    poolInfo.status !== 'approved' &&
-    poolInfo.status !== 'winner';
+    poolInfo.status !== "approved" &&
+    poolInfo.status !== "winner";
 
   const contextValue = {
     poolId,
@@ -263,7 +310,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
         {isLoading ? (
           <div className={styles.loadingWrap}>
             <Loader2 className={styles.loadingIcon} />
-            <p className={styles.loadingText}>Loading pool…</p>
+            <p className={styles.loadingText}>{labels.loading}</p>
           </div>
         ) : error ? (
           <Card className={styles.errorCard}>
@@ -271,7 +318,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
               <AlertCircle className={styles.errorIcon} />
               <p className={styles.errorText}>{error}</p>
               <Button variant="outline" asChild>
-                <Link to="/my-pool">Back to My Pool</Link>
+                <Link to={localizedPath("/my-pool")}>{labels.backToMyPool}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -279,10 +326,10 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
           <Card>
             <CardContent className={styles.notApprovedContent}>
               <p className={styles.notApprovedText}>
-                You must join and be approved to view {poolName || 'this pool'}.
+                {labels.notApproved(poolName)}
               </p>
               <Button asChild>
-                <Link to="/my-pool">Join a pool</Link>
+                <Link to={localizedPath("/my-pool")}>{labels.joinPool}</Link>
               </Button>
             </CardContent>
           </Card>

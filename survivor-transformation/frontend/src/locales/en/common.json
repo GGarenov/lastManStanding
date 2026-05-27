@@ -1,0 +1,40 @@
+{
+  "a11y": {
+    "close": "Close",
+    "errorIcon": "Error icon",
+    "pagination": "Pagination"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading…",
+    "redirecting": "Redirecting...",
+    "retry": "Retry",
+    "save": "Save"
+  },
+  "app": {
+    "name": "Last Man Standing"
+  },
+  "counts": {
+    "participants_one": "{{count}} participant",
+    "participants_other": "{{count}} participants",
+    "playersRemaining_one": "{{count}} player remaining",
+    "playersRemaining_other": "{{count}} players remaining"
+  },
+  "errors": {
+    "errorGeneric": "Something went wrong. Please try again."
+  },
+  "guest": {
+    "displayName": "Guest"
+  },
+  "language": {
+    "bg": "BG",
+    "en": "EN",
+    "switcher": "Language"
+  },
+  "notFound": {
+    "backHome": "Return to Home",
+    "code": "404",
+    "message": "Oops! Page not found"
+  }
+}

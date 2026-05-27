@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { buildLocalizedPath, useAppLocale } from "~/i18n/routing";
 import { useOpenPoolsStore } from "~/store/openPoolsStore";
 
 type PoolWithStatus = ReturnType<typeof useOpenPoolsStore.getState>["pools"][number];
@@ -11,6 +12,7 @@ type UseLeaderboardPoolIdResult = {
 };
 
 export function useLeaderboardPoolId(): UseLeaderboardPoolIdResult {
+  const appLocale = useAppLocale();
   const { poolId: poolIdParam } = useParams<{ poolId?: string }>();
   const { pools, fetchPools } = useOpenPoolsStore();
   const [poolId, setPoolIdState] = useState<string | null>(poolIdParam ?? null);
@@ -32,15 +34,23 @@ export function useLeaderboardPoolId(): UseLeaderboardPoolIdResult {
       );
       if (myPool) {
         setPoolIdState(myPool.id);
-        window.history.replaceState(null, "", `/leaderboard/${myPool.id}`);
+        window.history.replaceState(
+          null,
+          "",
+          buildLocalizedPath(appLocale, `/leaderboard/${myPool.id}`),
+        );
       }
     }
-  }, [poolIdParam, pools]);
+  }, [poolIdParam, pools, appLocale]);
 
   const setPoolId = (value: string | null) => {
     setPoolIdState(value);
     if (value) {
-      window.history.replaceState(null, "", `/leaderboard/${value}`);
+      window.history.replaceState(
+        null,
+        "",
+        buildLocalizedPath(appLocale, `/leaderboard/${value}`),
+      );
     }
   };
 

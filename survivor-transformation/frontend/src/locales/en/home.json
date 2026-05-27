@@ -1,0 +1,55 @@
+{
+  "smoke": {
+    "tagline": "Last Man Standing — pick one team per round, survive to win."
+  },
+  "winners_one": "{{count}} winner",
+  "winners_other": "{{count}} winners",
+  "statsBanner": {
+    "totalPlayers": "Total Players",
+    "playersLeft": "Players Left",
+    "currentRound": "Current round"
+  },
+  "hero": {
+    "logoAlt": "Last Man Standing",
+    "eyebrow": "Last man standing - World Cup Edition",
+    "editionPill": "{{tournament}} Edition",
+    "countdownLabel": "Registation close after",
+    "headingLine1": "Pick One Team Per Round.",
+    "headingLine2": "Last Man Standing Wins It All.",
+    "lead": "Join a pool, pick a winner each round, and never use the same team twice. If your team loses or draws, you're out. Last one standing takes the prize.",
+    "ctaJoin": "Join",
+    "ctaGoToPool": "Go to Pool",
+    "ctaHowItWorks": "How It Works",
+    "ctaRegister": "Register",
+    "ctaViewLeaderboard": "View Leaderboard",
+    "ctaMyPool": "My Pool",
+    "ctaAdminPanel": "Admin panel"
+  },
+  "completed": {
+    "badge": "Game completed",
+    "title": "The {{poolName}} game is completed",
+    "titlePoolFallback": "Pool",
+    "winnersIntro": "and the winners are:"
+  },
+  "howItWorks": {
+    "eyebrow": "How It Works",
+    "title": "Understand the Game in",
+    "titleHighlight": "30 Seconds",
+    "card1Title": "Pick one team per round",
+    "card1Text": "Each round, choose one team you think will win. If they win, you survive to the next round.",
+    "card2Title": "You CAN NOT pick the Same Team Twice",
+    "card2Text": "Once you use a team, it's gone forever. Choose wisely and save your best teams for later rounds.",
+    "card3Title": "One wrong pick and you're out",
+    "card3Text": "If your team loses or draws, you're eliminated. The last player standing wins the prize pool.",
+    "card4Title": "Check the statistics",
+    "card4Text": "You can see which teams are most picked and determine your strategy based on real-time statistics."
+  },
+  "featuredPool": {
+    "loginToJoin": "Log in to join",
+    "buyInText": "Request to join this pool. Pay the admin to confirm your entry. You'll be approved once payment is received.",
+    "joinPool": "Join pool",
+    "joining": "Joining…",
+    "waitingApproval": "Waiting for approval",
+    "goToMyPool": "Go to my pool"
+  }
+}

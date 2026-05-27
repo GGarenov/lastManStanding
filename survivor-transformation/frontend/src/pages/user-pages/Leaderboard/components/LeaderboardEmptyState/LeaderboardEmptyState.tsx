@@ -1,3 +1,8 @@
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { useLabels } from "~/hooks/useLabels";
+import { useLocalizedPath } from "~/i18n/routing";
+import { buildLeaderboardLabels } from "~/locales/labels/leaderboard.labels";
 import { Card, CardContent } from "~/components/Card/Card";
 import { Button } from "~/components/Button/Button";
 import { AlertCircle } from "lucide-react";
@@ -14,17 +19,21 @@ type LeaderboardEmptyStateProps = {
 };
 
 export function LeaderboardEmptyState({ variant }: LeaderboardEmptyStateProps) {
+  const localizedPath = useLocalizedPath();
+  const { t } = useLabels("leaderboard");
+  const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
+
   if (variant === "no-pool") {
     return (
       <Card>
         <CardContent className={styles.noPoolCard}>
           <AlertCircle className={styles.noPoolIcon} aria-hidden />
-          <h2 className={styles.noPoolTitle}>No Pool Available</h2>
-          <p className={styles.noPoolText}>
-            You need to join a pool to view the leaderboard.
-          </p>
+          <h2 className={styles.noPoolTitle}>{labels.empty.noPool.title}</h2>
+          <p className={styles.noPoolText}>{labels.empty.noPool.description}</p>
           <Button asChild>
-            <a href="/my-pool">Go to My Pool</a>
+            <Link to={localizedPath("/my-pool")}>
+              {labels.empty.noPool.goToMyPool}
+            </Link>
           </Button>
         </CardContent>
       </Card>
@@ -35,7 +44,7 @@ export function LeaderboardEmptyState({ variant }: LeaderboardEmptyStateProps) {
     return (
       <Card>
         <CardContent className={styles.emptyCard}>
-          Please select a pool to view the leaderboard.
+          {labels.empty.selectPool}
         </CardContent>
       </Card>
     );
@@ -45,7 +54,7 @@ export function LeaderboardEmptyState({ variant }: LeaderboardEmptyStateProps) {
     return (
       <Card>
         <CardContent className={styles.emptyCard}>
-          <p>No participants yet</p>
+          <p>{labels.empty.noParticipants}</p>
         </CardContent>
       </Card>
     );
@@ -54,7 +63,7 @@ export function LeaderboardEmptyState({ variant }: LeaderboardEmptyStateProps) {
   return (
     <Card>
       <CardContent className={styles.noMatch}>
-        <p>No entries match your filters or search.</p>
+        <p>{labels.empty.noMatch}</p>
       </CardContent>
     </Card>
   );
