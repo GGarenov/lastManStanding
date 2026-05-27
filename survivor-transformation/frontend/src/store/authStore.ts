@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { setAuthToken, hasAuthToken } from '~/api/client';
 import * as authApi from '~/api/auth.api';
+import { queryClient } from '~/lib/queryClient';
 
 export interface AuthUser {
   id: string;
@@ -47,6 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email: string, password: string) => {
     set({ isLoading: true });
     try {
+      queryClient.clear();
       const res = await authApi.login({ email, password });
       set({ user: mapUser(res.user), isLoading: false, isChecked: true });
     } catch {
@@ -71,6 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await authApi.logout();
     } finally {
       setAuthToken(null);
+      queryClient.clear();
       set({ user: null });
     }
   },
@@ -92,6 +95,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch {
       setAuthToken(null);
+      queryClient.clear();
       set({ user: null, isLoading: false, isChecked: true });
     }
   },

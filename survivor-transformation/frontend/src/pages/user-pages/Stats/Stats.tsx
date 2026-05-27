@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent } from '~/components/Card/Card';
 import { Skeleton } from '~/components/Skeleton/Skeleton';
 import {
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/Select/Select';
-import { Loader2, AlertCircle, Users, Clock, Flame, Zap, BarChart3, Eye } from 'lucide-react';
+import { Loader2, AlertCircle, Users, Clock, Flame, Zap, BarChart3, Eye, Lock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import * as poolsApi from '~/api/pools.api';
 import { useOpenPoolsStore } from '~/store/openPoolsStore';
@@ -136,17 +136,55 @@ export default function Stats() {
     error: statsError,
     refetch: refetchStats,
   } = useQuery({
-    queryKey: ['roundStats', poolId, selectedRoundNumber],
+    queryKey: ['roundStats', poolId, selectedRoundNumber, user?.id],
     queryFn: () => {
       if (!poolId || selectedRoundNumber === null) {
         throw new Error('Pool ID or round number missing');
       }
       return poolsApi.getRoundStats(poolId, selectedRoundNumber);
     },
-    enabled: !!poolId && selectedRoundNumber !== null,
+    enabled: !!poolId && selectedRoundNumber !== null && !!user?.id,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    // Polling fallback; PickTeamTab invalidates this query immediately after a pick
+    refetchInterval: 30000,
   });
+
+  const { data: myPicks = [] } = useQuery({
+    queryKey: ['myPicks', poolId, user?.id],
+    queryFn: () => {
+      if (!poolId) {
+        throw new Error('Pool ID missing');
+      }
+      return poolsApi.getMyPicks(poolId);
+    },
+    enabled: !!poolId && !!user?.id,
+    staleTime: 30000,
+  });
+
+  const hasMyPickForRound =
+    selectedRoundNumber !== null &&
+    myPicks.some((p) => Number(p.round) === selectedRoundNumber);
+
+  // Refetch stats when local picks say the user picked but API still returns masked data
+  useEffect(() => {
+    if (
+      poolId &&
+      selectedRoundNumber !== null &&
+      hasMyPickForRound &&
+      stats &&
+      !stats.picksRevealed &&
+      !isLoadingStats
+    ) {
+      refetchStats();
+    }
+  }, [
+    poolId,
+    selectedRoundNumber,
+    hasMyPickForRound,
+    stats?.picksRevealed,
+    isLoadingStats,
+    refetchStats,
+  ]);
 
   if (!poolId && !isLoadingRounds && pools.length === 0) {
     return (
@@ -171,6 +209,10 @@ export default function Stats() {
 
   const selectedRound = rounds.find((r) => r.roundNumber === selectedRoundNumber);
   const isRoundActive = selectedRound && !selectedRound.isClosed;
+
+  const canSeePicks = Boolean(
+    stats?.picksRevealed || selectedRound?.isClosed || hasMyPickForRound,
+  );
   const roundTitle = selectedRoundNumber
     ? `${getRoundDisplayText(poolInfo?.tournamentKey, selectedRoundNumber)} - Who's picking what?`
     : null;
@@ -310,6 +352,17 @@ export default function Stats() {
           </Card>
         ) : stats ? (
           <div>
+          {isRoundActive && !canSeePicks && (
+            <div className={styles.unlockBanner} role="status">
+              <Lock className={styles.unlockBannerIcon} aria-hidden />
+              <p className={styles.unlockBannerText}>
+                Make your pick to see who chose which team.
+              </p>
+              <Link to="/my-pool" className={styles.unlockBannerLink}>
+                Go to My Pool
+              </Link>
+            </div>
+          )}
           <div className={styles.statsGrid}>
             <Card role="article" aria-label={`Picks In: ${stats.picksIn}`}>
               <CardContent className={styles.statCard}>
@@ -333,14 +386,22 @@ export default function Stats() {
                 <p className={styles.statLabel}>Still Deciding</p>
               </CardContent>
             </Card>
-            <Card role="article" aria-label={`Trending Pick: ${stats.trendingPick || 'None'}`}>
+            <Card
+              role="article"
+              aria-label={`Trending Pick: ${canSeePicks ? stats.trendingPick || 'None' : 'Locked'}`}
+            >
               <CardContent className={styles.statCard}>
                 <div className={styles.statIconWrap}>
                   <div className={styles.statIconRed}>
                     <Flame className={`${styles.statIconSvg} ${styles.statIconSvgRed}`} />
                   </div>
                 </div>
-                <p className={styles.statValue} style={{ fontSize: '1.25rem' }}>{stats.trendingPick || 'None'}</p>
+                <p
+                  className={`${styles.statValue} ${!canSeePicks ? styles.statValueLocked : ''}`}
+                  style={{ fontSize: '1.25rem' }}
+                >
+                  {canSeePicks ? stats.trendingPick || 'None' : 'Locked'}
+                </p>
                 <p className={styles.statLabel}>Trending Pick</p>
               </CardContent>
             </Card>
@@ -363,25 +424,45 @@ export default function Stats() {
                   <BarChart3 className={styles.sectionIcon} aria-hidden />
                   <h2 className={styles.sectionTitle}>PICK DISTRIBUTION</h2>
                 </div>
-                {stats.pickDistribution.length === 0 ? (
+                {stats.picksIn === 0 ? (
                   <div className={styles.emptyCenter}>
                     <p>No picks yet</p>
                   </div>
+                ) : !canSeePicks ? (
+                  <div
+                    className={styles.lockedSection}
+                    role="status"
+                    aria-label="Pick distribution hidden until you make your pick"
+                  >
+                    <div className={styles.lockedOverlay}>
+                      <Lock className={styles.lockedOverlayIcon} aria-hidden />
+                      <p className={styles.lockedOverlayText}>
+                        Pick distribution is hidden until you make your pick.
+                      </p>
+                    </div>
+                  </div>
                 ) : (
-                  <div className={styles.distList}>
+                  <div className={styles.distList} role="list">
                     {stats.pickDistribution.map((item, index) => (
                       <div
-                        key={`${item.team}-${index}`}
+                        key={`${item.team ?? 'team'}-${index}`}
                         className={styles.distItem}
                         role="listitem"
                         aria-label={`${item.team}: ${item.count} picks (${item.percentage}%)`}
                       >
                         <div className={styles.distRow}>
-                          <TeamFlag teamName={item.team} tournamentConfig={tournamentConfig} height={24} />
+                          <TeamFlag teamName={item.team ?? ''} tournamentConfig={tournamentConfig} height={24} />
                           <span className={styles.distTeam}>{item.team}</span>
                           <span className={styles.distCount}>{item.count} ({item.percentage}%)</span>
                         </div>
-                        <div className={styles.progressTrack} role="progressbar" aria-valuenow={item.percentage} aria-valuemin={0} aria-valuemax={100} aria-label={`${item.team} pick percentage`}>
+                        <div
+                          className={styles.progressTrack}
+                          role="progressbar"
+                          aria-valuenow={item.percentage}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={`${item.team} pick percentage`}
+                        >
                           <div className={styles.progressBar} style={{ width: `${item.percentage}%` }} />
                         </div>
                       </div>
@@ -407,18 +488,32 @@ export default function Stats() {
                       const userObj = { username: pick.username };
                       const avatarInitials = getAvatarInitials(userObj);
                       const avatarColor = getAvatarColor(userObj);
+                      const timeAgo = formatDistanceToNow(new Date(pick.createdAt), { addSuffix: true });
+                      const recentPickAriaLabel =
+                        canSeePicks && pick.team
+                          ? `${pick.username} picked ${pick.team} ${timeAgo}`
+                          : `${pick.username} picked (hidden) ${timeAgo}`;
                       return (
                         <div
-                          key={`${pick.userId}-${pick.team}-${pick.createdAt}-${index}`}
+                          key={`${pick.userId}-${pick.createdAt}-${index}`}
                           className={styles.recentItem}
                           role="listitem"
-                          aria-label={`${pick.username} picked ${pick.team} ${formatDistanceToNow(new Date(pick.createdAt), { addSuffix: true })}`}
+                          aria-label={recentPickAriaLabel}
                         >
                           <div className={styles.avatar} style={{ backgroundColor: avatarColor }}>{avatarInitials}</div>
                           <span className={styles.username}>{pick.username}</span>
-                          <TeamFlag teamName={pick.team} tournamentConfig={tournamentConfig} height={20} />
-                          <span className={styles.teamName}>{pick.team}</span>
-                          <span className={styles.timeAgo}>{formatDistanceToNow(new Date(pick.createdAt), { addSuffix: true })}</span>
+                          {canSeePicks && pick.team ? (
+                            <>
+                              <TeamFlag teamName={pick.team} tournamentConfig={tournamentConfig} height={20} />
+                              <span className={styles.teamName}>{pick.team}</span>
+                            </>
+                          ) : (
+                            <span className={styles.hiddenTeamBadge}>
+                              <Lock className={styles.hiddenTeamBadgeIcon} aria-hidden />
+                              Hidden
+                            </span>
+                          )}
+                          <span className={styles.timeAgo}>{timeAgo}</span>
                         </div>
                       );
                     })}
@@ -452,8 +547,16 @@ export default function Stats() {
                           const userObj = { username: pick.username };
                           const avatarInitials = getAvatarInitials(userObj);
                           const avatarColor = getAvatarColor(userObj);
+                          const timeAgo = formatDistanceToNow(new Date(pick.createdAt), { addSuffix: true });
                           return (
-                            <TableRow key={`${pick.userId}-${pick.team}-${pick.createdAt}-${index}`}>
+                            <TableRow
+                              key={`${pick.userId}-${pick.createdAt}-${index}`}
+                              aria-label={
+                                canSeePicks && pick.team
+                                  ? `${pick.username} picked ${pick.team} ${timeAgo}`
+                                  : `${pick.username} picked (hidden) ${timeAgo}`
+                              }
+                            >
                               <TableCell>
                                 <div className={styles.tableCellUser}>
                                   <div className={styles.tableAvatar} style={{ backgroundColor: avatarColor }}>{avatarInitials}</div>
@@ -461,15 +564,20 @@ export default function Stats() {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <div className={styles.tableCellTeam}>
-                                  <TeamFlag teamName={pick.team} tournamentConfig={tournamentConfig} height={20} />
-                                  <span>{pick.team}</span>
-                                </div>
+                                {canSeePicks && pick.team ? (
+                                  <div className={styles.tableCellTeam}>
+                                    <TeamFlag teamName={pick.team} tournamentConfig={tournamentConfig} height={20} />
+                                    <span>{pick.team}</span>
+                                  </div>
+                                ) : (
+                                  <span className={styles.hiddenTeamBadge}>
+                                    <Lock className={styles.hiddenTeamBadgeIcon} aria-hidden />
+                                    Hidden
+                                  </span>
+                                )}
                               </TableCell>
                               <TableCell>
-                                <span className={styles.teamName}>
-                                  {formatDistanceToNow(new Date(pick.createdAt), { addSuffix: true })}
-                                </span>
+                                <span className={styles.teamName}>{timeAgo}</span>
                               </TableCell>
                             </TableRow>
                           );

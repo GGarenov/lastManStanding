@@ -21,3 +21,79 @@ export class PickTeamDto {
   @IsNotEmpty()
   team: string;
 }
+
+/** Team pick count for round stats distribution chart. */
+export class PickDistributionDto {
+  @ApiProperty({
+    description: 'Team name. Omitted from distribution when picks are hidden.',
+    nullable: true,
+    required: false,
+  })
+  team?: string | null;
+
+  @ApiProperty({ description: 'Number of picks for this team' })
+  count: number;
+
+  @ApiProperty({ description: 'Share of picks in this round (0–100)' })
+  percentage: number;
+}
+
+/** A participant pick row in round stats (recent / all picks lists). */
+export class RoundStatsUserPickDto {
+  @ApiProperty()
+  userId: string;
+
+  @ApiProperty()
+  username: string;
+
+  @ApiProperty({
+    description:
+      'Team picked. Null when picksRevealed is false (viewer has not picked and round is active).',
+    nullable: true,
+  })
+  team: string | null;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt: Date;
+}
+
+/** Response for GET /pools/:poolId/survivor/stats/:roundNumber */
+export class RoundStatsDto {
+  @ApiProperty()
+  roundNumber: number;
+
+  @ApiProperty({ description: 'Participants who submitted a pick this round' })
+  picksIn: number;
+
+  @ApiProperty({
+    description: 'Active participants who have not picked yet this round',
+  })
+  stillDeciding: number;
+
+  @ApiProperty({
+    description: 'Most picked team. Null when picks are hidden.',
+    nullable: true,
+  })
+  trendingPick: string | null;
+
+  @ApiProperty({ description: 'Distinct teams picked this round' })
+  teamsPicked: number;
+
+  @ApiProperty({
+    type: [PickDistributionDto],
+    description: 'Empty when picks are hidden.',
+  })
+  pickDistribution: PickDistributionDto[];
+
+  @ApiProperty({ type: [RoundStatsUserPickDto] })
+  recentPicks: RoundStatsUserPickDto[];
+
+  @ApiProperty({ type: [RoundStatsUserPickDto] })
+  allPicks: RoundStatsUserPickDto[];
+
+  @ApiProperty({
+    description:
+      'False while the round is active and the viewer has not picked; then team fields are hidden.',
+  })
+  picksRevealed: boolean;
+}

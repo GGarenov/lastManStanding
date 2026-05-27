@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PickController } from '../../src/modules/pick/pick.controller';
 import { PickService } from '../../src/modules/pick/pick.service';
+import { ParticipantService } from '../../src/modules/participant/participant.service';
 
 describe('PickController', () => {
   let controller: PickController;
   let pickService: jest.Mocked<PickService>;
+  let participantService: jest.Mocked<ParticipantService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,11 +22,20 @@ describe('PickController', () => {
             getLeaderboard: jest.fn(),
           },
         },
+        {
+          provide: ParticipantService,
+          useValue: {
+            ensureApproved: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<PickController>(PickController);
     pickService = module.get(PickService) as jest.Mocked<PickService>;
+    participantService = module.get(
+      ParticipantService,
+    ) as jest.Mocked<ParticipantService>;
   });
 
   describe('pickTeam', () => {
@@ -65,13 +76,14 @@ describe('PickController', () => {
   });
 
   describe('getRoundStats', () => {
-    it('calls getRoundStats with poolId and roundNumber', async () => {
-      const stats = { roundNumber: 2, picksIn: 5, stillDeciding: 3 };
+    it('ensures approved participant then calls getRoundStats with poolId, roundNumber and userId', async () => {
+      const stats = { roundNumber: 2, picksIn: 5, stillDeciding: 3, picksRevealed: false };
       pickService.getRoundStats.mockResolvedValue(stats as any);
 
-      const result = await controller.getRoundStats('pool1', 2);
+      const result = await controller.getRoundStats('pool1', 2, 'user1');
 
-      expect(pickService.getRoundStats).toHaveBeenCalledWith('pool1', 2);
+      expect(participantService.ensureApproved).toHaveBeenCalledWith('pool1', 'user1');
+      expect(pickService.getRoundStats).toHaveBeenCalledWith('pool1', 2, 'user1');
       expect(result).toEqual(stats);
     });
   });

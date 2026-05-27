@@ -6,15 +6,19 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { PickService } from './pick.service';
-import { PickTeamDto } from './pick.interface';
+import { PickTeamDto, RoundStatsDto } from './pick.interface';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ParticipantService } from '../participant/participant.service';
 
 @ApiTags('pools')
 @Controller('pools/:poolId/survivor')
 export class PickController {
-  constructor(private readonly pickService: PickService) {}
+  constructor(
+    private readonly pickService: PickService,
+    private readonly participantService: ParticipantService,
+  ) {}
 
   @Post('pick')
   @ApiBody({ type: PickTeamDto })
@@ -40,11 +44,21 @@ export class PickController {
   }
 
   @Get('stats/:roundNumber')
-  getRoundStats(
+  @ApiOperation({
+    summary: 'Round pick statistics',
+    description:
+      'Returns community pick stats for an approved participant. Team identities are hidden until the viewer has picked for this round or the round is closed.',
+  })
+  @ApiParam({ name: 'poolId', description: 'Pool ID' })
+  @ApiParam({ name: 'roundNumber', description: 'Round number', type: Number })
+  @ApiOkResponse({ type: RoundStatsDto })
+  async getRoundStats(
     @Param('poolId') poolId: string,
     @Param('roundNumber', ParseIntPipe) roundNumber: number,
+    @CurrentUser('sub') userId: string,
   ) {
-    return this.pickService.getRoundStats(poolId, roundNumber);
+    await this.participantService.ensureApproved(poolId, userId);
+    return this.pickService.getRoundStats(poolId, roundNumber, userId);
   }
 
   @Get('leaderboard')

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { usePoolPage } from '~/contexts/PoolPageContext';
+import { useAuthStore } from '~/store/authStore';
 import { TeamFlag } from '~/components/TeamFlag/TeamFlag';
 import { Card, CardContent } from '~/components/Card/Card';
 import {
@@ -155,6 +157,8 @@ function getErrorMessage(e: unknown): string {
 
 export function PickTeamTab() {
   const { poolId, rounds, tournamentConfig, poolInfo } = usePoolPage();
+  const userId = useAuthStore((s) => s.user?.id);
+  const queryClient = useQueryClient();
   const [myPicks, setMyPicks] = useState<poolsApi.MyPick[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingPickTeam, setPendingPickTeam] = useState<string | null>(null);
@@ -183,13 +187,19 @@ export function PickTeamTab() {
   };
 
   const handleConfirmPick = async () => {
-    if (!poolId || !pendingPickTeam) return;
+    if (!poolId || !pendingPickTeam || !activeRound) return;
     setIsSubmitting(true);
     try {
       await poolsApi.submitPick(poolId, pendingPickTeam);
       toast.success(`You picked ${pendingPickTeam}`);
       const updated = await poolsApi.getMyPicks(poolId);
       setMyPicks(updated);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['myPicks', poolId, userId] }),
+        queryClient.invalidateQueries({
+          queryKey: ['roundStats', poolId, activeRound.roundNumber, userId],
+        }),
+      ]);
       setPendingPickTeam(null);
     } catch (e) {
       toast.error(getErrorMessage(e));

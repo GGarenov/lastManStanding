@@ -8,6 +8,7 @@ describe('PickService', () => {
   let pickModel: {
     create: jest.Mock;
     find: jest.Mock;
+    findOne: jest.Mock;
   };
   let participantModel: { find: jest.Mock };
   let userModel: { find: jest.Mock };
@@ -19,6 +20,7 @@ describe('PickService', () => {
     pickModel = {
       create: jest.fn(),
       find: jest.fn(),
+      findOne: jest.fn(),
     };
     participantModel = { find: jest.fn() };
     userModel = { find: jest.fn() };
@@ -189,20 +191,16 @@ describe('PickService', () => {
   });
 
   describe('getRoundStats', () => {
-    it('throws NotFoundException when round does not exist', async () => {
-      roundService.getRoundByNumber.mockRejectedValue(new Error('Not found'));
-
-      await expect(service.getRoundStats('pool1', 5)).rejects.toThrow(NotFoundException);
-      await expect(service.getRoundStats('pool1', 5)).rejects.toThrow(/Round 5 not found/);
-    });
-
-    it('returns round stats structure when round exists', async () => {
-      roundService.getRoundByNumber.mockResolvedValue({});
+    const mockRoundStatsDeps = (
+      round: { isClosed?: boolean },
+      picks: Array<{ userId: string; team: string; createdAt: Date }> = [
+        { userId: 'u1', team: 'A', createdAt: new Date() },
+      ],
+    ) => {
+      roundService.getRoundByNumber.mockResolvedValue(round);
       pickModel.find.mockReturnValue({
         sort: jest.fn().mockReturnValue({
-          lean: jest.fn().mockResolvedValue([
-            { userId: 'u1', team: 'A', createdAt: new Date() },
-          ]),
+          lean: jest.fn().mockResolvedValue(picks),
         }),
       });
       participantModel.find.mockReturnValue({
@@ -215,17 +213,67 @@ describe('PickService', () => {
           lean: jest.fn().mockResolvedValue([{ _id: 'u1', username: 'user1', email: 'u@b.com' }]),
         }),
       });
+    };
 
-      const result = await service.getRoundStats('pool1', 1);
+    it('round not found → 404', async () => {
+      roundService.getRoundByNumber.mockRejectedValue(new Error('Not found'));
+
+      await expect(service.getRoundStats('pool1', 5, 'viewer')).rejects.toThrow(NotFoundException);
+      await expect(service.getRoundStats('pool1', 5, 'viewer')).rejects.toThrow(/Round 5 not found/);
+    });
+
+    it('closed round → full data even if viewer never picked', async () => {
+      mockRoundStatsDeps({ isClosed: true });
+
+      const result = await service.getRoundStats('pool1', 1, 'viewer');
 
       expect(result).toMatchObject({
         roundNumber: 1,
         picksIn: 1,
-        stillDeciding: expect.any(Number),
+        picksRevealed: true,
+        pickDistribution: [{ team: 'A', count: 1, percentage: 100 }],
+        recentPicks: [{ team: 'A' }],
+      });
+    });
+
+    it('active round + viewer has picked → full data, picksRevealed true', async () => {
+      mockRoundStatsDeps({ isClosed: false }, [
+        { userId: 'viewer', team: 'B', createdAt: new Date() },
+        { userId: 'u1', team: 'A', createdAt: new Date() },
+      ]);
+
+      const result = await service.getRoundStats('pool1', 1, 'viewer');
+
+      expect(result.picksRevealed).toBe(true);
+      expect(result.trendingPick).toBeTruthy();
+      expect(result.pickDistribution).toEqual(
+        expect.arrayContaining([
+          { team: 'A', count: 1, percentage: 50 },
+          { team: 'B', count: 1, percentage: 50 },
+        ]),
+      );
+    });
+
+    it('active round + viewer has not picked → teams masked, picksRevealed false', async () => {
+      mockRoundStatsDeps({ isClosed: false });
+
+      const result = await service.getRoundStats('pool1', 1, 'viewer');
+
+      expect(result).toMatchObject({
+        roundNumber: 1,
+        picksIn: 1,
+        picksRevealed: false,
+        trendingPick: null,
+        pickDistribution: [],
         teamsPicked: 1,
-        pickDistribution: expect.any(Array),
-        recentPicks: expect.any(Array),
-        allPicks: expect.any(Array),
+      });
+      expect(result.recentPicks[0]).toMatchObject({
+        username: 'user1',
+        team: null,
+      });
+      expect(result.allPicks[0]).toMatchObject({
+        username: 'user1',
+        team: null,
       });
     });
   });

@@ -94,12 +94,13 @@ export class PickService {
   }
 
   /**
-   * Get statistics for a specific round
+   * Get statistics for a specific round.
+   * Team identities are hidden until the viewer has picked for this round or the round is closed.
    */
-  async getRoundStats(poolId: string, roundNumber: number) {
-    // Verify round exists
+  async getRoundStats(poolId: string, roundNumber: number, userId: string) {
+    let round;
     try {
-      await this.roundService.getRoundByNumber(poolId, roundNumber);
+      round = await this.roundService.getRoundByNumber(poolId, roundNumber);
     } catch {
       throw new NotFoundException(`Round ${roundNumber} not found`);
     }
@@ -109,6 +110,13 @@ export class PickService {
       .find({ poolId, round: roundNumber })
       .sort({ createdAt: -1 })
       .lean();
+
+    // Match viewer against pick rows (avoids ObjectId/string mismatch on findOne)
+    const viewerId = userId.toString();
+    const viewerHasPick = picks.some(
+      (p) => (p.userId?.toString() ?? String(p.userId)) === viewerId,
+    );
+    const picksRevealed = round.isClosed || viewerHasPick;
 
     // Get approved participants who are still in the pool (not eliminated).
     // Only they are expected to pick this round; eliminated users must not count as "still deciding".
@@ -192,7 +200,7 @@ export class PickService {
     // All picks
     const allPicks = picks.map(formatPick);
 
-    return {
+    const baseStats = {
       roundNumber,
       picksIn,
       stillDeciding: Math.max(0, stillDeciding), // Ensure non-negative
@@ -201,6 +209,19 @@ export class PickService {
       pickDistribution,
       recentPicks,
       allPicks,
+      picksRevealed,
+    };
+
+    if (picksRevealed) {
+      return baseStats;
+    }
+
+    return {
+      ...baseStats,
+      trendingPick: null,
+      pickDistribution: [],
+      recentPicks: recentPicks.map((pick) => ({ ...pick, team: null })),
+      allPicks: allPicks.map((pick) => ({ ...pick, team: null })),
     };
   }
 

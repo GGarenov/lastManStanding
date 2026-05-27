@@ -169,7 +169,8 @@ export async function submitPick(
 
 /** Pick distribution for a round */
 export interface PickDistribution {
-  team: string;
+  /** Null/omitted when picks are hidden for the viewer */
+  team?: string | null;
   count: number;
   percentage: number;
 }
@@ -178,7 +179,8 @@ export interface PickDistribution {
 export interface UserPick {
   userId: string;
   username: string;
-  team: string;
+  /** Null when picks are hidden for the viewer */
+  team: string | null;
   createdAt: string; // ISO date string
 }
 
@@ -192,6 +194,8 @@ export interface RoundStats {
   pickDistribution: PickDistribution[];
   recentPicks: UserPick[];
   allPicks: UserPick[];
+  /** False while active round and viewer has not picked yet */
+  picksRevealed: boolean;
 }
 
 /**
@@ -219,6 +223,7 @@ export async function getRoundStats(
       pickDistribution: data?.pickDistribution ?? [],
       recentPicks: data?.recentPicks ?? [],
       allPicks: data?.allPicks ?? [],
+      picksRevealed: data?.picksRevealed ?? false,
     };
   } catch (error) {
     // Return default values on error
@@ -231,6 +236,7 @@ export async function getRoundStats(
       pickDistribution: [],
       recentPicks: [],
       allPicks: [],
+      picksRevealed: false,
     };
   }
 }

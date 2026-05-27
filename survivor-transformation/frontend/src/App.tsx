@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Sonner } from "~/components/Sonner/Sonner";
 import { TooltipProvider } from "~/components/Tooltip/Tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "~/lib/queryClient";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuthStore } from "~/store";
 import { AdminGuard } from "~/components/AdminGuard";
@@ -22,8 +23,6 @@ import Stats from "~/pages/user-pages/Stats/Stats";
 import Rules from "~/pages/user-pages/Rules/Rules";
 import Profile from "~/pages/user-pages/Profile/Profile";
 import NotFound from "~/pages/user-pages/NotFound/NotFound";
-
-const queryClient = new QueryClient();
 
 function AppRoutes() {
   const loadMe = useAuthStore((s) => s.loadMe);
