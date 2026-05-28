@@ -1,0 +1,13 @@
+name: Keep Backend Awake
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call backend health
+        run: curl -s https://lastmanstanding-5re5.onrender.com/api/health
