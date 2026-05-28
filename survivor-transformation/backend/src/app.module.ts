@@ -15,6 +15,7 @@ import {
 } from './modules';
 import { AuthGuard } from './guards';
 import { GuardsModule } from './guards/guards.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { GuardsModule } from './guards/guards.module';
     SurvivorModule,
     AdminModule,
     RakeModule,
+    HealthModule,
   ],
   providers: [
     {

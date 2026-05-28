@@ -34,7 +34,9 @@ Your local `backend/.env` currently contains real-looking secrets. Before produc
    - **Root Directory**: `backend`
    - **Environment**: `Node`
    - **Plan**: `Free`
-   - **Build Command**: `npm install && npm run build`
+    - **Build Command**: `npm install --include=dev && npm run build`
+     
+       Note: Render may set `NODE_ENV=production` which causes npm to skip `devDependencies` (including `@nestjs/cli`). Use `--include=dev` above or set the environment variable `NPM_CONFIG_PRODUCTION=false` in Render so the local `nest` binary is installed for the build.
    - **Start Command**: `npm run start:prod`
 
 Why this works:
