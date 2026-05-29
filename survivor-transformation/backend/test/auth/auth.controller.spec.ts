@@ -37,16 +37,26 @@ describe('AuthController', () => {
     it('calls authService.register with dto email, username, password', async () => {
       const dto = {
         email: 'user@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
         username: 'myuser',
         password: 'secret123',
       };
-      const created = { id: '1', email: dto.email, username: dto.username };
+      const created = {
+        id: '1',
+        email: dto.email,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        username: dto.username,
+      };
       authService.register.mockResolvedValue(created as any);
 
       const result = await controller.register(dto as any);
 
       expect(authService.register).toHaveBeenCalledWith(
         dto.email,
+        dto.firstName,
+        dto.lastName,
         dto.username,
         dto.password,
       );

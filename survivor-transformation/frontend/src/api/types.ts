@@ -57,6 +57,8 @@ export interface BackendRound {
 export interface BackendUser {
   _id: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   username?: string;
   role?: string;
   balance?: number;
@@ -65,6 +67,13 @@ export interface BackendUser {
 }
 
 export interface LoginResponse {
-  user: { _id: string; email: string; username?: string; role?: string };
+  user: {
+    _id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    role?: string;
+  };
   token: string;
 }

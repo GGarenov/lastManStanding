@@ -32,17 +32,27 @@ describe('AuthService', () => {
       const created = {
         _id: 'user1',
         email: 'a@b.com',
+        firstName: 'John',
+        lastName: 'Doe',
         username: 'user1',
         passwordHash: 'hashed',
         role: 'user',
       };
       usersService.create.mockResolvedValue(created);
 
-      const result = await service.register('a@b.com', 'user1', 'password123');
+      const result = await service.register(
+        'a@b.com',
+        'John',
+        'Doe',
+        'user1',
+        'password123',
+      );
 
       expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
       expect(usersService.create).toHaveBeenCalledWith({
         email: 'a@b.com',
+        firstName: 'John',
+        lastName: 'Doe',
         username: 'user1',
         passwordHash: 'hashed',
       });
@@ -65,7 +75,13 @@ describe('AuthService', () => {
       };
       usersService.create.mockResolvedValue(created);
 
-      const result = await service.register('a@b.com', 'user1', 'pass');
+      const result = await service.register(
+        'a@b.com',
+        'John',
+        'Doe',
+        'user1',
+        'pass',
+      );
 
       expect((result as any).passwordHash).toBeUndefined();
       expect((result as any).email).toBe('a@b.com');

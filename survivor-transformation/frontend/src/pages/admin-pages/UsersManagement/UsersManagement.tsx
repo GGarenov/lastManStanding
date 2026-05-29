@@ -24,7 +24,7 @@ import { ConfirmDialog } from "~/components/pools/ConfirmDialog/ConfirmDialog";
 import { useUsersManagementData } from "./hooks/useUsersManagementData";
 import styles from "./UsersManagement.module.less";
 
-/** Display name from user object, preferring username over email */
+/** Display username from user object, falling back to email local-part */
 function getUserDisplayName(user: { username?: string; email?: string }): string {
   if (user.username) return user.username;
   if (user.email) {
@@ -32,6 +32,10 @@ function getUserDisplayName(user: { username?: string; email?: string }): string
     return part || "—";
   }
   return "—";
+}
+
+function formatName(value?: string): string {
+  return value?.trim() || "—";
 }
 
 export default function UsersManagement() {
@@ -76,7 +80,9 @@ export default function UsersManagement() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
+                      <TableHead>First name</TableHead>
+                      <TableHead>Last name</TableHead>
+                      <TableHead>Username</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Joined at</TableHead>
@@ -89,7 +95,7 @@ export default function UsersManagement() {
                     {users.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={5}
+                          colSpan={7}
                           className={styles.emptyCell}
                         >
                           No users found
@@ -98,6 +104,18 @@ export default function UsersManagement() {
                     ) : (
                       users.map((user) => (
                         <TableRow key={user.id}>
+                          <TableCell
+                            className={styles.nameCell}
+                            title={formatName(user.firstName)}
+                          >
+                            {formatName(user.firstName)}
+                          </TableCell>
+                          <TableCell
+                            className={styles.nameCell}
+                            title={formatName(user.lastName)}
+                          >
+                            {formatName(user.lastName)}
+                          </TableCell>
                           <TableCell
                             className={styles.nameCell}
                             title={getUserDisplayName(user)}

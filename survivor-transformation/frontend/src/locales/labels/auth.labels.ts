@@ -2,6 +2,8 @@ import type { TFunction } from "i18next";
 
 export function buildAuthLabels(t: TFunction<"auth">) {
   const registerErrors = {
+    firstNameRequired: t("register.errors.firstNameRequired"),
+    lastNameRequired: t("register.errors.lastNameRequired"),
     usernameRequired: t("register.errors.usernameRequired"),
     usernameMin: t("register.errors.usernameMin"),
     usernameMax: t("register.errors.usernameMax"),
@@ -30,8 +32,13 @@ export function buildAuthLabels(t: TFunction<"auth">) {
       },
     },
     register: {
+      heading: t("register.heading"),
       title: t("register.title"),
       description: t("register.description"),
+      firstNameLabel: t("register.firstNameLabel"),
+      firstNamePlaceholder: t("register.firstNamePlaceholder"),
+      lastNameLabel: t("register.lastNameLabel"),
+      lastNamePlaceholder: t("register.lastNamePlaceholder"),
       emailLabel: t("register.emailLabel"),
       emailPlaceholder: t("register.emailPlaceholder"),
       usernameLabel: t("register.usernameLabel"),

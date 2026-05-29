@@ -22,6 +22,18 @@ export class RegisterDto {
   @IsEmail()
   email: string;
 
+  @ApiProperty({ example: 'John' })
+  @IsString()
+  @MinLength(1, { message: 'First name is required' })
+  @MaxLength(50, { message: 'First name must be at most 50 characters long' })
+  firstName: string;
+
+  @ApiProperty({ example: 'Doe' })
+  @IsString()
+  @MinLength(1, { message: 'Last name is required' })
+  @MaxLength(50, { message: 'Last name must be at most 50 characters long' })
+  lastName: string;
+
   @ApiProperty()
   @IsString()
   @MinLength(3, { message: 'Username must be at least 3 characters long' })

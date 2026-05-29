@@ -1,4 +1,4 @@
-@import '../../../styles/variables.less';
+@import "../../../styles/variables.less";
 
 .fullscreenCenter {
   min-height: 100vh;
@@ -23,10 +23,32 @@
   color: var(--survivor-app-text);
 }
 
-.card {
+.content {
   width: 100%;
   max-width: 400px;
   margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+.pageHeading {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.card {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.nameRow {
+  display: row;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .form {

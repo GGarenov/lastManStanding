@@ -37,6 +37,8 @@ export default function Register() {
     }
   }, [isChecked, user, navigate, appLocale]);
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -47,6 +49,15 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!firstName.trim()) {
+      setError(labels.register.errors.firstNameRequired);
+      return;
+    }
+    if (!lastName.trim()) {
+      setError(labels.register.errors.lastNameRequired);
+      return;
+    }
 
     const usernameError = labels.register.validateUsername(username);
     if (usernameError) {
@@ -68,7 +79,13 @@ export default function Register() {
     }
     setIsLoading(true);
     try {
-      await register(email.trim(), username.trim(), password);
+      await register(
+        email.trim(),
+        firstName.trim(),
+        lastName.trim(),
+        username.trim(),
+        password,
+      );
       const u = useAuthStore.getState().user;
       navigate(getRedirectPath(u, appLocale), { replace: true });
     } catch (err: unknown) {
@@ -103,82 +120,115 @@ export default function Register() {
 
   return (
     <div className={style.page}>
-      <Card className={style.card}>
-        <CardHeader>
-          <CardTitle>{labels.register.title}</CardTitle>
-          <CardDescription>{labels.register.description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className={style.form}>
-            {error && <p className={style.errorText}>{error}</p>}
-            <div className={style.field}>
-              <Label htmlFor="email">{labels.register.emailLabel}</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={labels.register.emailPlaceholder}
-                autoComplete="email"
-                disabled={isLoading}
-                className={style.input}
-              />
-            </div>
-            <div className={style.field}>
-              <Label htmlFor="username">{labels.register.usernameLabel}</Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder={labels.register.usernamePlaceholder}
-                autoComplete="username"
-                disabled={isLoading}
-                minLength={3}
-                maxLength={30}
-                pattern="[a-zA-Z0-9_-]+"
-                className={style.input}
-              />
-              <p className={style.hintText}>{labels.register.usernameHint}</p>
-            </div>
-            <div className={style.field}>
-              <Label htmlFor="password">{labels.register.passwordLabel}</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                disabled={isLoading}
-                className={style.input}
-              />
-            </div>
-            <div className={style.field}>
-              <Label htmlFor="confirmPassword">
-                {labels.register.confirmPasswordLabel}
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
-                disabled={isLoading}
-                className={style.input}
-              />
-            </div>
-            <Button type="submit" className={style.submitButton} disabled={isLoading}>
-              {isLoading ? labels.register.submitting : labels.register.submit}
-            </Button>
-            <p className={style.footerText}>
-              {labels.register.hasAccount}{' '}
-              <Link to={localizedPath('/login')} className={style.loginLink}>
-                {labels.register.loginLink}
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+      <div className={style.content}>
+        <h1 className={style.pageHeading}>{labels.register.heading}</h1>
+        <Card className={style.card}>
+          <CardHeader>
+            <CardTitle>{labels.register.title}</CardTitle>
+            <CardDescription>{labels.register.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className={style.form}>
+              {error && <p className={style.errorText}>{error}</p>}
+              <div className={style.nameRow}>
+                <div className={style.field}>
+                  <Label htmlFor="firstName">{labels.register.firstNameLabel}</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder={labels.register.firstNamePlaceholder}
+                    autoComplete="given-name"
+                    disabled={isLoading}
+                    maxLength={50}
+                    className={style.input}
+                  />
+                </div>
+                <div className={style.field}>
+                  <Label htmlFor="lastName">{labels.register.lastNameLabel}</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder={labels.register.lastNamePlaceholder}
+                    autoComplete="family-name"
+                    disabled={isLoading}
+                    maxLength={50}
+                    className={style.input}
+                  />
+                </div>
+              </div>
+              <div className={style.field}>
+                <Label htmlFor="email">{labels.register.emailLabel}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={labels.register.emailPlaceholder}
+                  autoComplete="email"
+                  disabled={isLoading}
+                  className={style.input}
+                />
+              </div>
+              <div className={style.field}>
+                <Label htmlFor="username">{labels.register.usernameLabel}</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder={labels.register.usernamePlaceholder}
+                  autoComplete="username"
+                  disabled={isLoading}
+                  minLength={3}
+                  maxLength={30}
+                  pattern="[a-zA-Z0-9_-]+"
+                  className={style.input}
+                />
+                <p className={style.hintText}>{labels.register.usernameHint}</p>
+              </div>
+              <div className={style.field}>
+                <Label htmlFor="password">{labels.register.passwordLabel}</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  disabled={isLoading}
+                  className={style.input}
+                />
+              </div>
+              <div className={style.field}>
+                <Label htmlFor="confirmPassword">
+                  {labels.register.confirmPasswordLabel}
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  disabled={isLoading}
+                  className={style.input}
+                />
+              </div>
+              <Button type="submit" className={style.submitButton} disabled={isLoading}>
+                {isLoading ? labels.register.submitting : labels.register.submit}
+              </Button>
+              <p className={style.footerText}>
+                {labels.register.hasAccount}{' '}
+                <Link to={localizedPath('/login')} className={style.loginLink}>
+                  {labels.register.loginLink}
+                </Link>
+              </p>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

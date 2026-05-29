@@ -14,7 +14,13 @@ export class AuthController {
   @Post('register')
   @ApiBody({ type: RegisterDto })
   register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto.email, dto.username, dto.password);
+    return this.authService.register(
+      dto.email,
+      dto.firstName,
+      dto.lastName,
+      dto.username,
+      dto.password,
+    );
   }
 
   @Public()
