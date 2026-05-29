@@ -8,6 +8,7 @@ import type { AppLocale } from '~/i18n/constants';
 import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
 import { useLabels } from '~/hooks/useLabels';
 import { buildAuthLabels } from '~/locales/labels/auth.labels';
+import { getApiErrorMessage } from '~/api/auth.api';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import style from './Register.module.less';
 
@@ -73,10 +74,6 @@ export default function Register() {
       setError(labels.register.errors.passwordMismatch);
       return;
     }
-    if (password.length < 6) {
-      setError(labels.register.errors.passwordMin);
-      return;
-    }
     setIsLoading(true);
     try {
       await register(
@@ -89,22 +86,14 @@ export default function Register() {
       const u = useAuthStore.getState().user;
       navigate(getRedirectPath(u, appLocale), { replace: true });
     } catch (err: unknown) {
-      const apiMessage =
-        err &&
-        typeof err === 'object' &&
-        'response' in err &&
-        err.response &&
-        typeof err.response === 'object' &&
-        'data' in err.response &&
-        err.response.data &&
-        typeof err.response.data === 'object' &&
-        'message' in err.response.data &&
-        typeof err.response.data.message === 'string'
-          ? err.response.data.message
-          : err instanceof Error
-            ? err.message
-            : null;
-      setError(apiMessage ?? labels.register.errors.failed);
+      const apiMessage = getApiErrorMessage(err);
+      if (apiMessage === 'Username is already taken') {
+        setError(labels.register.errors.usernameTaken);
+      } else if (apiMessage === 'Email is already registered') {
+        setError(labels.register.errors.emailTaken);
+      } else {
+        setError(apiMessage ?? labels.register.errors.failed);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -183,9 +172,6 @@ export default function Register() {
                   placeholder={labels.register.usernamePlaceholder}
                   autoComplete="username"
                   disabled={isLoading}
-                  minLength={3}
-                  maxLength={30}
-                  pattern="[a-zA-Z0-9_-]+"
                   className={style.input}
                 />
                 <p className={style.hintText}>{labels.register.usernameHint}</p>

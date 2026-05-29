@@ -5,12 +5,10 @@ export function buildAuthLabels(t: TFunction<"auth">) {
     firstNameRequired: t("register.errors.firstNameRequired"),
     lastNameRequired: t("register.errors.lastNameRequired"),
     usernameRequired: t("register.errors.usernameRequired"),
-    usernameMin: t("register.errors.usernameMin"),
-    usernameMax: t("register.errors.usernameMax"),
-    usernamePattern: t("register.errors.usernamePattern"),
     required: t("register.errors.required"),
     passwordMismatch: t("register.errors.passwordMismatch"),
-    passwordMin: t("register.errors.passwordMin"),
+    usernameTaken: t("register.errors.usernameTaken"),
+    emailTaken: t("register.errors.emailTaken"),
     failed: t("register.errors.failed"),
   };
 
@@ -54,11 +52,6 @@ export function buildAuthLabels(t: TFunction<"auth">) {
       errors: registerErrors,
       validateUsername: (value: string): string | null => {
         if (!value.trim()) return registerErrors.usernameRequired;
-        if (value.length < 3) return registerErrors.usernameMin;
-        if (value.length > 30) return registerErrors.usernameMax;
-        if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-          return registerErrors.usernamePattern;
-        }
         return null;
       },
     },

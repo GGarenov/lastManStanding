@@ -25,6 +25,7 @@ export function buildHomeLabels(
         t("hero.rakeExplanation", { prizePoolEur, rakeEur }),
       ctaJoin: t("hero.ctaJoin"),
       ctaGoToPool: t("hero.ctaGoToPool"),
+      ctaTournamentLobby: t("hero.ctaTournamentLobby"),
       ctaHowItWorks: t("hero.ctaHowItWorks"),
       ctaRegister: t("hero.ctaRegister"),
       ctaViewLeaderboard: t("hero.ctaViewLeaderboard"),

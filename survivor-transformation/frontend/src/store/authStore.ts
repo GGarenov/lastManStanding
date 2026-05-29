@@ -80,9 +80,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password,
       });
       await get().login(email, password);
-    } catch {
+    } catch (err) {
       set({ isLoading: false });
-      throw new Error('Registration failed');
+      throw err;
     }
   },
 

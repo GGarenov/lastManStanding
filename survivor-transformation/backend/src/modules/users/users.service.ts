@@ -13,6 +13,10 @@ export class UsersService {
     return this.userModel.findOne({ email });
   }
 
+  findByUsername(username: string) {
+    return this.userModel.findOne({ username });
+  }
+
   findById(userId: string) {
     return this.userModel.findById(userId);
   }
@@ -36,5 +40,13 @@ export class UsersService {
 
   async countAdmins(): Promise<number> {
     return this.userModel.countDocuments({ role: 'admin' });
+  }
+
+  findRegisteredPublic() {
+    return this.userModel
+      .find({ role: { $ne: 'admin' } })
+      .select('firstName lastName -_id')
+      .sort({ createdAt: 1 })
+      .lean();
   }
 }

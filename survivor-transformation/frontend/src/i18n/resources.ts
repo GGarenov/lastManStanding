@@ -8,6 +8,7 @@ import enNavbar from '~/locales/en/navbar.json';
 import enPool from '~/locales/en/pool.json';
 import enProfile from '~/locales/en/profile.json';
 import enRules from '~/locales/en/rules.json';
+import enTournamentLobby from '~/locales/en/tournamentLobby.json';
 
 import bgAuth from '~/locales/bg/auth.json';
 import bgCommon from '~/locales/bg/common.json';
@@ -17,6 +18,7 @@ import bgNavbar from '~/locales/bg/navbar.json';
 import bgPool from '~/locales/bg/pool.json';
 import bgProfile from '~/locales/bg/profile.json';
 import bgRules from '~/locales/bg/rules.json';
+import bgTournamentLobby from '~/locales/bg/tournamentLobby.json';
 
 export const resources = {
   en: {
@@ -28,6 +30,7 @@ export const resources = {
     leaderboard: enLeaderboard,
     profile: enProfile,
     auth: enAuth,
+    tournamentLobby: enTournamentLobby,
   },
   bg: {
     common: bgCommon,
@@ -38,5 +41,6 @@ export const resources = {
     leaderboard: bgLeaderboard,
     profile: bgProfile,
     auth: bgAuth,
+    tournamentLobby: bgTournamentLobby,
   },
 } satisfies Record<AppLocale, Record<string, Record<string, unknown>>>;

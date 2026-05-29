@@ -174,11 +174,20 @@ export function HomeHero({
               </div>
             )}
             <div className={styles.ctaRow}>
-              <Link to={localizedPath(isLoggedIn ? "/my-pool" : "/login")}>
+              <Link
+                to={localizedPath(isLoggedIn ? "/my-pool" : "/login")}
+                className={styles.ctaJoinHidden}
+              >
                 <Button size="lg" className={styles.ctaButtonPrimary}>
                   {isLoggedIn && hasJoinedAnyPool
                     ? labels.hero.ctaGoToPool
                     : labels.hero.ctaJoin}
+                  <ArrowRight className={styles.iconSm} />
+                </Button>
+              </Link>
+              <Link to={localizedPath("/tournament-lobby")}>
+                <Button size="lg" className={styles.ctaButtonPrimary}>
+                  {labels.hero.ctaTournamentLobby}
                   <ArrowRight className={styles.iconSm} />
                 </Button>
               </Link>

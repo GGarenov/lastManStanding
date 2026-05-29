@@ -17,7 +17,8 @@ describe('AuthService', () => {
     jest.clearAllMocks();
     usersService = {
       create: jest.fn(),
-      findByEmail: jest.fn(),
+      findByEmail: jest.fn().mockResolvedValue(null),
+      findByUsername: jest.fn().mockResolvedValue(null),
       findById: jest.fn(),
     } as any;
     configService = {
@@ -49,6 +50,8 @@ describe('AuthService', () => {
       );
 
       expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
+      expect(usersService.findByUsername).toHaveBeenCalledWith('user1');
+      expect(usersService.findByEmail).toHaveBeenCalledWith('a@b.com');
       expect(usersService.create).toHaveBeenCalledWith({
         email: 'a@b.com',
         firstName: 'John',
