@@ -264,3 +264,221 @@ Today, `getRoundStats` returns full team data for everyone and does not receive 
 | Is backend required? | **Yes**, to prevent API/network inspection from leaking picks. |
 | Main unlock condition | User has picked **or** round is closed. |
 | Main files to change | `pick.service.ts`, `pick.controller.ts`, `pools.api.ts`, `Stats.tsx`, `Stats.module.less` |
+
+---
+
+## Phase 6 — Reveal picks when pick deadline passes (not when viewer picks)
+
+### Problem (current behavior)
+
+After Phase 1–5, `picksRevealed` is computed as:
+
+```ts
+picksRevealed = round.isClosed || viewerHasPick
+```
+
+So a user who submits their pick **immediately** sees everyone else's teams on Stats. That still allows copy/strategy based on others during the open pick window.
+
+### Desired behavior
+
+Align Stats reveal with the **same moment** the app already locks picking:
+
+| Area | Current “time is up” check |
+|------|----------------------------|
+| `RoundCountdownBanner` | `now >= new Date(activeRound.pickDeadline)` → shows “picks locked” |
+| `PickTeamTab` | `deadlinePassed = pickDeadline && new Date() >= new Date(pickDeadline)` → disables team selection |
+| Backend `pickTeam` | `new Date() > round.pickDeadline` → rejects pick |
+
+**New rule:** For an **active** round (`isClosed === false`), community picks are **hidden until `pickDeadline` has passed**. Making your own pick must **not** unlock other users' teams.
+
+`pickDeadline` is set per round in **Admin → Rounds** (`RoundsTab` add/edit round) or from tournament config when creating a round.
+
+### Updated business rules
+
+#### When team picks are **hidden** (locked)
+
+All of the following:
+
+1. Selected round is **active** (`isClosed === false`).
+2. **`pickDeadline` has not passed** (`now < pickDeadline`). If the round has **no** `pickDeadline`, treat as still in the pick window → keep hidden until the round is closed.
+3. Viewer is an approved participant (same access as today).
+
+> **Removed:** “viewer has not submitted a pick” as a hide condition.  
+> **Removed:** “viewer has submitted a pick” as a reveal condition.
+
+#### When team picks are **revealed**
+
+Any of:
+
+1. Round is **closed** (historical round — full data).
+2. **`pickDeadline` has passed** for that round (`now >= pickDeadline`), even if the viewer never picked and the round is still open administratively.
+3. *(Unchanged)* Eliminated users: still use server-side `picksRevealed`; no special client bypass.
+
+#### UX copy change
+
+Replace unlock CTA *"Make your pick to see who chose which team"* with something like:
+
+- *"Community picks unlock when the pick window closes."*
+- Optionally show the same countdown as `RoundCountdownBanner` on Stats for the active round.
+
+---
+
+### Phase 6 — Implementation tasks
+
+#### 6.0 — Align spec & summary (doc only)
+
+- [ ] **6.0.1** Update the **Summary** table above (line ~265): main unlock condition → **pick deadline passed or round closed**.
+- [ ] **6.0.2** Update **Business Rules** section (lines 27–43) to match Phase 6 rules so future work does not reintroduce `viewerHasPick`.
+
+---
+
+#### 6.1 — Backend: change `picksRevealed` in `getRoundStats`
+
+**File:** `survivor-transformation/backend/src/modules/pick/pick.service.ts`
+
+- [ ] **6.1.1** Add helper (inline is fine) consistent with pick submission:
+
+  ```ts
+  const pickDeadlinePassed =
+    round.pickDeadline != null &&
+    new Date() >= new Date(round.pickDeadline);
+
+  const picksRevealed = round.isClosed || pickDeadlinePassed;
+  ```
+
+- [ ] **6.1.2** Remove `viewerHasPick` from the reveal condition. You may still load viewer's pick for future features, but it must not affect masking.
+
+- [ ] **6.1.3** *(Recommended)* Add optional response fields for clearer UI (Swagger + `RoundStatsDto`):
+  - `pickDeadline?: string | null` (ISO, for selected round)
+  - `pickDeadlinePassed: boolean`
+  - Keeps Stats in sync with server clock and avoids duplicating date logic on the client.
+
+- [ ] **6.1.4** Update `@ApiProperty` / comments on `picksRevealed` in `pick.interface.ts`: *“true when round is closed or pick deadline has passed”*.
+
+---
+
+#### 6.2 — Backend tests
+
+**File:** `survivor-transformation/backend/test/pick/pick.service.spec.ts`
+
+- [ ] **6.2.1** Extend `mockRoundStatsDeps` to accept `pickDeadline?: Date | null` on the round mock.
+
+- [ ] **6.2.2** **Replace / rewrite** test `active round + viewer has picked → full data, picksRevealed true`:
+  - Active round, deadline **in the future**, viewer **has** picked → `picksRevealed: false`, teams **masked**.
+
+- [ ] **6.2.3** **New:** Active round, deadline **in the past**, viewer **has not** picked → `picksRevealed: true`, full team data.
+
+- [ ] **6.2.4** **New:** Active round, deadline **in the past**, viewer **has** picked → `picksRevealed: true`.
+
+- [ ] **6.2.5** **Keep:** `active round + viewer has not picked` with deadline **not passed** → masked (update mock to include future `pickDeadline`).
+
+- [ ] **6.2.6** **Keep:** `closed round → full data` regardless of deadline / viewer pick.
+
+- [ ] **6.2.7** **New:** Active round, **no** `pickDeadline` on round → `picksRevealed: false` until `isClosed: true` (legacy pools without admin deadline).
+
+---
+
+#### 6.3 — Frontend API types
+
+**File:** `survivor-transformation/frontend/src/api/pools.api.ts`
+
+- [ ] **6.3.1** Extend `RoundStats` with optional `pickDeadline`, `pickDeadlinePassed` if added in 6.1.3.
+
+- [ ] **6.3.2** Update JSDoc on `picksRevealed`: no longer tied to “viewer has not picked”.
+
+- [ ] **6.3.3** Map new fields in `getRoundStats` with safe defaults (`pickDeadlinePassed: data?.pickDeadlinePassed ?? false`).
+
+---
+
+#### 6.4 — Frontend Stats page logic & UI
+
+**Files:** `Stats.tsx`, `Stats.module.less`, locale labels (`pool.labels.ts` / `en` & `bg` pool strings)
+
+- [ ] **6.4.1** Change `canSeePicks` derivation (primary: `stats.picksRevealed`; fallback — **remove** `hasMyPickForRound`):
+
+  ```ts
+  const pickDeadlinePassed =
+    stats.pickDeadlinePassed ??
+    (selectedRound?.pickDeadline != null &&
+      new Date() >= new Date(selectedRound.pickDeadline));
+
+  const canSeePicks =
+    stats.picksRevealed ??
+    (selectedRound?.isClosed || pickDeadlinePassed);
+  ```
+
+- [ ] **6.4.2** `useQuery` for `getMyPicks` is **no longer required** for reveal logic; keep only if used elsewhere on the page, or remove to simplify.
+
+- [ ] **6.4.3** Update **unlock banner** (when `isRoundActive && !canSeePicks`):
+  - Message: picks unlock when the countdown hits zero / pick window closes.
+  - Link can still point to `/my-pool/:poolId` to make a pick before deadline.
+  - Remove wording that implies picking unlocks Stats.
+
+- [ ] **6.4.4** Update **locked overlay** on Pick Distribution: *"hidden until the pick window closes"* (not “until you make your pick”).
+
+- [ ] **6.4.5** *(Optional)* Render `RoundCountdownBanner` on Stats for the active round so users see the same timer as My Pool / layout header.
+
+- [ ] **6.4.6** Verify locked UI still uses `canSeePicks` for trending, distribution, recent picks, and table (per Phase 3); re-apply Phase 3 if `Stats.tsx` is missing those branches.
+
+---
+
+#### 6.5 — Cache / polling
+
+**File:** `PickTeamTab.tsx` (pick submit handler)
+
+- [ ] **6.5.1** After successful `submitPick`, invalidating `roundStats` is still fine for counts (`picksIn`, etc.) but **will not** unlock teams until deadline — no behavior change required beyond expectations.
+
+- [ ] **6.5.2** Confirm Stats `refetchInterval: 30000` so when the deadline passes, all clients pick up `picksRevealed: true` within ~30s without refresh. *(Optional enhancement: refetch once when local countdown hits zero via `setTimeout`.)*
+
+---
+
+#### 6.6 — Manual QA (add to Phase 5)
+
+- [ ] **6.6.1** Active round, **before** deadline: User A and User B both picked; User C opens Stats → sees usernames/times but **not** teams; Network tab has no opponent team names.
+- [ ] **6.6.2** Same round, User C **after** submitting own pick but **before** deadline → still **no** team reveal.
+- [ ] **6.6.3** After deadline (`RoundCountdownBanner` shows locked): all users see full picks on Stats, including users who never picked.
+- [ ] **6.6.4** Closed historical round → always full picks.
+- [ ] **6.6.5** Round with **no** `pickDeadline` → picks stay hidden on active round until admin closes the round.
+- [ ] **6.6.6** Change deadline in Admin Rounds → reveal moment matches new time (after refetch).
+
+---
+
+### Suggested task order (Phase 6)
+
+1. Backend `picksRevealed` + tests (6.1, 6.2) — **first** (security / fairness).
+2. Frontend types (6.3).
+3. Stats `canSeePicks` + copy/banner (6.4).
+4. QA (6.6).
+
+### Files to touch (checklist)
+
+| File | Change |
+|------|--------|
+| `backend/src/modules/pick/pick.service.ts` | New `picksRevealed` formula |
+| `backend/src/modules/pick/pick.interface.ts` | DTO/docs + optional fields |
+| `backend/test/pick/pick.service.spec.ts` | Updated + new cases |
+| `frontend/src/api/pools.api.ts` | Types + mapping |
+| `frontend/src/pages/user-pages/Stats/Stats.tsx` | `canSeePicks`, banner copy |
+| `frontend/src/pages/user-pages/Stats/Stats.module.less` | Only if banner/overlay text layout changes |
+| `frontend/src/locales/labels/pool.labels.ts` (+ `en`/`bg` json if needed) | New locked/unlock strings |
+| `frontend/src/components/RoundCountdownBanner/RoundCountdownBanner.tsx` | Reference only — **no change** unless reusing on Stats |
+
+### Reference: existing deadline logic (do not duplicate differently)
+
+```ts
+// RoundCountdownBanner.tsx
+const isPast = now >= new Date(activeRound.pickDeadline!);
+
+// PickTeamTab.tsx
+const deadlinePassed =
+  !!activeRound?.pickDeadline &&
+  new Date() >= new Date(activeRound.pickDeadline);
+
+// pick.service.ts pickTeam()
+if (round.pickDeadline && new Date() > round.pickDeadline) {
+  throw new BadRequestException('Pick deadline has passed for this round');
+}
+```
+
+Use the **same comparison** (`>=` vs `>`) everywhere; today pick submission uses `>` while banners use `>=`. Pick one convention (recommend **`>=`** for “deadline instant = locked”) and align backend `pickTeam` if you normalize.
+
