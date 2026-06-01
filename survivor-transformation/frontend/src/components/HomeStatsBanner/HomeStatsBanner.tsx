@@ -25,29 +25,29 @@ export function HomeStatsBanner({
   );
 
   return (
-    <section className={styles.statsSection}>
+    <section className={styles.statsSection} aria-label={labels.statsBanner.prizePool}>
       <Card className={styles.statsBannerCard}>
         <CardContent className={styles.statsBannerContent}>
           <div className={styles.statsBannerGrid}>
-            <div className={styles.statsBannerItem}>
+            <div className={`${styles.statsBannerItem} ${styles.statsBannerItemPrize}`}>
               <p className={styles.statsBannerItemLabel}>
                 {labels.statsBanner.prizePool}
               </p>
               <p className={styles.statsBannerItemValue}>{prizeDisplay}</p>
             </div>
-            <div className={styles.statsBannerItem}>
+            <div className={`${styles.statsBannerItem} ${styles.statsBannerItemPlayers}`}>
               <p className={styles.statsBannerItemLabel}>
                 {labels.statsBanner.totalPlayers}
               </p>
               <p className={styles.statsBannerItemValue}>{playersDisplay}</p>
             </div>
-            <div className={styles.statsBannerItem}>
+            <div className={`${styles.statsBannerItem} ${styles.statsBannerItemSurvivors}`}>
               <p className={styles.statsBannerItemLabel}>
                 {labels.statsBanner.playersLeft}
               </p>
               <p className={styles.statsBannerItemValue}>{survivorsDisplay}</p>
             </div>
-            <div className={styles.statsBannerItem}>
+            <div className={`${styles.statsBannerItem} ${styles.statsBannerItemRound}`}>
               <p className={styles.statsBannerItemLabel}>
                 {labels.statsBanner.currentRound}
               </p>

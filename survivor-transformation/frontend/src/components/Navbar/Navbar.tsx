@@ -73,6 +73,7 @@ export function Navbar() {
             <NavLink
               key={to}
               to={localizedPath(to)}
+              end={to === "/"}
               className={({ isActive: active }) =>
                 cn(styles.navLink, active && styles.active)
               }
@@ -128,6 +129,7 @@ export function Navbar() {
               <NavLink
                 key={to}
                 to={localizedPath(to)}
+                end={to === "/"}
                 className={({ isActive: active }) =>
                   cn(styles.mobileNavLink, active && styles.active)
                 }

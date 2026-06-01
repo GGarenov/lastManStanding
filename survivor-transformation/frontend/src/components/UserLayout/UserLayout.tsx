@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { Outlet, useParams, useLocation } from 'react-router-dom';
 import { Navbar } from '~/components/Navbar/Navbar';
 import { RoundCountdownBanner } from '~/components/RoundCountdownBanner/RoundCountdownBanner';
-import { PrizePoolBanner } from '~/components/PrizePoolBanner/PrizePoolBanner';
 import { HomeStatsBanner } from '~/components/HomeStatsBanner/HomeStatsBanner';
 import { ActiveTournamentProvider } from '~/contexts/ActiveTournamentContext';
 import { useActiveTournament } from '~/contexts/ActiveTournamentContext';
@@ -114,7 +113,6 @@ function UserLayoutContent({ poolId, tournamentKey }: UserLayoutContentProps) {
         />
       )}
       <RoundCountdownBanner poolId={poolId} tournamentKey={tournamentKey} />
-      <PrizePoolBanner poolId={poolId} />
       <Outlet />
     </div>
   );

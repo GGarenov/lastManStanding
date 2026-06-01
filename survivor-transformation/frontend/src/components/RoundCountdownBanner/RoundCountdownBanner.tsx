@@ -91,7 +91,7 @@ export function RoundCountdownBanner({
           </span>
         ) : (
           <>
-            <span className={styles.countdown}>
+            <span className={styles.countdown} aria-label={labels.timeLeft(roundLabel)}>
               {formatCountdown(remainingMs)}
             </span>
             <span className={styles.text}>

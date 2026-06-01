@@ -1,50 +1,101 @@
 @import '../../styles/variables.less';
 
+@timer-black: #0a0e0a;
+@timer-black-mid: #121a12;
+@timer-green: #4ade80;
+@timer-green-bright: #86efac;
+@timer-green-dark: #16a34a;
+@timer-green-glow: ~"color-mix(in srgb, @{timer-green} 30%, transparent)";
+
 .root {
   width: 100%;
-  background: ~"color-mix(in srgb, var(--primary-bg) 10%, transparent)";
-  border-bottom: 1px solid ~"color-mix(in srgb, var(--primary-bg) 20%, transparent)";
-  color: var(--app-text);
+  background: linear-gradient(
+    180deg,
+    @timer-black-mid 0%,
+    ~"color-mix(in srgb, @{timer-green-dark} 18%, @{timer-black})" 100%
+  );
+  border-bottom: 2px solid ~"color-mix(in srgb, @{timer-green} 50%, @{timer-green-dark})";
+  color: @timer-green-bright;
+  box-shadow:
+    0 4px 16px ~"color-mix(in srgb, black 50%, transparent)",
+    inset 0 1px 0 ~"color-mix(in srgb, @{timer-green} 15%, transparent)";
 }
 
 .inner {
   width: 100%;
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
   min-width: 0;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.5rem 0.75rem;
+
   @media (min-width: 640px) {
-    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    gap: 0.75rem 1rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 1rem 2rem;
+    gap: 1rem 1.25rem;
   }
 }
 
 .icon {
-  width: 1rem;
-  height: 1rem;
+  width: 1.375rem;
+  height: 1.375rem;
   flex-shrink: 0;
-  color: var(--primary-bg);
+  color: @timer-green;
+  filter: drop-shadow(0 0 8px @timer-green-glow);
+
   @media (min-width: 640px) {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.75rem;
+    height: 1.75rem;
   }
 }
 
 .text {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   word-break: break-word;
   text-align: center;
+  line-height: 1.35;
+  color: ~"color-mix(in srgb, @{timer-green-bright} 75%, white)";
+
+  @media (min-width: 640px) {
+    font-size: 1.0625rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 1.125rem;
+  }
 }
 
 .countdown {
-  font-family: ui-monospace, monospace;
-  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   tabular-nums: tabular-nums;
-  color: var(--primary-bg);
+  color: @timer-green;
   flex-shrink: 0;
+  text-shadow: 0 0 24px @timer-green-glow;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.375rem;
+  background: ~"color-mix(in srgb, @{timer-green-dark} 35%, @{timer-black})";
+  border: 1px solid ~"color-mix(in srgb, @{timer-green} 45%, @{timer-green-dark})";
+
+  @media (min-width: 640px) {
+    font-size: 1.875rem;
+    padding: 0.2rem 0.65rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 2.125rem;
+    letter-spacing: 0.08em;
+  }
 }
