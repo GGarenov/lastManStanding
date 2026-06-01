@@ -1,3 +1,8 @@
 .survivor_fe_TournamentLobby_heroImage {
   object-fit: contain;
 }
+
+
+.survivor_fe_HomeHero_buyInInfoBox {
+  display: none;
+}
