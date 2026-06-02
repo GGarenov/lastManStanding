@@ -1,5 +1,6 @@
 import type { TFunction } from "i18next";
 import { buildPoolConfirmLabels } from "~/locales/helpers/pool.helpers";
+import { getRoundStageLabel } from "~/config/tournaments";
 
 const ROUND_STAGE_KEYS: Record<number, string> = {
   1: "groupStage",
@@ -11,8 +12,12 @@ const ROUND_STAGE_KEYS: Record<number, string> = {
 
 export function getPickTeamStageLabel(
   t: TFunction<"pool">,
+  tournamentKey: string | undefined | null,
   roundNumber: number,
 ): string {
+  const predefinedLabel = getRoundStageLabel(tournamentKey, roundNumber);
+  if (predefinedLabel) return predefinedLabel;
+
   const stageKey = ROUND_STAGE_KEYS[roundNumber];
   if (stageKey) {
     return t(`pickTeam.stage.${stageKey}`);
@@ -32,8 +37,10 @@ export function buildPoolLabels(
       noActiveRound: t("pickTeam.noActiveRound"),
       roundHeading: (round: number, stage: string) =>
         t("pickTeam.roundHeading", { round, stage }),
-      getStageLabel: (roundNumber: number) =>
-        getPickTeamStageLabel(t, roundNumber),
+      getStageLabel: (
+        roundNumber: number,
+        tournamentKey?: string | null,
+      ) => getPickTeamStageLabel(t, tournamentKey, roundNumber),
       picksLocked: t("pickTeam.picksLocked"),
       mustPick: t("pickTeam.mustPick"),
       picksCloseAt: (datetime: string) =>

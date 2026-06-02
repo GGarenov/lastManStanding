@@ -223,7 +223,10 @@ export function PickTeamTab() {
     );
   }
 
-  const stageLabel = pickLabels.getStageLabel(activeRound.roundNumber);
+  const stageLabel = pickLabels.getStageLabel(
+    activeRound.roundNumber,
+    poolInfo?.tournamentKey,
+  );
   const heading = pickLabels.roundHeading(activeRound.roundNumber, stageLabel);
 
   return (

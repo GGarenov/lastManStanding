@@ -1,6 +1,7 @@
 import { usePoolPage } from '~/contexts/PoolPageContext';
 import { TeamFlag } from '~/components/TeamFlag/TeamFlag';
 import { Card, CardContent } from '~/components/Card/Card';
+import { getRoundStageLabel } from '~/config/tournaments';
 import {
   Table,
   TableBody,
@@ -16,18 +17,6 @@ import {
   participantMatchHasResult,
 } from '~/lib/participantMatchDisplay';
 import styles from './ResultsTab.module.less';
-
-/** Derives stage label from round number (legacy fallback when not using tournament config). */
-function getStageLabel(roundNumber: number): string {
-  const labels: Record<number, string> = {
-    1: 'Group Stage',
-    2: 'Round of 16',
-    3: 'Quarter-finals',
-    4: 'Semi-finals',
-    5: 'Final',
-  };
-  return labels[roundNumber] ?? `Round ${roundNumber}`;
-}
 
 interface ResultRowProps {
   match: ParticipantMatch;
@@ -66,7 +55,7 @@ function ResultRow({ match, tournamentConfig }: ResultRowProps) {
 }
 
 export function ResultsTab() {
-  const { rounds, tournamentConfig } = usePoolPage();
+  const { rounds, tournamentConfig, poolInfo } = usePoolPage();
 
   const roundsWithResults = rounds.filter((round) =>
     round.matches.some(participantMatchHasResult)
@@ -88,7 +77,9 @@ export function ResultsTab() {
       {roundsWithResults.map((round) => (
         <section key={round.roundNumber}>
           <h3 className={styles.sectionTitle}>
-            Round {round.roundNumber} – {getStageLabel(round.roundNumber)}
+            Round {round.roundNumber} –{' '}
+            {getRoundStageLabel(poolInfo?.tournamentKey, round.roundNumber) ??
+              `Round ${round.roundNumber}`}
           </h3>
           <div className={styles.tableWrapper}>
             <Table className={styles.table}>
