@@ -7,3 +7,5 @@
    user2 login (ot sushtiq komp) nishto ne e izbral i trqbva da ne vijda koi kvo e izbral. Vliza v stats i vijda koi kvo e izbral. Refresh = spira da vijda -> pravilno. (Moje bi trqbva v logikata da se pazi user check)
 7. admin mobile - total shteta da se fixne
 8. Da se proveri mobile view-to
+9. PickTeamTab i ResultsTab trqbva da se barnat da nqma takiva greshki da pishe semi-final i podobni..
+10. Winners banners and whatever..
