@@ -206,6 +206,7 @@
 
 .teamName {
   min-width: 0;
+  display: block;
   font-size: 0.875rem;
   font-weight: 500;
   color: inherit;
@@ -215,6 +216,16 @@
 
   @media (min-width: 640px) {
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .teamName {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
   }
 }
 
