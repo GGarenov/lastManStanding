@@ -17,7 +17,7 @@ Example: user `test3` is still deciding, but can already see that `test2 → Spa
 
 **Recommendation: implement on both backend and frontend.**
 
-- **Backend** — do not send team identities when the viewer has not picked yet (for an open round).
+- **Backend** — do not send team identities while the round is active and the pick deadline has not passed.
 - **Frontend** — render locked / hidden UI based on a `picksRevealed` flag from the API (with a local fallback for safety).
 
 ---
@@ -32,14 +32,14 @@ All of the following must be true:
 
 1. The selected round is **active** (`isClosed === false`).
 2. The logged-in user is an **approved, non-eliminated** participant in the pool.
-3. The user has **not** submitted a pick for that round.
+3. The round pick deadline has **not** passed (`now < pickDeadline`) or no deadline is set.
 
 ### When team picks are **revealed**
 
 Any of:
 
 1. The round is **closed** (historical round — show everything).
-2. The user **has** submitted a pick for that round.
+2. The round pick deadline **has passed** (`now >= pickDeadline`).
 3. *(Optional edge case)* User is **eliminated** — they cannot pick anymore; decide whether they should see live picks as spectators. **Suggested:** still hide until round closes, to avoid leaking info to eliminated players who might share it.
 
 ### What to show in each section when locked
@@ -58,7 +58,7 @@ Any of:
 
 ### CTA when locked
 
-Show a short message + link: **"Make your pick to unlock community picks"** → `/my-pool/:poolId` (or the pool pick tab).
+Show a short message + link: **"Community picks unlock when the pick window closes."** → `/my-pool/:poolId` (or the pool pick tab).
 
 ---
 
@@ -262,7 +262,7 @@ Today, `getRoundStats` returns full team data for everyone and does not receive 
 |----------|--------|
 | Can this be frontend-only? | Only for cosmetic hiding — **not fair** for a competitive game. |
 | Is backend required? | **Yes**, to prevent API/network inspection from leaking picks. |
-| Main unlock condition | User has picked **or** round is closed. |
+| Main unlock condition | Pick deadline has passed **or** round is closed. |
 | Main files to change | `pick.service.ts`, `pick.controller.ts`, `pools.api.ts`, `Stats.tsx`, `Stats.module.less` |
 
 ---
@@ -327,8 +327,8 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
 
 #### 6.0 — Align spec & summary (doc only)
 
-- [ ] **6.0.1** Update the **Summary** table above (line ~265): main unlock condition → **pick deadline passed or round closed**.
-- [ ] **6.0.2** Update **Business Rules** section (lines 27–43) to match Phase 6 rules so future work does not reintroduce `viewerHasPick`.
+- [x] **6.0.1** Update the **Summary** table above (line ~265): main unlock condition → **pick deadline passed or round closed**.
+- [x] **6.0.2** Update **Business Rules** section (lines 27–43) to match Phase 6 rules so future work does not reintroduce `viewerHasPick`.
 
 ---
 
@@ -336,7 +336,7 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
 
 **File:** `survivor-transformation/backend/src/modules/pick/pick.service.ts`
 
-- [ ] **6.1.1** Add helper (inline is fine) consistent with pick submission:
+- [x] **6.1.1** Add helper (inline is fine) consistent with pick submission:
 
   ```ts
   const pickDeadlinePassed =
@@ -346,14 +346,14 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
   const picksRevealed = round.isClosed || pickDeadlinePassed;
   ```
 
-- [ ] **6.1.2** Remove `viewerHasPick` from the reveal condition. You may still load viewer's pick for future features, but it must not affect masking.
+- [x] **6.1.2** Remove `viewerHasPick` from the reveal condition. You may still load viewer's pick for future features, but it must not affect masking.
 
-- [ ] **6.1.3** *(Recommended)* Add optional response fields for clearer UI (Swagger + `RoundStatsDto`):
+- [x] **6.1.3** *(Recommended)* Add optional response fields for clearer UI (Swagger + `RoundStatsDto`):
   - `pickDeadline?: string | null` (ISO, for selected round)
   - `pickDeadlinePassed: boolean`
   - Keeps Stats in sync with server clock and avoids duplicating date logic on the client.
 
-- [ ] **6.1.4** Update `@ApiProperty` / comments on `picksRevealed` in `pick.interface.ts`: *“true when round is closed or pick deadline has passed”*.
+- [x] **6.1.4** Update `@ApiProperty` / comments on `picksRevealed` in `pick.interface.ts`: *“true when round is closed or pick deadline has passed”*.
 
 ---
 
@@ -361,20 +361,20 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
 
 **File:** `survivor-transformation/backend/test/pick/pick.service.spec.ts`
 
-- [ ] **6.2.1** Extend `mockRoundStatsDeps` to accept `pickDeadline?: Date | null` on the round mock.
+- [x] **6.2.1** Extend `mockRoundStatsDeps` to accept `pickDeadline?: Date | null` on the round mock.
 
-- [ ] **6.2.2** **Replace / rewrite** test `active round + viewer has picked → full data, picksRevealed true`:
+- [x] **6.2.2** **Replace / rewrite** test `active round + viewer has picked → full data, picksRevealed true`:
   - Active round, deadline **in the future**, viewer **has** picked → `picksRevealed: false`, teams **masked**.
 
-- [ ] **6.2.3** **New:** Active round, deadline **in the past**, viewer **has not** picked → `picksRevealed: true`, full team data.
+- [x] **6.2.3** **New:** Active round, deadline **in the past**, viewer **has not** picked → `picksRevealed: true`, full team data.
 
-- [ ] **6.2.4** **New:** Active round, deadline **in the past**, viewer **has** picked → `picksRevealed: true`.
+- [x] **6.2.4** **New:** Active round, deadline **in the past**, viewer **has** picked → `picksRevealed: true`.
 
-- [ ] **6.2.5** **Keep:** `active round + viewer has not picked` with deadline **not passed** → masked (update mock to include future `pickDeadline`).
+- [x] **6.2.5** **Keep:** `active round + viewer has not picked` with deadline **not passed** → masked (update mock to include future `pickDeadline`).
 
-- [ ] **6.2.6** **Keep:** `closed round → full data` regardless of deadline / viewer pick.
+- [x] **6.2.6** **Keep:** `closed round → full data` regardless of deadline / viewer pick.
 
-- [ ] **6.2.7** **New:** Active round, **no** `pickDeadline` on round → `picksRevealed: false` until `isClosed: true` (legacy pools without admin deadline).
+- [x] **6.2.7** **New:** Active round, **no** `pickDeadline` on round → `picksRevealed: false` until `isClosed: true` (legacy pools without admin deadline).
 
 ---
 
@@ -382,11 +382,11 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
 
 **File:** `survivor-transformation/frontend/src/api/pools.api.ts`
 
-- [ ] **6.3.1** Extend `RoundStats` with optional `pickDeadline`, `pickDeadlinePassed` if added in 6.1.3.
+- [x] **6.3.1** Extend `RoundStats` with optional `pickDeadline`, `pickDeadlinePassed` if added in 6.1.3.
 
-- [ ] **6.3.2** Update JSDoc on `picksRevealed`: no longer tied to “viewer has not picked”.
+- [x] **6.3.2** Update JSDoc on `picksRevealed`: no longer tied to “viewer has not picked”.
 
-- [ ] **6.3.3** Map new fields in `getRoundStats` with safe defaults (`pickDeadlinePassed: data?.pickDeadlinePassed ?? false`).
+- [x] **6.3.3** Map new fields in `getRoundStats` with safe defaults (`pickDeadlinePassed: data?.pickDeadlinePassed ?? false`).
 
 ---
 
@@ -394,7 +394,7 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
 
 **Files:** `Stats.tsx`, `Stats.module.less`, locale labels (`pool.labels.ts` / `en` & `bg` pool strings)
 
-- [ ] **6.4.1** Change `canSeePicks` derivation (primary: `stats.picksRevealed`; fallback — **remove** `hasMyPickForRound`):
+- [x] **6.4.1** Change `canSeePicks` derivation (primary: `stats.picksRevealed`; fallback — **remove** `hasMyPickForRound`):
 
   ```ts
   const pickDeadlinePassed =
@@ -407,18 +407,18 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
     (selectedRound?.isClosed || pickDeadlinePassed);
   ```
 
-- [ ] **6.4.2** `useQuery` for `getMyPicks` is **no longer required** for reveal logic; keep only if used elsewhere on the page, or remove to simplify.
+- [x] **6.4.2** `useQuery` for `getMyPicks` is **no longer required** for reveal logic; keep only if used elsewhere on the page, or remove to simplify.
 
-- [ ] **6.4.3** Update **unlock banner** (when `isRoundActive && !canSeePicks`):
+- [x] **6.4.3** Update **unlock banner** (when `isRoundActive && !canSeePicks`):
   - Message: picks unlock when the countdown hits zero / pick window closes.
   - Link can still point to `/my-pool/:poolId` to make a pick before deadline.
   - Remove wording that implies picking unlocks Stats.
 
-- [ ] **6.4.4** Update **locked overlay** on Pick Distribution: *"hidden until the pick window closes"* (not “until you make your pick”).
+- [x] **6.4.4** Update **locked overlay** on Pick Distribution: *"hidden until the pick window closes"* (not “until you make your pick”).
 
-- [ ] **6.4.5** *(Optional)* Render `RoundCountdownBanner` on Stats for the active round so users see the same timer as My Pool / layout header.
+- [x] **6.4.5** *(Optional)* Render `RoundCountdownBanner` on Stats for the active round so users see the same timer as My Pool / layout header.
 
-- [ ] **6.4.6** Verify locked UI still uses `canSeePicks` for trending, distribution, recent picks, and table (per Phase 3); re-apply Phase 3 if `Stats.tsx` is missing those branches.
+- [x] **6.4.6** Verify locked UI still uses `canSeePicks` for trending, distribution, recent picks, and table (per Phase 3); re-apply Phase 3 if `Stats.tsx` is missing those branches.
 
 ---
 
@@ -426,9 +426,61 @@ Replace unlock CTA *"Make your pick to see who chose which team"* with something
 
 **File:** `PickTeamTab.tsx` (pick submit handler)
 
-- [ ] **6.5.1** After successful `submitPick`, invalidating `roundStats` is still fine for counts (`picksIn`, etc.) but **will not** unlock teams until deadline — no behavior change required beyond expectations.
+- [x] **6.5.1** After successful `submitPick`, invalidating `roundStats` is still fine for counts (`picksIn`, etc.) but **will not** unlock teams until deadline — no behavior change required beyond expectations.
 
-- [ ] **6.5.2** Confirm Stats `refetchInterval: 30000` so when the deadline passes, all clients pick up `picksRevealed: true` within ~30s without refresh. *(Optional enhancement: refetch once when local countdown hits zero via `setTimeout`.)*
+- [x] **6.5.2** Confirm Stats `refetchInterval: 30000` so when the deadline passes, all clients pick up `picksRevealed: true` within ~30s without refresh. *(Optional enhancement: refetch once when local countdown hits zero via `setTimeout`.)*
+
+---
+
+### Phase 6 execution log (implemented)
+
+Implemented tasks **6.0 → 6.5** with deadline-based reveal.
+
+#### What was changed
+
+- **Backend reveal rule changed to deadline-based**
+  - `picksRevealed` now uses `round.isClosed || pickDeadlinePassed`.
+  - Removed `viewerHasPick` from reveal logic.
+  - Added response fields: `pickDeadline`, `pickDeadlinePassed`.
+  - Updated DTO/Swagger descriptions accordingly.
+
+- **Backend tests updated and expanded**
+  - Added/updated cases for:
+    - future deadline + viewer picked => still masked
+    - past deadline + viewer not picked => revealed
+    - past deadline + viewer picked => revealed
+    - no deadline + active round => masked until close
+  - Existing closed-round behavior preserved.
+
+- **Frontend API updated**
+  - `RoundStats` now includes `pickDeadline` and `pickDeadlinePassed`.
+  - Safe defaults mapped in `getRoundStats`.
+  - JSDoc for `picksRevealed` updated to deadline/closed behavior.
+
+- **Stats page logic/UI updated**
+  - `canSeePicks` now derives from `picksRevealed` / deadline fallback (no pick-based unlock).
+  - Restored locked states for trending, distribution, recent picks, and all-picks table.
+  - Updated lock messaging to: unlock when pick window closes.
+  - Added `RoundCountdownBanner` to Stats header for active rounds.
+
+- **Locale labels updated (EN/BG)**
+  - Added `locked`, `hidden`, `pickDistributionLockedUntilDeadline`, `unlockWhenWindowCloses`, `makePickBeforeDeadline`.
+
+- **Cache/polling confirmation**
+  - No change needed in `PickTeamTab` logic for unlocking behavior.
+  - `Stats.tsx` already polls with `refetchInterval: 30000`, which satisfies 6.5.2.
+
+#### Files changed
+
+- `survivor-transformation/backend/src/modules/pick/pick.service.ts`
+- `survivor-transformation/backend/src/modules/pick/pick.interface.ts`
+- `survivor-transformation/backend/test/pick/pick.service.spec.ts`
+- `survivor-transformation/frontend/src/api/pools.api.ts`
+- `survivor-transformation/frontend/src/pages/user-pages/Stats/Stats.tsx`
+- `survivor-transformation/frontend/src/locales/labels/pool.labels.ts`
+- `survivor-transformation/frontend/src/locales/en/pool.json`
+- `survivor-transformation/frontend/src/locales/bg/pool.json`
+- `Stats_page_edit.md`
 
 ---
 

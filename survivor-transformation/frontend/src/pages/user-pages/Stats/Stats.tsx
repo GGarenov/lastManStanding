@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/Select/Select';
-import { Loader2, AlertCircle, Users, Clock, Flame, Zap, BarChart3, Eye } from 'lucide-react';
+import { Loader2, AlertCircle, Users, Clock, Flame, Zap, BarChart3, Eye, Lock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import * as poolsApi from '~/api/pools.api';
 import { useOpenPoolsStore } from '~/store/openPoolsStore';
@@ -31,11 +31,16 @@ import { getTournamentConfig, getPredefinedRound } from '~/config/tournaments';
 import { formatAppDistanceToNow } from '~/i18n/dateLocale';
 import { getAvatarInitials, getAvatarColor } from '~/lib/user-utils';
 import { WinnerBanner } from '~/components/WinnerBanner/WinnerBanner';
+import { RoundCountdownBanner } from '~/components/RoundCountdownBanner/RoundCountdownBanner';
 import styles from './Stats.module.less';
 
 /** Returns the active round (first with isClosed: false), or undefined if none. */
 function getActiveRound(rounds: poolsApi.ParticipantRound[]): poolsApi.ParticipantRound | undefined {
   return rounds.find((r) => !r.isClosed);
+}
+
+function toTeamOrFallback(team: string | null | undefined, fallback: string): string {
+  return team ?? fallback;
 }
 
 export default function Stats() {
@@ -158,11 +163,9 @@ export default function Stats() {
               <AlertCircle className={styles.noPoolIcon} />
               <h2 className={styles.noPoolTitle}>{statsLabels.noPoolTitle}</h2>
               <p className={styles.noPoolText}>{statsLabels.noPoolText}</p>
-              <Button asChild>
-                <Link to={localizedPath("/my-pool")}>
-                  {statsLabels.goToMyPool}
-                </Link>
-              </Button>
+              <Link to={localizedPath("/my-pool")} className={styles.noPoolLink}>
+                {statsLabels.goToMyPool}
+              </Link>
             </CardContent>
           </Card>
         </main>
@@ -190,6 +193,16 @@ export default function Stats() {
 
   const showWinnerBanner = poolInfo?.status === 'winner' && poolInfo?.poolStatus === 'finished';
   const showEliminatedMessage = poolInfo?.eliminated === true && poolInfo?.poolStatus === 'finished';
+  const pickDeadlinePassedFromRound =
+    selectedRound?.pickDeadline != null &&
+    new Date() >= new Date(selectedRound.pickDeadline);
+  const pickDeadlinePassed = stats
+    ? (stats.pickDeadlinePassed ?? pickDeadlinePassedFromRound)
+    : pickDeadlinePassedFromRound;
+  const canSeePicks =
+    selectedRound?.isClosed === true
+      ? true
+      : !!pickDeadlinePassed;
 
   return (
     <div className={styles.page}>
@@ -227,6 +240,12 @@ export default function Stats() {
               )}
               <h2 className={styles.roundTitle}>{roundTitle}</h2>
             </div>
+          )}
+          {isRoundActive && (
+            <RoundCountdownBanner
+              poolId={poolId}
+              tournamentKey={poolInfo?.tournamentKey}
+            />
           )}
         </div>
 
@@ -340,6 +359,19 @@ export default function Stats() {
           </Card>
         ) : stats ? (
           <div>
+          {isRoundActive && !canSeePicks && (
+            <div className={styles.unlockBanner} role="status">
+              <Clock className={styles.unlockBannerIcon} aria-hidden />
+              <p className={styles.unlockBannerText}>
+                {statsLabels.unlockWhenWindowCloses}
+              </p>
+              {poolId && (
+                <Link to={localizedPath(`/my-pool/${poolId}`)} className={styles.unlockBannerLink}>
+                  {statsLabels.makePickBeforeDeadline}
+                </Link>
+              )}
+            </div>
+          )}
           <div className={styles.statsGrid}>
             <Card role="article" aria-label={`${statsLabels.picksIn}: ${stats.picksIn}`}>
               <CardContent className={styles.statCard}>
@@ -368,7 +400,7 @@ export default function Stats() {
             </Card>
             <Card
               role="article"
-              aria-label={`${statsLabels.trendingPick}: ${stats.trendingPick || statsLabels.none}`}
+              aria-label={`${statsLabels.trendingPick}: ${canSeePicks ? (stats.trendingPick || statsLabels.none) : statsLabels.locked}`}
             >
               <CardContent className={styles.statCard}>
                 <div className={styles.statIconWrap}>
@@ -376,8 +408,8 @@ export default function Stats() {
                     <Flame className={`${styles.statIconSvg} ${styles.statIconSvgRed}`} />
                   </div>
                 </div>
-                <p className={styles.statValue} style={{ fontSize: '1.25rem' }}>
-                  {stats.trendingPick || statsLabels.none}
+                <p className={`${styles.statValue} ${!canSeePicks ? styles.statValueLocked : ''}`} style={{ fontSize: '1.25rem' }}>
+                  {canSeePicks ? (stats.trendingPick || statsLabels.none) : statsLabels.locked}
                 </p>
                 <p className={styles.statLabel}>{statsLabels.trendingPick}</p>
               </CardContent>
@@ -406,9 +438,18 @@ export default function Stats() {
                     {statsLabels.pickDistribution}
                   </h2>
                 </div>
-                {stats.pickDistribution.length === 0 ? (
+                {stats.picksIn === 0 ? (
                   <div className={styles.emptyCenter}>
                     <p>{statsLabels.noPicksYet}</p>
+                  </div>
+                ) : !canSeePicks ? (
+                  <div className={styles.lockedSection}>
+                    <div className={styles.lockedOverlay}>
+                      <Lock className={styles.lockedOverlayIcon} aria-hidden />
+                      <p className={styles.lockedOverlayText}>
+                        {statsLabels.pickDistributionLockedUntilDeadline}
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className={styles.distList}>
@@ -418,14 +459,18 @@ export default function Stats() {
                         className={styles.distItem}
                         role="listitem"
                         aria-label={statsLabels.distItemAria(
-                          item.team,
+                          toTeamOrFallback(item.team, statsLabels.hidden),
                           item.count,
                           item.percentage,
                         )}
                       >
                         <div className={styles.distRow}>
-                          <TeamFlag teamName={item.team} tournamentConfig={tournamentConfig} height={24} />
-                          <span className={styles.distTeam}>{item.team}</span>
+                          <TeamFlag
+                            teamName={toTeamOrFallback(item.team, statsLabels.hidden)}
+                            tournamentConfig={tournamentConfig}
+                            height={24}
+                          />
+                          <span className={styles.distTeam}>{toTeamOrFallback(item.team, statsLabels.hidden)}</span>
                           <span className={styles.distCount}>{item.count} ({item.percentage}%)</span>
                         </div>
                         <div
@@ -434,7 +479,7 @@ export default function Stats() {
                           aria-valuenow={item.percentage}
                           aria-valuemin={0}
                           aria-valuemax={100}
-                          aria-label={statsLabels.progressAria(item.team)}
+                          aria-label={statsLabels.progressAria(toTeamOrFallback(item.team, statsLabels.hidden))}
                         >
                           <div className={styles.progressBar} style={{ width: `${item.percentage}%` }} />
                         </div>
@@ -476,14 +521,27 @@ export default function Stats() {
                           role="listitem"
                           aria-label={statsLabels.recentPickRowAria(
                             pick.username,
-                            pick.team,
+                            canSeePicks ? toTeamOrFallback(pick.team, statsLabels.none) : statsLabels.hidden,
                             timeAgo,
                           )}
                         >
                           <div className={styles.avatar} style={{ backgroundColor: avatarColor }}>{avatarInitials}</div>
                           <span className={styles.username}>{pick.username}</span>
-                          <TeamFlag teamName={pick.team} tournamentConfig={tournamentConfig} height={20} />
-                          <span className={styles.teamName}>{pick.team}</span>
+                          {canSeePicks ? (
+                            <>
+                              <TeamFlag
+                                teamName={toTeamOrFallback(pick.team, statsLabels.none)}
+                                tournamentConfig={tournamentConfig}
+                                height={20}
+                              />
+                              <span className={styles.teamName}>{toTeamOrFallback(pick.team, statsLabels.none)}</span>
+                            </>
+                          ) : (
+                            <span className={styles.hiddenTeamBadge}>
+                              <Lock className={styles.hiddenTeamBadgeIcon} aria-hidden />
+                              {statsLabels.hidden}
+                            </span>
+                          )}
                           <span className={styles.timeAgo}>{timeAgo}</span>
                         </div>
                       );
@@ -535,10 +593,21 @@ export default function Stats() {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <div className={styles.tableCellTeam}>
-                                  <TeamFlag teamName={pick.team} tournamentConfig={tournamentConfig} height={20} />
-                                  <span>{pick.team}</span>
-                                </div>
+                                {canSeePicks ? (
+                                  <div className={styles.tableCellTeam}>
+                                    <TeamFlag
+                                      teamName={toTeamOrFallback(pick.team, statsLabels.none)}
+                                      tournamentConfig={tournamentConfig}
+                                      height={20}
+                                    />
+                                    <span>{toTeamOrFallback(pick.team, statsLabels.none)}</span>
+                                  </div>
+                                ) : (
+                                  <span className={styles.hiddenTeamBadge}>
+                                    <Lock className={styles.hiddenTeamBadgeIcon} aria-hidden />
+                                    {statsLabels.hidden}
+                                  </span>
+                                )}
                               </TableCell>
                               <TableCell>
                                 <span className={styles.teamName}>

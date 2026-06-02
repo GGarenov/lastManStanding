@@ -38,6 +38,23 @@
   margin-bottom: 1rem;
 }
 
+.noPoolLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-base);
+  border: 1px solid var(--border-color);
+  color: var(--app-text);
+  text-decoration: none;
+  background: var(--card-bg);
+  transition: background 0.15s;
+
+  &:hover {
+    background: ~"color-mix(in srgb, var(--muted-bg) 60%, var(--card-bg))";
+  }
+}
+
 .winnerBannerWrap {
   margin-bottom: 1.5rem;
 }

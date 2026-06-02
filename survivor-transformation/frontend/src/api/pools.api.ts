@@ -187,6 +187,8 @@ export interface UserPick {
 /** Round statistics response */
 export interface RoundStats {
   roundNumber: number;
+  pickDeadline?: string | null;
+  pickDeadlinePassed: boolean;
   picksIn: number;
   stillDeciding: number;
   trendingPick: string | null;
@@ -194,7 +196,7 @@ export interface RoundStats {
   pickDistribution: PickDistribution[];
   recentPicks: UserPick[];
   allPicks: UserPick[];
-  /** False while active round and viewer has not picked yet */
+  /** True when round is closed or when the pick deadline has passed */
   picksRevealed: boolean;
 }
 
@@ -216,6 +218,8 @@ export async function getRoundStats(
     // Return data with defaults for missing fields
     return {
       roundNumber: data?.roundNumber ?? roundNumber,
+      pickDeadline: data?.pickDeadline ?? null,
+      pickDeadlinePassed: data?.pickDeadlinePassed ?? false,
       picksIn: data?.picksIn ?? 0,
       stillDeciding: data?.stillDeciding ?? 0,
       trendingPick: data?.trendingPick ?? null,
@@ -229,6 +233,8 @@ export async function getRoundStats(
     // Return default values on error
     return {
       roundNumber,
+      pickDeadline: null,
+      pickDeadlinePassed: false,
       picksIn: 0,
       stillDeciding: 0,
       trendingPick: null,

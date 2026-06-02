@@ -48,7 +48,7 @@ export class RoundStatsUserPickDto {
 
   @ApiProperty({
     description:
-      'Team picked. Null when picksRevealed is false (viewer has not picked and round is active).',
+      'Team picked. Null when picksRevealed is false (active round before pick deadline).',
     nullable: true,
   })
   team: string | null;
@@ -93,7 +93,21 @@ export class RoundStatsDto {
 
   @ApiProperty({
     description:
-      'False while the round is active and the viewer has not picked; then team fields are hidden.',
+      'True when the round is closed or when the pick deadline has passed.',
   })
   picksRevealed: boolean;
+
+  @ApiProperty({
+    description: 'Round pick deadline in ISO format. Null when no deadline is set.',
+    nullable: true,
+    required: false,
+    type: String,
+    format: 'date-time',
+  })
+  pickDeadline?: Date | null;
+
+  @ApiProperty({
+    description: 'Whether the round pick deadline has passed.',
+  })
+  pickDeadlinePassed: boolean;
 }

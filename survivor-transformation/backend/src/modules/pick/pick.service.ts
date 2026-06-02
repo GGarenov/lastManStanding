@@ -37,7 +37,7 @@ export class PickService {
     // 2️⃣ Get active round
     const round = await this.roundService.getActiveRound(poolId);
 
-    if (round.pickDeadline && new Date() > round.pickDeadline) {
+    if (round.pickDeadline && new Date() >= round.pickDeadline) {
       throw new BadRequestException('Pick deadline has passed for this round');
     }
 
@@ -95,9 +95,9 @@ export class PickService {
 
   /**
    * Get statistics for a specific round.
-   * Team identities are hidden until the viewer has picked for this round or the round is closed.
+   * Team identities are hidden until the round is closed or the pick deadline has passed.
    */
-  async getRoundStats(poolId: string, roundNumber: number, userId: string) {
+  async getRoundStats(poolId: string, roundNumber: number, _userId: string) {
     let round;
     try {
       round = await this.roundService.getRoundByNumber(poolId, roundNumber);
@@ -111,12 +111,10 @@ export class PickService {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Match viewer against pick rows (avoids ObjectId/string mismatch on findOne)
-    const viewerId = userId.toString();
-    const viewerHasPick = picks.some(
-      (p) => (p.userId?.toString() ?? String(p.userId)) === viewerId,
-    );
-    const picksRevealed = round.isClosed || viewerHasPick;
+    const pickDeadlinePassed =
+      round.pickDeadline != null &&
+      new Date() >= new Date(round.pickDeadline);
+    const picksRevealed = round.isClosed || pickDeadlinePassed;
 
     // Get approved participants who are still in the pool (not eliminated).
     // Only they are expected to pick this round; eliminated users must not count as "still deciding".
@@ -202,6 +200,8 @@ export class PickService {
 
     const baseStats = {
       roundNumber,
+      pickDeadline: round.pickDeadline ?? null,
+      pickDeadlinePassed,
       picksIn,
       stillDeciding: Math.max(0, stillDeciding), // Ensure non-negative
       trendingPick,

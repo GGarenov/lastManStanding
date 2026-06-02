@@ -47,7 +47,7 @@ export class PickController {
   @ApiOperation({
     summary: 'Round pick statistics',
     description:
-      'Returns community pick stats for an approved participant. Team identities are hidden until the viewer has picked for this round or the round is closed.',
+      'Returns community pick stats for an approved participant. Team identities are hidden until the round is closed or its pick deadline has passed.',
   })
   @ApiParam({ name: 'poolId', description: 'Pool ID' })
   @ApiParam({ name: 'roundNumber', description: 'Round number', type: Number })

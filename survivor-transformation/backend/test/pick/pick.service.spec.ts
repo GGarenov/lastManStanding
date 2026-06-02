@@ -192,7 +192,7 @@ describe('PickService', () => {
 
   describe('getRoundStats', () => {
     const mockRoundStatsDeps = (
-      round: { isClosed?: boolean },
+      round: { isClosed?: boolean; pickDeadline?: Date | null },
       picks: Array<{ userId: string; team: string; createdAt: Date }> = [
         { userId: 'u1', team: 'A', createdAt: new Date() },
       ],
@@ -223,7 +223,7 @@ describe('PickService', () => {
     });
 
     it('closed round → full data even if viewer never picked', async () => {
-      mockRoundStatsDeps({ isClosed: true });
+      mockRoundStatsDeps({ isClosed: true, pickDeadline: null });
 
       const result = await service.getRoundStats('pool1', 1, 'viewer');
 
@@ -231,13 +231,44 @@ describe('PickService', () => {
         roundNumber: 1,
         picksIn: 1,
         picksRevealed: true,
+        pickDeadlinePassed: false,
         pickDistribution: [{ team: 'A', count: 1, percentage: 100 }],
         recentPicks: [{ team: 'A' }],
       });
     });
 
-    it('active round + viewer has picked → full data, picksRevealed true', async () => {
-      mockRoundStatsDeps({ isClosed: false }, [
+    it('active round + future deadline + viewer has picked → teams masked, picksRevealed false', async () => {
+      const future = new Date(Date.now() + 60_000);
+      mockRoundStatsDeps({ isClosed: false, pickDeadline: future }, [
+        { userId: 'viewer', team: 'B', createdAt: new Date() },
+        { userId: 'u1', team: 'A', createdAt: new Date() },
+      ]);
+
+      const result = await service.getRoundStats('pool1', 1, 'viewer');
+
+      expect(result.picksRevealed).toBe(false);
+      expect(result.pickDeadlinePassed).toBe(false);
+      expect(result.trendingPick).toBeNull();
+      expect(result.pickDistribution).toEqual([]);
+      expect(result.recentPicks[0].team).toBeNull();
+    });
+
+    it('active round + past deadline + viewer has not picked → full data, picksRevealed true', async () => {
+      const past = new Date(Date.now() - 60_000);
+      mockRoundStatsDeps({ isClosed: false, pickDeadline: past });
+
+      const result = await service.getRoundStats('pool1', 1, 'viewer');
+
+      expect(result.picksRevealed).toBe(true);
+      expect(result.pickDeadlinePassed).toBe(true);
+      expect(result.trendingPick).toBe('A');
+      expect(result.pickDistribution).toEqual([{ team: 'A', count: 1, percentage: 100 }]);
+      expect(result.recentPicks[0].team).toBe('A');
+    });
+
+    it('active round + past deadline + viewer has picked → full data, picksRevealed true', async () => {
+      const past = new Date(Date.now() - 60_000);
+      mockRoundStatsDeps({ isClosed: false, pickDeadline: past }, [
         { userId: 'viewer', team: 'B', createdAt: new Date() },
         { userId: 'u1', team: 'A', createdAt: new Date() },
       ]);
@@ -245,7 +276,7 @@ describe('PickService', () => {
       const result = await service.getRoundStats('pool1', 1, 'viewer');
 
       expect(result.picksRevealed).toBe(true);
-      expect(result.trendingPick).toBeTruthy();
+      expect(result.pickDeadlinePassed).toBe(true);
       expect(result.pickDistribution).toEqual(
         expect.arrayContaining([
           { team: 'A', count: 1, percentage: 50 },
@@ -254,8 +285,9 @@ describe('PickService', () => {
       );
     });
 
-    it('active round + viewer has not picked → teams masked, picksRevealed false', async () => {
-      mockRoundStatsDeps({ isClosed: false });
+    it('active round + viewer has not picked + deadline not passed → teams masked, picksRevealed false', async () => {
+      const future = new Date(Date.now() + 60_000);
+      mockRoundStatsDeps({ isClosed: false, pickDeadline: future });
 
       const result = await service.getRoundStats('pool1', 1, 'viewer');
 
@@ -263,6 +295,7 @@ describe('PickService', () => {
         roundNumber: 1,
         picksIn: 1,
         picksRevealed: false,
+        pickDeadlinePassed: false,
         trendingPick: null,
         pickDistribution: [],
         teamsPicked: 1,
@@ -275,6 +308,20 @@ describe('PickService', () => {
         username: 'user1',
         team: null,
       });
+    });
+
+    it('active round + no pickDeadline → teams masked until round is closed', async () => {
+      mockRoundStatsDeps({ isClosed: false, pickDeadline: null }, [
+        { userId: 'viewer', team: 'B', createdAt: new Date() },
+        { userId: 'u1', team: 'A', createdAt: new Date() },
+      ]);
+
+      const result = await service.getRoundStats('pool1', 1, 'viewer');
+
+      expect(result.picksRevealed).toBe(false);
+      expect(result.pickDeadlinePassed).toBe(false);
+      expect(result.trendingPick).toBeNull();
+      expect(result.pickDistribution).toEqual([]);
     });
   });
 
