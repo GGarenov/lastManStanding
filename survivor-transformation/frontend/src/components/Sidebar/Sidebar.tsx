@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, forwardRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, forwardRef } from 'react';
 import styles from './Sidebar.module.less';
 import type {
   SidebarProviderProps,
@@ -19,18 +19,51 @@ import type {
 const SidebarContext = createContext<{ open: boolean; setOpen: (v: boolean) => void } | null>(null);
 
 export function SidebarProvider({ children }: SidebarProviderProps) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.innerWidth >= 768;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const onChange = (event: MediaQueryListEvent) => {
+      setOpen(event.matches);
+    };
+
+    setOpen(mediaQuery.matches);
+    mediaQuery.addEventListener('change', onChange);
+
+    return () => mediaQuery.removeEventListener('change', onChange);
+  }, []);
+
   return (
     <SidebarContext.Provider value={{ open, setOpen }}>
-      <div className={styles.provider}>{children}</div>
+      <div className={styles.provider}>
+        {children}
+        <button
+          type="button"
+          className={`${styles.mobileOverlay} ${open ? styles.overlayVisible : ''}`.trim()}
+          onClick={() => setOpen(false)}
+          aria-label="Close sidebar"
+        />
+      </div>
     </SidebarContext.Provider>
   );
 }
 
 export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
-  ({ className, ...props }, ref) => (
-    <aside ref={ref} className={`${styles.sidebar} ${className ?? ''}`.trim()} {...props} />
-  )
+  ({ className, ...props }, ref) => {
+    const ctx = useContext(SidebarContext);
+    return (
+      <aside
+        ref={ref}
+        className={`${styles.sidebar} ${ctx?.open ? styles.open : styles.closed} ${className ?? ''}`.trim()}
+        {...props}
+      />
+    );
+  }
 );
 Sidebar.displayName = 'Sidebar';
 
