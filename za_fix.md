@@ -8,4 +8,4 @@
 7. admin mobile - total shteta da se fixne _FIXED_
 8. Da se proveri mobile view-to _FIXED_
 9. PickTeamTab i ResultsTab trqbva da se barnat da nqma takiva greshki da pishe semi-final i podobni.. _FIXED_
-10. Winners banners and whatever..
+10. Winners banners and whatever.. _FIXED_
