@@ -45,20 +45,35 @@ export default function MyPool() {
     poolName: string;
     reason?: "team_lost" | "no_pick";
   } | null>(null);
+  const [finishedMembershipPool, setFinishedMembershipPool] = useState<{
+    poolId: string;
+    poolName: string;
+  } | null>(null);
+
+  const isCompletedStatus = (status?: string | null): boolean => {
+    if (!status) return false;
+    const normalized = status.toLowerCase();
+    return (
+      normalized === "finished" ||
+      normalized === "closed" ||
+      normalized === "completed"
+    );
+  };
 
   useEffect(() => {
     fetchPools();
   }, [fetchPools, user?.id]);
 
   useEffect(() => {
-    if (!user || isLoading || pools.length > 0) {
+    if (!user || isLoading) {
       setEliminatedFrom(null);
+      setFinishedMembershipPool(null);
       return;
     }
     let cancelled = false;
     poolsApi
       .getMyPoolMemberships()
-      .then((memberships) => {
+      .then(async (memberships) => {
         if (cancelled) return;
         const eliminated = memberships.find((m) => m.eliminated);
         setEliminatedFrom(
@@ -69,14 +84,39 @@ export default function MyPool() {
               }
             : null,
         );
+
+        // Resolve completed pool from memberships (independent from open-pools list).
+        const candidates = memberships.filter(
+          (m) => m.status === "approved" || m.status === "winner" || m.eliminated,
+        );
+        for (const membership of candidates) {
+          try {
+            const statusRes = await poolsApi.getMyPoolStatus(membership.poolId);
+            if (cancelled) return;
+            if (isCompletedStatus(statusRes.poolStatus)) {
+              setFinishedMembershipPool({
+                poolId: membership.poolId,
+                poolName:
+                  statusRes.name || membership.poolName || labels.poolFallback,
+              });
+              return;
+            }
+          } catch {
+            // Keep trying next candidate.
+          }
+        }
+        setFinishedMembershipPool(null);
       })
       .catch(() => {
-        if (!cancelled) setEliminatedFrom(null);
+        if (!cancelled) {
+          setEliminatedFrom(null);
+          setFinishedMembershipPool(null);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [user, isLoading, pools.length, labels.poolFallback]);
+  }, [user, isLoading, labels.poolFallback]);
 
   const handleJoin = async (poolId: string) => {
     if (!user) return;
@@ -91,9 +131,25 @@ export default function MyPool() {
   const myPools = pools.filter(
     (p) => p.myStatus === "approved" || p.myStatus === "winner",
   );
+  const finishedPoolAlreadyInList = finishedMembershipPool
+    ? myPools.some((pool) => pool.id === finishedMembershipPool.poolId)
+    : false;
   if (!isLoading && myPools.length === 1) {
     const pool = myPools[0];
     return <UserPoolPage poolId={pool.id} poolName={pool.name} />;
+  }
+  if (
+    !isLoading &&
+    finishedMembershipPool &&
+    !finishedPoolAlreadyInList &&
+    myPools.length <= 1
+  ) {
+    return (
+      <UserPoolPage
+        poolId={finishedMembershipPool.poolId}
+        poolName={finishedMembershipPool.poolName}
+      />
+    );
   }
 
   return (

@@ -33,7 +33,13 @@
     "badge": "Game completed",
     "title": "The {{poolName}} game is completed",
     "titlePoolFallback": "Pool",
-    "winnersIntro": "and the winners are:"
+    "winnersIntro": "And the winners are:",
+    "splitPrizePool": "They split the prize pool of {{prizeTotal}}.",
+    "splitPrizePoolEach": "They split the prize pool of {{prizeTotal}} ({{prizeEach}} each).",
+    "recapTitle": "How it ended",
+    "recapRound": "Round {{round}}: {{players}} players left",
+    "recapPickLine": "{{count}} picked {{team}}",
+    "recapOutcome": "{{team}} won."
   },
   "howItWorks": {
     "eyebrow": "How It Works",

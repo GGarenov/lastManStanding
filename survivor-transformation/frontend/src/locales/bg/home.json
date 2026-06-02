@@ -33,7 +33,13 @@
     "badge": "Играта приключи",
     "title": "Играта в {{poolName}} приключи",
     "titlePoolFallback": "Турнир",
-    "winnersIntro": "и победителите са:"
+    "winnersIntro": "И победителите са:",
+    "splitPrizePool": "Те си разделят наградния фонд от {{prizeTotal}}.",
+    "splitPrizePoolEach": "Те си разделят наградния фонд от {{prizeTotal}} (по {{prizeEach}} на човек).",
+    "recapTitle": "Как завърши",
+    "recapRound": "Кръг {{round}}: {{players}} играчи останаха",
+    "recapPickLine": "{{count}} избраха {{team}}",
+    "recapOutcome": "{{team}} победи."
   },
   "howItWorks": {
     "eyebrow": "Как работи",

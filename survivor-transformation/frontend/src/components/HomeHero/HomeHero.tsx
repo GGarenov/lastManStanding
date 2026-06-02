@@ -6,6 +6,7 @@ import { buildHomeLabels } from "~/locales/labels/home.labels";
 import { Trophy, Medal, ArrowRight } from "lucide-react";
 import { Button } from "@/components/Button/Button";
 import { CountdownBanner } from "@/components/CountdownBanner/CountdownBanner";
+import { HomeCompletedRecap } from "@/components/HomeCompletedRecap/HomeCompletedRecap";
 import { formatEntryFeeCopy } from "@/config/rake";
 import logoWhite from "~/assets/logo/logo-white.svg";
 import heroBanner from "~/assets/images/banner1.png";
@@ -26,6 +27,10 @@ type HomeHeroProps = {
   hasMultipleWinners: boolean;
   prizeTotalDisplay?: string;
   prizeEachDisplay?: string | null;
+  recapRoundNumber?: number;
+  recapPlayersRemainingBeforeRound?: number;
+  recapTopPicks?: { team: string; count: number }[];
+  recapWinnerTeam?: string | null;
   entryFeeEur?: number;
   rakePerEntryEur?: number;
 };
@@ -42,6 +47,10 @@ export function HomeHero({
   hasMultipleWinners,
   prizeTotalDisplay,
   prizeEachDisplay,
+  recapRoundNumber,
+  recapPlayersRemainingBeforeRound,
+  recapTopPicks,
+  recapWinnerTeam,
   entryFeeEur,
   rakePerEntryEur,
 }: HomeHeroProps) {
@@ -65,77 +74,84 @@ export function HomeHero({
     hasPoolFeeConfig && rakePerEntryEur !== undefined
       ? `€${rakePerEntryEur}`
       : null;
+  const completedPrizeCopy =
+    hasMultipleWinners && prizeEachDisplay
+      ? labels.completed.splitPrizePoolEach(prizeTotalDisplay ?? "—", prizeEachDisplay)
+      : labels.completed.splitPrizePool(prizeTotalDisplay ?? "—");
 
   return (
     <section className={styles.hero}>
       {showCompletedView ? (
-        <>
+        <div className={styles.completedWrap}>
           <img
             src={logoWhite}
             alt={labels.hero.logoAlt}
             className={styles.heroLogo}
           />
-          <div className={`${styles.badge} ${styles.badgeAmber}`}>
-            <Trophy className={styles.iconSm} />
-            {labels.completed.badge}
-          </div>
-          <h1 className={styles.heroTitle}>
-            {labels.completed.title(completedPoolName)}
-          </h1>
-          <p className={styles.heroText}>{labels.completed.winnersIntro}</p>
-          <div className={styles.winnerChips}>
-            {winnerNames.map((name) => (
-              <span key={name} className={styles.winnerChip}>
-                <Medal className={styles.winnerChipIcon} aria-hidden />
-                {name}
-              </span>
-            ))}
-          </div>
-          <p className={styles.prizeText}>
-            They split the prize pool of{" "}
-            <span className={styles.prizeHighlight}>
-              {prizeTotalDisplay ?? "—"}
-            </span>
-            {hasMultipleWinners && prizeEachDisplay && (
-              <>
-                {" "}
-                <span className={styles.prizeGradient}>
-                  {prizeEachDisplay} each
+          <div className={styles.completedCard}>
+            <div className={`${styles.badge} ${styles.badgeAmber}`}>
+              <Trophy className={styles.iconSm} />
+              {labels.completed.badge}
+            </div>
+            <h1 className={styles.heroTitle}>
+              {labels.completed.title(completedPoolName)}
+            </h1>
+            <p className={styles.heroText}>{labels.completed.winnersIntro}</p>
+            <div className={styles.winnerChips}>
+              {winnerNames.map((name) => (
+                <span key={name} className={styles.winnerChip}>
+                  <Medal className={styles.winnerChipIcon} aria-hidden />
+                  {name}
                 </span>
-              </>
+              ))}
+            </div>
+
+            <div className={styles.prizePanel}>
+              <p className={styles.prizeLabel}>Prize pool</p>
+              <p className={styles.prizeAmount}>{prizeTotalDisplay ?? "—"}</p>
+              <p className={styles.prizeText}>
+                <span className={styles.prizeHighlight}>{completedPrizeCopy}</span>
+              </p>
+            </div>
+
+            <HomeCompletedRecap
+              roundNumber={recapRoundNumber}
+              playersRemainingBeforeRound={recapPlayersRemainingBeforeRound}
+              topPicks={recapTopPicks ?? []}
+              winnerTeam={recapWinnerTeam}
+            />
+
+            <div className={styles.ctaRow}>
+              <Link
+                to={localizedPath("/leaderboard")}
+                className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
+              >
+                {labels.hero.ctaViewLeaderboard}
+                <ArrowRight className={styles.iconSm} />
+              </Link>
+              <Link
+                to={localizedPath("/my-pool")}
+                className={`${styles.ctaButton} ${styles.ctaButtonPrimary}`}
+              >
+                {labels.hero.ctaMyPool}
+              </Link>
+              <Link
+                to={localizedPath("/rules")}
+                className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
+              >
+                {labels.hero.ctaHowItWorks}
+              </Link>
+            </div>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`${styles.ctaButton} ${styles.ctaButtonOutline} ${styles.adminButton}`}
+              >
+                {labels.hero.ctaAdminPanel}
+              </Link>
             )}
-            .
-          </p>
-          <div className={styles.ctaRow}>
-            <Link
-              to={localizedPath("/leaderboard")}
-              className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
-            >
-              {labels.hero.ctaViewLeaderboard}
-              <ArrowRight className={styles.iconSm} />
-            </Link>
-            <Link
-              to={localizedPath("/my-pool")}
-              className={`${styles.ctaButton} ${styles.ctaButtonPrimary}`}
-            >
-              {labels.hero.ctaMyPool}
-            </Link>
-            <Link
-              to={localizedPath("/rules")}
-              className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
-            >
-              {labels.hero.ctaHowItWorks}
-            </Link>
           </div>
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className={`${styles.ctaButton} ${styles.ctaButtonOutline} ${styles.adminButton}`}
-            >
-              {labels.hero.ctaAdminPanel}
-            </Link>
-          )}
-        </>
+        </div>
       ) : (
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>

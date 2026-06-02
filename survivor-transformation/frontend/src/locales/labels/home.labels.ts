@@ -39,6 +39,16 @@ export function buildHomeLabels(
           poolName: poolName ?? t("completed.titlePoolFallback"),
         }),
       winnersIntro: t("completed.winnersIntro"),
+      splitPrizePool: (prizeTotal: string) =>
+        t("completed.splitPrizePool", { prizeTotal }),
+      splitPrizePoolEach: (prizeTotal: string, prizeEach: string) =>
+        t("completed.splitPrizePoolEach", { prizeTotal, prizeEach }),
+      recapTitle: t("completed.recapTitle"),
+      recapRound: (round: number, players: number) =>
+        t("completed.recapRound", { round, players }),
+      recapPickLine: (team: string, count: number) =>
+        t("completed.recapPickLine", { team, count }),
+      recapOutcome: (team: string) => t("completed.recapOutcome", { team }),
     },
     howItWorks: {
       eyebrow: t("howItWorks.eyebrow"),

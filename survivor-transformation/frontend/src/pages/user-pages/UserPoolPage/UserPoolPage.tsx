@@ -44,6 +44,16 @@ function getErrorMessage(e: unknown, fallback: string): string {
 
 const DATA_TABS = ["results", "standings", "playoffs"] as const;
 
+function isCompletedPoolStatus(status?: string | null): boolean {
+  if (!status) return false;
+  const normalized = status.toLowerCase();
+  return (
+    normalized === "finished" ||
+    normalized === "closed" ||
+    normalized === "completed"
+  );
+}
+
 function UserPoolPageContent() {
   const { poolInfo, refreshPoolData } = usePoolPage();
   const { t } = useLabels("pool");
@@ -55,6 +65,8 @@ function UserPoolPageContent() {
 
   const isEliminated = poolInfo?.eliminated ?? false;
   const poolStatus = poolInfo?.poolStatus ?? "";
+  // Keep this visible even after pool completion.
+  const showEliminatedBanner = isEliminated;
 
   const isPickTabRelevant =
     !isEliminated &&
@@ -96,7 +108,7 @@ function UserPoolPageContent() {
   const displayName = poolInfo?.name ?? labels.poolFallback;
   const playersRemaining = poolInfo?.playersRemaining ?? 0;
   const showWinnerBanner =
-    poolInfo?.status === "winner" && poolStatus === "finished";
+    poolInfo?.status === "winner" && isCompletedPoolStatus(poolStatus);
 
   const statusBadgeClass = isEliminated
     ? styles.statusBadgeEliminated
@@ -143,7 +155,7 @@ function UserPoolPageContent() {
         )}
       </div>
 
-      {isEliminated && (
+      {showEliminatedBanner && (
         <Card className={styles.eliminatedCard} role="alert" aria-live="polite">
           <CardContent className={styles.eliminatedContent}>
             <div className={styles.eliminatedRow}>

@@ -20,6 +20,34 @@
   }
 }
 
+.completedWrap {
+  max-width: 64rem;
+}
+
+.completedCard {
+  position: relative;
+  margin-top: 1.25rem;
+  padding: 1.25rem 1.2rem 1.4rem;
+  border-radius: 1.15rem;
+  border: 1px solid ~"color-mix(in srgb, #f59e0b 38%, transparent)";
+  background:
+    radial-gradient(
+      circle at 0% 0%,
+      ~"color-mix(in srgb, #f59e0b 13%, transparent)" 0%,
+      transparent 52%
+    ),
+    linear-gradient(
+      180deg,
+      ~"color-mix(in srgb, #111827 90%, transparent)" 0%,
+      ~"color-mix(in srgb, #0b1220 92%, transparent)" 100%
+    );
+  box-shadow: 0 26px 65px rgba(0, 0, 0, 0.35);
+
+  @media (min-width: 768px) {
+    padding: 1.7rem 1.8rem 1.8rem;
+  }
+}
+
 .heroGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -161,7 +189,8 @@
 }
 
 .heroTitle {
-  font-size: 1.875rem;
+  margin-top: 0.75rem;
+  font-size: 2.15rem;
   font-weight: 700;
   color: var(--app-text);
   letter-spacing: -0.025em;
@@ -169,7 +198,7 @@
   word-break: break-word;
 
   @media (min-width: 768px) {
-    font-size: 3rem;
+    font-size: 3.4rem;
   }
 }
 
@@ -178,18 +207,18 @@
 }
 
 .heroText {
-  margin-top: 1.5rem;
+  margin-top: 0.9rem;
   max-width: 36rem;
-  font-size: 1.125rem;
+  font-size: 1.08rem;
   color: var(--muted-text);
 }
 
 .winnerChips {
-  margin-top: 1.5rem;
+  margin-top: 1.1rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.75rem;
 }
 
@@ -199,10 +228,11 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 9999px;
-  background: ~"color-mix(in srgb, #f59e0b 20%, transparent)";
-  font-size: 1.125rem;
+  border: 1px solid ~"color-mix(in srgb, #f59e0b 38%, transparent)";
+  background: ~"color-mix(in srgb, #f59e0b 15%, transparent)";
+  font-size: 1rem;
   font-weight: 600;
-  color: #b45309;
+  color: #fbbf24;
 }
 
 .winnerChipIcon {
@@ -212,15 +242,50 @@
 }
 
 .prizeText {
-  margin-top: 1rem;
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--muted-text);
+  margin-top: 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #dbe4f0;
+  max-width: 44rem;
+}
+
+.prizePanel {
+  margin-top: 1.1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid ~"color-mix(in srgb, #22c55e 28%, transparent)";
+  background:
+    linear-gradient(
+      180deg,
+      ~"color-mix(in srgb, #22c55e 8%, transparent)" 0%,
+      ~"color-mix(in srgb, #0f172a 92%, transparent)" 100%
+    );
+}
+
+.prizeLabel {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #93a4ba;
+}
+
+.prizeAmount {
+  margin: 0.15rem 0 0.3rem;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+
+  @media (min-width: 768px) {
+    font-size: 2.9rem;
+  }
 }
 
 .prizeHighlight {
   font-weight: 600;
-  color: var(--app-text);
+  color: #dbe4f0;
 }
 
 .prizeGradient {
@@ -231,7 +296,7 @@
 }
 
 .ctaRow {
-  margin-top: 2.5rem;
+  margin-top: 1.35rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

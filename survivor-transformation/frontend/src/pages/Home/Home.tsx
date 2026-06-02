@@ -93,6 +93,12 @@ export default function Home() {
           hasMultipleWinners={hasMultipleWinners}
           prizeTotalDisplay={completedPrizeTotalDisplay}
           prizeEachDisplay={completedPrizeEachDisplay}
+          recapRoundNumber={completedPool?.lastRoundRecap?.roundNumber}
+          recapPlayersRemainingBeforeRound={
+            completedPool?.lastRoundRecap?.playersRemainingBeforeRound
+          }
+          recapTopPicks={completedPool?.lastRoundRecap?.topPicks ?? []}
+          recapWinnerTeam={completedPool?.lastRoundRecap?.winnerTeam ?? null}
           entryFeeEur={heroEntryFeeEur}
           rakePerEntryEur={heroRakePerEntryEur}
         />

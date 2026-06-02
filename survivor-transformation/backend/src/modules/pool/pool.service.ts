@@ -45,6 +45,10 @@ export class PoolService {
         status: { $in: ['open', 'active'] },
       })
       .lean();
+    const latestFinishedPool = await this.poolModel
+      .findOne({ status: 'finished' })
+      .sort({ finishedAt: -1, updatedAt: -1, createdAt: -1 })
+      .lean();
 
     const myPoolIds = userId
       ? await this.participantModel.distinct('poolId', { userId })
@@ -52,10 +56,14 @@ export class PoolService {
     const myPools = myPoolIds.length
       ? await this.poolModel.find({ _id: { $in: myPoolIds } }).lean()
       : [];
-    const openIds = new Set(openPools.map((p: any) => String(p._id)));
-    const extraPools = myPools.filter((p: any) => !openIds.has(String(p._id)));
-
-    const allPools = [...openPools, ...extraPools];
+    const publicPools = latestFinishedPool
+      ? [...openPools, latestFinishedPool]
+      : openPools;
+    const publicIds = new Set(publicPools.map((p: any) => String(p._id)));
+    const extraPools = myPools.filter(
+      (p: any) => !publicIds.has(String(p._id)),
+    );
+    const allPools = [...publicPools, ...extraPools];
 
     return Promise.all(
       allPools.map(async (pool: any) => {
