@@ -57,17 +57,16 @@ export function HomeHero({
   const localizedPath = useLocalizedPath();
   const { t } = useLabels("home");
   const { t: tCommon } = useLabels("common");
-  const labels = useMemo(
-    () => buildHomeLabels(t, tCommon),
-    [t, tCommon],
-  );
+  const labels = useMemo(() => buildHomeLabels(t, tCommon), [t, tCommon]);
   const hasPoolFeeConfig =
     typeof entryFeeEur === "number" && typeof rakePerEntryEur === "number";
   const buyInCopy = hasPoolFeeConfig
     ? formatEntryFeeCopy(entryFeeEur, rakePerEntryEur)
     : null;
   const prizePoolEur =
-    hasPoolFeeConfig && entryFeeEur !== undefined && rakePerEntryEur !== undefined
+    hasPoolFeeConfig &&
+    entryFeeEur !== undefined &&
+    rakePerEntryEur !== undefined
       ? `€${entryFeeEur - rakePerEntryEur}`
       : null;
   const rakeEur =
@@ -76,7 +75,10 @@ export function HomeHero({
       : null;
   const completedPrizeCopy =
     hasMultipleWinners && prizeEachDisplay
-      ? labels.completed.splitPrizePoolEach(prizeTotalDisplay ?? "—", prizeEachDisplay)
+      ? labels.completed.splitPrizePoolEach(
+          prizeTotalDisplay ?? "—",
+          prizeEachDisplay,
+        )
       : labels.completed.splitPrizePool(prizeTotalDisplay ?? "—");
 
   return (
@@ -110,7 +112,9 @@ export function HomeHero({
               <p className={styles.prizeLabel}>Prize pool</p>
               <p className={styles.prizeAmount}>{prizeTotalDisplay ?? "—"}</p>
               <p className={styles.prizeText}>
-                <span className={styles.prizeHighlight}>{completedPrizeCopy}</span>
+                <span className={styles.prizeHighlight}>
+                  {completedPrizeCopy}
+                </span>
               </p>
             </div>
 
@@ -167,7 +171,10 @@ export function HomeHero({
                 <span className={styles.heroCountdownLabel}>
                   {labels.hero.countdownLabel}
                 </span>
-                <CountdownBanner endDate={COMING_SOON_END_DATE} variant="inline" />
+                <CountdownBanner
+                  endDate={COMING_SOON_END_DATE}
+                  variant="inline"
+                />
               </div>
             )}
             <h1 className={styles.heroHeading}>
@@ -181,7 +188,9 @@ export function HomeHero({
             {hasPoolFeeConfig && buyInCopy && prizePoolEur && rakeEur && (
               <div className={styles.buyInInfoBox}>
                 <p className={styles.buyInValue}>
-                  <span className={styles.buyInLabel}>{labels.hero.buyInLabel}:</span>{" "}
+                  <span className={styles.buyInLabel}>
+                    {labels.hero.buyInLabel}:
+                  </span>{" "}
                   {buyInCopy}
                 </p>
                 <p className={styles.buyInSubtext}>
@@ -201,7 +210,7 @@ export function HomeHero({
                   <ArrowRight className={styles.iconSm} />
                 </Button>
               </Link>
-              <Link to={localizedPath("/tournament-lobby")}>
+              <Link to={localizedPath("/my-pool")}>
                 <Button size="lg" className={styles.ctaButtonPrimary}>
                   {labels.hero.ctaTournamentLobby}
                   <ArrowRight className={styles.iconSm} />
