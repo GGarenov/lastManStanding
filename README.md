@@ -56,19 +56,19 @@ Last surviving participant wins (or multiple winners when rules resolve ties at 
 
 ### Rules Page
 
-![Rules Page](docs/screenshots/01-rules-page.png)
+![Rules Page](assets/screenshots/01-rules-page.png)
 
 ### Home / Landing
 
-![Home Page](docs/screenshots/02-home-page.png)
+![Home Page](assets/screenshots/02-home-page.png)
 
 ### Admin Panel
 
-![Admin Panel](docs/screenshots/03-admin-panel.png)
+![Admin Panel](assets/screenshots/03-admin-panel.png)
 
 ### Pick Team View
 
-![Pick Team View](docs/screenshots/04-pick-team.png)
+![Pick Team View](assets/screenshots/04-pick-team.png)
 
 ## Tech Stack
 
