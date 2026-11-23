@@ -4,7 +4,7 @@ import { AlertCircle, Loader2, Trophy } from "lucide-react";
 import { Button } from "~/components/Button/Button";
 import { Card, CardContent } from "~/components/Card/Card";
 import { CountdownBanner } from "~/components/CountdownBanner/CountdownBanner";
-import { COMING_SOON_END_DATE } from "~/config/comingSoon";
+import { getCountdownEndDate } from "~/config/comingSoon";
 import { useLabels } from "~/hooks/useLabels";
 import { useLocalizedPath } from "~/i18n/routing";
 import { getHomePoolId } from "~/lib/poolViewer";
@@ -98,7 +98,7 @@ export default function PoolHome() {
             <p className={styles.mutedText}>{labels.comingSoonText}</p>
             <div className={styles.countdown}>
               <CountdownBanner
-                endDate={COMING_SOON_END_DATE}
+                endDate={getCountdownEndDate()}
                 label={labels.countdownLabel}
                 variant="inline"
               />

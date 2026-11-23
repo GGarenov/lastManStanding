@@ -15,6 +15,18 @@ export function buildCommonLabels(t: TFunction<"common">) {
       pagination: t("a11y.pagination"),
       errorIcon: t("a11y.errorIcon"),
     },
+    countdown: {
+      days: t("countdown.days"),
+      hours: t("countdown.hours"),
+      minutes: t("countdown.minutes"),
+      seconds: t("countdown.seconds"),
+      closed: t("countdown.closed"),
+      closedWithLabel: (label: string) =>
+        t("countdown.closedWithLabel", { label }),
+      daysShort: t("countdown.daysShort"),
+      hoursShort: t("countdown.hoursShort"),
+      minutesShort: t("countdown.minutesShort"),
+    },
   };
 }
 

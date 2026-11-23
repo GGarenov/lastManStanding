@@ -1,5 +1,13 @@
+import { getTournamentConfig, worldCup2026Config } from "~/config/tournaments";
+
+/** Used when the active tournament has no `startsAt` (or there is no active tournament). */
+const DEFAULT_COUNTDOWN_END_DATE = worldCup2026Config.startsAt as string;
+
 /**
- * Countdown target shown while no pool is running ("Coming soon").
- * Used by HomeHero and the pool home page.
+ * Countdown target for the hero / "coming soon" countdown:
+ * the active tournament's `startsAt`, falling back to World Cup 2026.
+ * Used by HomeHero (Rules page) and the pool home page.
  */
-export const COMING_SOON_END_DATE = "2026-06-11T22:00:00";
+export function getCountdownEndDate(tournamentKey?: string | null): string {
+  return getTournamentConfig(tournamentKey)?.startsAt ?? DEFAULT_COUNTDOWN_END_DATE;
+}

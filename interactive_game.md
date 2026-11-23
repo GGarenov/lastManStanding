@@ -5,7 +5,7 @@ Goal: anyone (guest or logged in) who opens the site lands on the live tournamen
 already picked, standings, results and playoffs. Picking a team is the only action that needs an
 account and a buy-in.
 
-Status: **Phases 1–5 done — Phases 6–7 not started.**
+Status: **Phases 1–6 done — Phase 7 (QA) not started.**
 
 ### Decisions (2026-11-23)
 
@@ -169,13 +169,19 @@ Status: **Phases 1–5 done — Phases 6–7 not started.**
   - Lint is clean; tests are the same as `main` (6 already-failing ones); the build passes.
 - Note (unchanged behaviour): when any finished pool exists, the hero shows the **completed-pool recap** instead of the buy-in/countdown hero (`showCompletedView`). That's how the old home worked. Phase 6.3 ("always show the countdown") will need to handle that view too.
 
-## Phase 6 — CountdownBanner: World Cup start → 1 March 2027
+## Phase 6 — CountdownBanner: World Cup start → 1 March 2027 ✅
 
-- [ ] **6.1** In [HomeHero.tsx:16](survivor-transformation/frontend/src/components/HomeHero/HomeHero.tsx#L16) change
-  `COMING_SOON_END_DATE = "2026-06-11T22:00:00"` → `"2027-03-01T00:00:00+02:00"`. Use an explicit timezone, because without an offset each browser reads it as its own local time.
-- [ ] **6.2** Better: move the date to the tournament config (`world-cup-2026.config.ts`, e.g. `startsAt`), so it isn't hardcoded in a component.
-- [ ] **6.3** Remove the `!hasActivePool` condition in HomeHero, so the countdown **always** shows, even when a pool is already `active`.
-- [ ] **6.4** Nice to have: `CountdownBanner` has hardcoded English text ("Days", "Hours", "Closed"…). Move it to i18n for `/bg`.
+- [x] **6.1** The countdown target is **`2027-03-01T00:00:00+02:00`** (1 March 2027, 00:00 Bulgarian time; 28 Feb 22:00 UTC). It has an explicit offset, so every browser counts down to the same moment.
+- [x] **6.2** The date lives in the tournament config:
+  - New optional `startsAt` in [types.ts](survivor-transformation/frontend/src/config/tournaments/types.ts); `world-cup-2026.config.ts` sets it.
+  - [config/comingSoon.ts](survivor-transformation/frontend/src/config/comingSoon.ts) now exports `getCountdownEndDate(tournamentKey?)`: the active tournament's `startsAt`, else World Cup 2026. The old `COMING_SOON_END_DATE` constant is gone.
+  - Used by HomeHero (via RulesIntro, with the active tournament) and by PoolHome's "coming soon" state.
+- [x] **6.3** The countdown **always** shows:
+  - `!hasActivePool` is removed (along with the `hasActivePool` prop).
+  - It's also shown in the **completed-pool recap view**, above the recap card. Otherwise it would stay hidden while any finished pool exists.
+- [x] **6.4** `CountdownBanner` text (Days / Hours / Minutes / Seconds / Closed, plus the short d/h/m of the banner variant) comes from the new `common.countdown.*` keys (en + bg).
+  - Also fixed the English hero label typo: "Registation close after" → "Registration closes in".
+- Tests: new `comingSoon.test.ts` (date, UTC instant, fallbacks). tsc, lint, build and tests are the same as before.
 
 ## Phase 7 — QA checklist
 

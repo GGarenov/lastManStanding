@@ -5,6 +5,7 @@ import { useActiveTournament } from "~/contexts/ActiveTournamentContext";
 import { HomeHero } from "~/components/HomeHero/HomeHero";
 import { HomeFeaturedPool } from "~/components/HomeFeaturedPool/HomeFeaturedPool";
 import { useCompletedPool } from "~/hooks/useCompletedPool";
+import { getCountdownEndDate } from "~/config/comingSoon";
 import {
   getFeaturedPool,
   formatPrizePoolEur,
@@ -51,7 +52,6 @@ export function RulesIntro() {
   };
 
   const featuredPool = getFeaturedPool(pools);
-  const hasActivePool = pools.some((p) => p.status === "active");
 
   const { completedPool, completedPoolLoading } = useCompletedPool({
     user,
@@ -84,7 +84,7 @@ export function RulesIntro() {
         isAdmin={Boolean(isAdmin)}
         isLoggedIn={Boolean(user)}
         hasJoinedAnyPool={hasJoinedAnyPool}
-        hasActivePool={hasActivePool}
+        countdownEndDate={getCountdownEndDate(activeTournament?.key)}
         activeTournamentLabel={activeTournament?.label ?? null}
         completedPoolName={completedPool?.poolName}
         winnerNames={completedPool?.winnerNames ?? []}

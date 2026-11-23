@@ -36,5 +36,16 @@
     "backHome": "Return to Home",
     "code": "404",
     "message": "Oops! Page not found"
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "closed": "Closed",
+    "closedWithLabel": "{{label}} — Closed",
+    "daysShort": "d",
+    "hoursShort": "h",
+    "minutesShort": "m"
   }
 }

@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Clock, Lock } from "lucide-react";
+import { useLabels } from "~/hooks/useLabels";
+import { buildCommonLabels } from "~/locales/labels/common.labels";
 import styles from "./CountdownBanner.module.less";
 
 export interface CountdownBannerProps {
@@ -21,6 +23,8 @@ function pad(n: number): string {
 }
 
 export function CountdownBanner({ endDate, label, variant = "inline" }: CountdownBannerProps) {
+  const { t } = useLabels("common");
+  const labels = useMemo(() => buildCommonLabels(t).countdown, [t]);
   const deadline = parseEndDate(endDate);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -56,7 +60,7 @@ export function CountdownBanner({ endDate, label, variant = "inline" }: Countdow
             <>
               <Lock className={`${styles.bannerIcon} ${styles.bannerIconDestructive}`} />
               <span className={styles.bannerClosedText}>
-                {label ? `${label} — Closed` : "Closed"}
+                {label ? labels.closedWithLabel(label) : labels.closed}
               </span>
             </>
           ) : (
@@ -65,7 +69,7 @@ export function CountdownBanner({ endDate, label, variant = "inline" }: Countdow
               {label && <span className={styles.bannerLabel}>{label}</span>}
               <span className={styles.bannerTimer}>
                 {timeLeft.days > 0
-                  ? `${timeLeft.days}d ${pad(timeLeft.hours)}h ${pad(timeLeft.minutes)}m`
+                  ? `${timeLeft.days}${labels.daysShort} ${pad(timeLeft.hours)}${labels.hoursShort} ${pad(timeLeft.minutes)}${labels.minutesShort}`
                   : `${pad(timeLeft.hours)}:${pad(timeLeft.minutes)}:${pad(timeLeft.seconds)}`}
               </span>
             </>
@@ -81,13 +85,13 @@ export function CountdownBanner({ endDate, label, variant = "inline" }: Countdow
       {isClosed ? (
         <div className={styles.inlineClosed}>
           <Lock className={styles.inlineClosedIcon} />
-          <span className={styles.inlineClosedText}>Closed</span>
+          <span className={styles.inlineClosedText}>{labels.closed}</span>
         </div>
       ) : (
         <div className={styles.boxes}>
           <div className={styles.box}>
             <span className={styles.boxValue}>{pad(timeLeft.days)}</span>
-            <span className={styles.boxLabel}>Days</span>
+            <span className={styles.boxLabel}>{labels.days}</span>
           </div>
           <div className={styles.sep}>
             <span className={styles.sepChar}>:</span>
@@ -95,7 +99,7 @@ export function CountdownBanner({ endDate, label, variant = "inline" }: Countdow
           </div>
           <div className={styles.box}>
             <span className={styles.boxValue}>{pad(timeLeft.hours)}</span>
-            <span className={styles.boxLabel}>Hours</span>
+            <span className={styles.boxLabel}>{labels.hours}</span>
           </div>
           <div className={styles.sep}>
             <span className={styles.sepChar}>:</span>
@@ -103,7 +107,7 @@ export function CountdownBanner({ endDate, label, variant = "inline" }: Countdow
           </div>
           <div className={styles.box}>
             <span className={styles.boxValue}>{pad(timeLeft.minutes)}</span>
-            <span className={styles.boxLabel}>Minutes</span>
+            <span className={styles.boxLabel}>{labels.minutes}</span>
           </div>
           <div className={styles.sep}>
             <span className={styles.sepChar}>:</span>
@@ -111,7 +115,7 @@ export function CountdownBanner({ endDate, label, variant = "inline" }: Countdow
           </div>
           <div className={styles.box}>
             <span className={styles.boxValue}>{pad(timeLeft.seconds)}</span>
-            <span className={styles.boxLabel}>Seconds</span>
+            <span className={styles.boxLabel}>{labels.seconds}</span>
           </div>
         </div>
       )}

@@ -10,6 +10,8 @@ import type { TournamentConfig } from './types';
 export const worldCup2026Config: TournamentConfig = {
   key: 'world-cup-2026',
   label: 'World Cup 2026',
+  /** Countdown target shown on the site: 1 March 2027, 00:00 Bulgarian time (EET, UTC+2). */
+  startsAt: '2027-03-01T00:00:00+02:00',
   teams: [
     // Hosts
     { displayName: 'United States', code: 'us', shortName: 'USA' },

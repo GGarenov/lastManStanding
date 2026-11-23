@@ -8,7 +8,6 @@ import { Button } from "@/components/Button/Button";
 import { CountdownBanner } from "@/components/CountdownBanner/CountdownBanner";
 import { HomeCompletedRecap } from "@/components/HomeCompletedRecap/HomeCompletedRecap";
 import { formatEntryFeeCopy } from "@/config/rake";
-import { COMING_SOON_END_DATE } from "@/config/comingSoon";
 import { HOW_TO_PLAY_ANCHOR } from "@/config/anchors";
 import logoWhite from "~/assets/logo/logo-white.svg";
 import heroBanner from "~/assets/images/banner1.png";
@@ -19,7 +18,8 @@ type HomeHeroProps = {
   isAdmin: boolean;
   isLoggedIn: boolean;
   hasJoinedAnyPool: boolean;
-  hasActivePool: boolean;
+  /** Countdown target (ISO 8601), see `getCountdownEndDate`. */
+  countdownEndDate: string;
   activeTournamentLabel?: string | null;
   completedPoolName?: string;
   winnerNames: string[];
@@ -39,7 +39,7 @@ export function HomeHero({
   isAdmin,
   isLoggedIn,
   hasJoinedAnyPool,
-  hasActivePool,
+  countdownEndDate,
   activeTournamentLabel,
   completedPoolName,
   winnerNames,
@@ -80,6 +80,16 @@ export function HomeHero({
         )
       : labels.completed.splitPrizePool(prizeTotalDisplay ?? "—");
 
+  // Always shown, in both the regular and the completed-pool view.
+  const countdown = (
+    <div className={styles.heroCountdownRow}>
+      <span className={styles.heroCountdownLabel}>
+        {labels.hero.countdownLabel}
+      </span>
+      <CountdownBanner endDate={countdownEndDate} variant="inline" />
+    </div>
+  );
+
   return (
     <section className={styles.hero}>
       {showCompletedView ? (
@@ -89,6 +99,7 @@ export function HomeHero({
             alt={labels.hero.logoAlt}
             className={styles.heroLogo}
           />
+          {countdown}
           <div className={styles.completedCard}>
             <div className={`${styles.badge} ${styles.badgeAmber}`}>
               <Trophy className={styles.iconSm} />
@@ -165,17 +176,7 @@ export function HomeHero({
                 {labels.hero.editionPill(activeTournamentLabel)}
               </div>
             )}
-            {!hasActivePool && (
-              <div className={styles.heroCountdownRow}>
-                <span className={styles.heroCountdownLabel}>
-                  {labels.hero.countdownLabel}
-                </span>
-                <CountdownBanner
-                  endDate={COMING_SOON_END_DATE}
-                  variant="inline"
-                />
-              </div>
-            )}
+            {countdown}
             <h1 className={styles.heroHeading}>
               <span>{labels.hero.headingLine1}</span>
               <br />

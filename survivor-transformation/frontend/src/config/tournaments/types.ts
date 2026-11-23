@@ -50,4 +50,10 @@ export interface TournamentConfig {
    * derived from rounds.length.
    */
   maxRounds?: number;
+  /**
+   * Optional countdown target for the "coming soon" / hero countdown (tournament start).
+   * ISO 8601 with an explicit offset, e.g. '2027-03-01T00:00:00+02:00',
+   * so every browser counts down to the same moment.
+   */
+  startsAt?: string;
 }

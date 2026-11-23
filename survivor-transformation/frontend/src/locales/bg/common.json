@@ -36,5 +36,16 @@
     "close": "Затвори",
     "pagination": "Странициране",
     "errorIcon": "Икона за грешка"
+  },
+  "countdown": {
+    "days": "Дни",
+    "hours": "Часа",
+    "minutes": "Минути",
+    "seconds": "Секунди",
+    "closed": "Затворено",
+    "closedWithLabel": "{{label}} — затворено",
+    "daysShort": "д",
+    "hoursShort": "ч",
+    "minutesShort": "м"
   }
 }
