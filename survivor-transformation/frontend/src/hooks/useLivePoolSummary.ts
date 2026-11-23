@@ -65,10 +65,12 @@ export function useLivePoolSummary({
         let survivorsLeft = 0;
         let currentRoundLabel = "—";
 
-        if (user && featuredPool) {
+        // Same numbers for every viewer, so always read the public endpoints
+        // (works for guests and for logged-in users who haven't bought in).
+        if (featuredPool) {
           const [statusRes, roundsRes] = await Promise.all([
-            poolsApi.getMyPoolStatus(featuredPoolId),
-            poolsApi.getParticipantRounds(featuredPoolId),
+            poolsApi.getPublicPoolSummary(featuredPoolId),
+            poolsApi.getParticipantRounds(featuredPoolId, "public"),
           ]).catch(() => [null, null]);
 
           if (cancelled) return;

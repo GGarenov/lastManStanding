@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLabels } from '~/hooks/useLabels';
-import { useLocalizedPath } from '~/i18n/routing';
+import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
+import { getSpectatorPoolId } from '~/lib/poolViewer';
 import { buildPoolLabels } from '~/locales/labels/pool.labels';
 import { Card, CardContent } from '~/components/Card/Card';
 import { Skeleton } from '~/components/Skeleton/Skeleton';
@@ -53,14 +54,20 @@ export default function Stats() {
   );
   const { poolId: poolIdParam } = useParams<{ poolId?: string }>();
   const user = useAuthStore((s) => s.user);
+  const authChecked = useAuthStore((s) => s.isChecked);
+  const appLocale = useAppLocale();
   const { pools, fetchPools } = useOpenPoolsStore();
-  
+
   const [poolId, setPoolId] = useState<string | null>(poolIdParam || null);
   const [rounds, setRounds] = useState<poolsApi.ParticipantRound[]>([]);
   const [selectedRoundNumber, setSelectedRoundNumber] = useState<number | null>(null);
   const [isLoadingRounds, setIsLoadingRounds] = useState(true);
   const [roundsError, setRoundsError] = useState<string | null>(null);
   const [poolInfo, setPoolInfo] = useState<poolsApi.MyPoolStatusResponse | null>(null);
+  // Members read the member endpoints; guests and non-members read the public ones.
+  const dataAccess: poolsApi.PoolDataAccess = poolsApi.isMemberStatus(poolInfo?.status)
+    ? 'member'
+    : 'public';
 
   // Fetch pools if needed
   useEffect(() => {
@@ -76,20 +83,27 @@ export default function Stats() {
       return;
     }
 
-    // If no poolId in URL, use first pool where user is approved or winner (so finished pool is auto-selected)
+    // If no poolId in URL, use first pool where user is approved or winner (so finished pool is auto-selected).
+    // Guests / non-members fall back to the featured public pool.
     if (pools.length > 0) {
       const myPool = pools.find((p) => p.myStatus === 'approved' || p.myStatus === 'winner');
-      if (myPool) {
-        setPoolId(myPool.id);
+      const nextPoolId = myPool?.id ?? getSpectatorPoolId(pools);
+      if (nextPoolId) {
+        setPoolId(nextPoolId);
         // Update URL without navigation
-        window.history.replaceState(null, '', `/stats/${myPool.id}`);
+        window.history.replaceState(
+          null,
+          '',
+          buildLocalizedPath(appLocale, `/stats/${nextPoolId}`),
+        );
       }
     }
-  }, [poolIdParam, pools]);
+  }, [poolIdParam, pools, appLocale]);
 
   // Fetch pool info and rounds when poolId is available
   useEffect(() => {
-    if (!poolId || !user) {
+    if (!authChecked) return;
+    if (!poolId) {
       setIsLoadingRounds(false);
       return;
     }
@@ -101,12 +115,15 @@ export default function Stats() {
       setRoundsError(null);
       try {
         // Fetch pool info to get tournament config
-        const poolStatusRes = await poolsApi.getMyPoolStatus(poolId);
+        const poolStatusRes = await poolsApi.getPoolStatusForViewer(poolId, !!user);
         if (cancelled) return;
         setPoolInfo(poolStatusRes);
 
         // Fetch rounds
-        const roundsRes = await poolsApi.getParticipantRounds(poolId);
+        const roundsRes = await poolsApi.getParticipantRounds(
+          poolId,
+          poolsApi.isMemberStatus(poolStatusRes.status) ? 'member' : 'public',
+        );
         if (cancelled) return;
         setRounds(roundsRes.sort((a, b) => a.roundNumber - b.roundNumber));
         
@@ -133,7 +150,7 @@ export default function Stats() {
     return () => {
       cancelled = true;
     };
-  }, [poolId, user, selectedRoundNumber, statsLabels.loadDataFailed]);
+  }, [authChecked, poolId, user, selectedRoundNumber, statsLabels.loadDataFailed]);
 
   // Fetch stats for selected round
   const {
@@ -142,14 +159,15 @@ export default function Stats() {
     error: statsError,
     refetch: refetchStats,
   } = useQuery({
-    queryKey: ['roundStats', poolId, selectedRoundNumber],
+    queryKey: ['roundStats', poolId, selectedRoundNumber, dataAccess],
     queryFn: () => {
       if (!poolId || selectedRoundNumber === null) {
         throw new Error('Pool ID or round number missing');
       }
-      return poolsApi.getRoundStats(poolId, selectedRoundNumber);
+      return poolsApi.getRoundStats(poolId, selectedRoundNumber, dataAccess);
     },
-    enabled: !!poolId && selectedRoundNumber !== null,
+    // Wait for poolInfo so the first request already goes to the right endpoint.
+    enabled: !!poolId && selectedRoundNumber !== null && poolInfo !== null,
     staleTime: 30000, // Consider data fresh for 30 seconds
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
   });
@@ -245,6 +263,7 @@ export default function Stats() {
             <RoundCountdownBanner
               poolId={poolId}
               tournamentKey={poolInfo?.tournamentKey}
+              access={dataAccess}
             />
           )}
         </div>

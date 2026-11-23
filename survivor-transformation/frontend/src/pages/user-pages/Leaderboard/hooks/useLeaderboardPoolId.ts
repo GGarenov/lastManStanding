@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { buildLocalizedPath, useAppLocale } from "~/i18n/routing";
 import { useOpenPoolsStore } from "~/store/openPoolsStore";
+import { getSpectatorPoolId } from "~/lib/poolViewer";
 
 type PoolWithStatus = ReturnType<typeof useOpenPoolsStore.getState>["pools"][number];
 
@@ -32,12 +33,14 @@ export function useLeaderboardPoolId(): UseLeaderboardPoolIdResult {
       const myPool = pools.find(
         (p) => p.myStatus === "approved" || p.myStatus === "winner"
       );
-      if (myPool) {
-        setPoolIdState(myPool.id);
+      // Guests / non-members fall back to the featured public pool.
+      const nextPoolId = myPool?.id ?? getSpectatorPoolId(pools);
+      if (nextPoolId) {
+        setPoolIdState(nextPoolId);
         window.history.replaceState(
           null,
           "",
-          buildLocalizedPath(appLocale, `/leaderboard/${myPool.id}`),
+          buildLocalizedPath(appLocale, `/leaderboard/${nextPoolId}`),
         );
       }
     }

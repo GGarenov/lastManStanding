@@ -5,7 +5,7 @@ Goal: anyone (guest or logged in) who opens the site lands on the live tournamen
 already picked, standings, results and playoffs. Picking a team is the only action that needs an
 account and a buy-in.
 
-Status: **Phase 1 (backend) done — Phases 2–7 not started.**
+Status: **Phases 1–2 done — Phases 3–7 not started.**
 
 ### Decisions (2026-11-23)
 
@@ -52,16 +52,41 @@ Status: **Phase 1 (backend) done — Phases 2–7 not started.**
   - These are unit tests, not e2e. There's no e2e/DB test setup in the repo.
   - Already failing on `main`, untouched: `PoolService › getOpenPools` (2 tests) and `AdminService › startPool` (1 test).
 
-## Phase 2 — Frontend: API + data layer for guests
+## Phase 2 — Frontend: API + data layer for guests ✅
 
-- [ ] **2.1** In [pools.api.ts](survivor-transformation/frontend/src/api/pools.api.ts) add `getPublicRounds`, `getPublicRoundStats`, `getPublicLeaderboard`, `getPublicPoolSummary`.
-- [ ] **2.2** In `UserPoolPage` (data loading around lines 262–271), branch the data source:
-  - member → current calls (`getMyPoolStatus`, `getParticipantRounds`)
-  - guest or non-member → public calls; `poolInfo` built from the public summary with `status: 'none'`.
-- [ ] **2.3** Add a `viewerMode: 'member' | 'spectator'` (or `isSpectator`) flag to `PoolPageContext` so tabs can adapt.
-- [ ] **2.4** Make `RoundCountdownBanner`, `useLivePoolSummary`, `StandingsTab`, `ResultsTab`, `PlayoffsTab` and `Stats` use the public endpoints when the viewer isn't a member.
-- [ ] **2.5** `PickTeamTab`: skip `getMyPicks` for spectators (no `myPicks`, no "used teams").
-- [ ] **2.6** `UserLayout` currently loads `getMyPoolMemberships` / `getMyPoolStatus`. Keep it for logged-in users and fall back to the featured public pool for guests.
+- [x] **2.1** [pools.api.ts](survivor-transformation/frontend/src/api/pools.api.ts):
+  - `getParticipantRounds`, `getRoundStats` and `getLeaderboard` take an `access: 'member' | 'public'` argument (default `member`), so the response normalization isn't duplicated.
+  - New `getPublicPoolSummary`: same shape as `MyPoolStatusResponse` with `status: 'none'`, plus `totalPlayers`, `startedAt` and `finishedAt`.
+  - New `getPoolStatusForViewer(poolId, isLoggedIn)`: logged in → `/pools/:id/me`, guest → public summary.
+  - New `isMemberStatus(status)`: approved or winner.
+  - New [lib/poolViewer.ts](survivor-transformation/frontend/src/lib/poolViewer.ts) `getSpectatorPoolId(pools)`: picks the default pool for non-members (active → open → finished).
+- [x] **2.2** `UserPoolPage` has a new opt-in prop **`allowSpectator`** (default `false`, so `/my-pool` behaves as before):
+  - Members → member endpoints.
+  - Guests / non-members → public endpoints, and with `allowSpectator` they get the full tabs instead of the "join" card.
+  - Loading waits for the auth check, so the first request already goes to the right endpoint.
+- [x] **2.3** `PoolPageContext` has `viewerMode: 'member' | 'spectator'` and `isSpectator`.
+- [x] **2.4** Callers updated:
+  - `ResultsTab`, `StandingsTab` and `PlayoffsTab` had no API calls (they read `rounds` from the context), so they needed no change.
+  - `RoundCountdownBanner` has a new `access` prop.
+  - `useLivePoolSummary` always uses the public endpoints, since it shows the same numbers to everyone. This also fixes logged-in non-members seeing 0 survivors.
+  - `Stats`: guests and non-members can now see it with public data, and it defaults to the featured pool when the user has no pool of their own.
+  - `Leaderboard`: same as Stats. The member leaderboard is used whenever the user is logged in, because that endpoint only needs a login.
+- [x] **2.5** `PickTeamTab`: spectators skip `getMyPicks`, and selecting a team does nothing for them yet (Phase 4 adds the redirect).
+- [x] **2.6** `UserLayout`:
+  - Memberships are loaded only when logged in.
+  - The timer pool is the URL pool on Stats/Leaderboard, otherwise the approved membership, otherwise the featured public pool.
+  - The banner reads the public endpoints unless the user is a member of that pool.
+- **Visible now (before Phase 3):**
+  - Guests see the round countdown and the full stats strip (survivors, current round) on every page.
+  - `/stats` and `/leaderboard` work for guests.
+  - Side fix: the Stats URL rewrite now keeps the `/en` or `/bg` prefix.
+- **Tests:**
+  - New `pools.api.test.ts` (endpoint per access mode, summary mapping, viewer status) and `poolViewer.test.ts`.
+  - Already failing on `main`, untouched: `utils.test.ts` (2), `i18n.test.ts` (1) and `locale-structure.test.ts` (3).
+  - `tsc` has 24 errors, the same 24 as on `main`.
+- **Not verified in a browser:**
+  - The local frontend can't reach the Render API (CORS only allows the Netlify domain).
+  - Check on Netlify after deploy, logged out: `/en/stats`, `/en/leaderboard`, and the countdown banner.
 
 ## Phase 3 — New Home page = live pool view
 
@@ -69,7 +94,8 @@ Status: **Phase 1 (backend) done — Phases 2–7 not started.**
 
 - [ ] **3.1** Create a new `Home` (or `PoolHome`) page for `/:locale` index:
   - Pick the featured pool: the active pool if there is one, otherwise the most recent finished pool. Reuse `getFeaturedPool` from [home.helpers.ts](survivor-transformation/frontend/src/pages/Home/home.helpers.ts).
-  - Render `UserPoolPage` for that pool in **member** mode if the user is approved, otherwise **spectator** mode.
+  - Render `<UserPoolPage poolId=… poolName=… allowSpectator />`. It picks member or spectator mode by itself (Phase 2).
+    For the default pool, use `getSpectatorPoolId(pools)`, but prefer the user's own approved pool when they have one.
   - If there is no pool at all → show a short "Coming soon" state with the countdown (see Phase 5) and a link to Rules.
 - [ ] **3.2** Spectator header: add a small CTA strip above the tabs ("Watching as guest — Log in / Register to play", or "Buy in to play" for logged-in non-members).
 - [ ] **3.3** Keep `/my-pool` as a route. It's still the place with the **Buy-in / Join** button (pool cards). Members going to `/my-pool` still see their pool as today.

@@ -9,34 +9,56 @@ import { stripLocalePrefix } from '~/i18n/routing';
 import { useAuthStore } from '~/store/authStore';
 import { useOpenPoolsStore } from '~/store/openPoolsStore';
 import { useLivePoolSummary } from '~/hooks/useLivePoolSummary';
-import { getMyPoolMemberships, getMyPoolStatus } from '~/api/pools.api';
+import {
+  getMyPoolMemberships,
+  getPoolStatusForViewer,
+  isMemberStatus,
+  type MyPoolMembership,
+  type MyPoolStatusResponse,
+  type PoolDataAccess,
+} from '~/api/pools.api';
+import { getSpectatorPoolId } from '~/lib/poolViewer';
 import styles from './UserLayout.module.less';
 
 /**
  * Layout for user-facing pages: Navbar + RoundCountdownBanner + page content.
  *
- * Pool context for timer (Task 4.3):
- * - Home, My Pool, Rules, Profile: use user's approved pool from memberships. If none, banner hides.
- * - Stats, Leaderboard: use poolId from URL if present; else fallback to first approved pool.
- * - Participant API for active round with pickDeadline is provided by Task 1.4 (GET .../survivor/rounds).
+ * Pool context for the round timer:
+ * - Stats, Leaderboard: poolId from the URL when present.
+ * - Otherwise the user's approved pool from memberships.
+ * - Guests / non-members: the featured public pool (active → open → finished), read via the public endpoints.
  */
 export function UserLayout() {
   const { poolId: poolIdParam } = useParams<{ poolId?: string }>();
   const location = useLocation();
-  const [memberships, setMemberships] = useState<Awaited<ReturnType<typeof getMyPoolMemberships>>>([]);
-  const [poolStatus, setPoolStatus] = useState<Awaited<ReturnType<typeof getMyPoolStatus>> | null>(null);
+  const userId = useAuthStore((s) => s.user?.id ?? null);
+  const authChecked = useAuthStore((s) => s.isChecked);
+  const pools = useOpenPoolsStore((s) => s.pools);
+  const [memberships, setMemberships] = useState<MyPoolMembership[]>([]);
+  const [poolStatus, setPoolStatus] = useState<MyPoolStatusResponse | null>(null);
 
   const pathWithoutLocale = stripLocalePrefix(location.pathname);
   const isStatsOrLeaderboard =
     pathWithoutLocale.startsWith('/stats') || pathWithoutLocale.startsWith('/leaderboard');
 
   const poolId = useMemo(() => {
+    if (!authChecked) return null;
     if (isStatsOrLeaderboard && poolIdParam) return poolIdParam;
     const approved = memberships.find((m) => m.status === 'approved');
-    return approved?.poolId ?? null;
-  }, [isStatsOrLeaderboard, poolIdParam, memberships]);
+    return approved?.poolId ?? getSpectatorPoolId(pools);
+  }, [authChecked, isStatsOrLeaderboard, poolIdParam, memberships, pools]);
+
+  const roundsAccess: PoolDataAccess = memberships.some(
+    (m) => m.poolId === poolId && isMemberStatus(m.status),
+  )
+    ? 'member'
+    : 'public';
 
   useEffect(() => {
+    if (!userId) {
+      setMemberships([]);
+      return;
+    }
     let cancelled = false;
     getMyPoolMemberships()
       .then((data) => {
@@ -48,7 +70,7 @@ export function UserLayout() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!poolId) {
@@ -56,7 +78,7 @@ export function UserLayout() {
       return;
     }
     let cancelled = false;
-    getMyPoolStatus(poolId)
+    getPoolStatusForViewer(poolId, userId !== null)
       .then((data) => {
         if (!cancelled) setPoolStatus(data ?? null);
       })
@@ -66,13 +88,17 @@ export function UserLayout() {
     return () => {
       cancelled = true;
     };
-  }, [poolId]);
+  }, [poolId, userId]);
 
   const tournamentKey = poolStatus?.tournamentKey ?? null;
 
   return (
     <ActiveTournamentProvider>
-      <UserLayoutContent poolId={poolId} tournamentKey={tournamentKey} />
+      <UserLayoutContent
+        poolId={poolId}
+        tournamentKey={tournamentKey}
+        roundsAccess={roundsAccess}
+      />
     </ActiveTournamentProvider>
   );
 }
@@ -80,9 +106,14 @@ export function UserLayout() {
 type UserLayoutContentProps = {
   poolId: string | null;
   tournamentKey: string | null;
+  roundsAccess: PoolDataAccess;
 };
 
-function UserLayoutContent({ poolId, tournamentKey }: UserLayoutContentProps) {
+function UserLayoutContent({
+  poolId,
+  tournamentKey,
+  roundsAccess,
+}: UserLayoutContentProps) {
   const user = useAuthStore((state) => state.user);
   const { pools, fetchPools } = useOpenPoolsStore();
   const { activeTournament } = useActiveTournament();
@@ -112,7 +143,11 @@ function UserLayoutContent({ poolId, tournamentKey }: UserLayoutContentProps) {
           currentRoundDisplay={currentRoundDisplay}
         />
       )}
-      <RoundCountdownBanner poolId={poolId} tournamentKey={tournamentKey} />
+      <RoundCountdownBanner
+        poolId={poolId}
+        tournamentKey={tournamentKey}
+        access={roundsAccess}
+      />
       <Outlet />
     </div>
   );

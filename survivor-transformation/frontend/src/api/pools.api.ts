@@ -112,6 +112,73 @@ export async function getMyPoolStatus(poolId: string): Promise<MyPoolStatusRespo
   };
 }
 
+/**
+ * Which backend endpoints to read pool data from.
+ * - `member`: `/pools/:id/survivor/...` (login + approved membership for rounds/stats; login for leaderboard)
+ * - `public`: `/pools/:id/public/...` (no login; usernames never derived from emails)
+ */
+export type PoolDataAccess = 'member' | 'public';
+
+/** Approved or winner — the statuses that may use the member endpoints. */
+export function isMemberStatus(status?: string | null): boolean {
+  return status === 'approved' || status === 'winner';
+}
+
+function poolDataPath(poolId: string, access: PoolDataAccess, path: string): string {
+  return `/pools/${poolId}/${access === 'public' ? 'public' : 'survivor'}/${path}`;
+}
+
+/** GET /pools/:poolId/public/summary */
+export interface PublicPoolSummary {
+  id: string;
+  name: string;
+  tournamentKey?: string;
+  poolStatus?: string;
+  playersRemaining?: number;
+  /** Approved + winner participants */
+  totalPlayers?: number;
+  prizePoolEur?: number;
+  entryFeeEur?: number;
+  rakePerEntryEur?: number;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+}
+
+/**
+ * Public pool summary, shaped like `MyPoolStatusResponse` with `status: 'none'`
+ * so pages can use it in place of `getMyPoolStatus` for guests.
+ */
+export async function getPublicPoolSummary(
+  poolId: string
+): Promise<MyPoolStatusResponse & Pick<PublicPoolSummary, 'totalPlayers' | 'startedAt' | 'finishedAt'>> {
+  const { data } = await apiClient.get<PublicPoolSummary>(`/pools/${poolId}/public/summary`);
+  return {
+    status: 'none',
+    eliminated: false,
+    name: data?.name ?? '',
+    tournamentKey: data?.tournamentKey ?? undefined,
+    poolStatus: data?.poolStatus,
+    playersRemaining: data?.playersRemaining,
+    totalPlayers: data?.totalPlayers,
+    prizePoolEur: data?.prizePoolEur,
+    entryFeeEur: Number(data?.entryFeeEur) || DEFAULT_ENTRY_FEE_EUR,
+    rakePerEntryEur: Number(data?.rakePerEntryEur) || DEFAULT_RAKE_PER_ENTRY_EUR,
+    startedAt: data?.startedAt ?? null,
+    finishedAt: data?.finishedAt ?? null,
+  };
+}
+
+/**
+ * Pool status for whoever is viewing: the per-user status when logged in
+ * (`status` may be none / pending / rejected / approved / winner), the public summary otherwise.
+ */
+export function getPoolStatusForViewer(
+  poolId: string,
+  isLoggedIn: boolean
+): Promise<MyPoolStatusResponse> {
+  return isLoggedIn ? getMyPoolStatus(poolId) : getPublicPoolSummary(poolId);
+}
+
 /** Match shape from participant rounds API (same as admin). */
 export interface ParticipantMatch {
   homeTeam: string;
@@ -134,10 +201,11 @@ export interface ParticipantRound {
 }
 
 export async function getParticipantRounds(
-  poolId: string
+  poolId: string,
+  access: PoolDataAccess = 'member'
 ): Promise<ParticipantRound[]> {
   const { data } = await apiClient.get<ParticipantRound[]>(
-    `/pools/${poolId}/survivor/rounds`
+    poolDataPath(poolId, access, 'rounds')
   );
   return Array.isArray(data) ? data : [];
 }
@@ -204,15 +272,17 @@ export interface RoundStats {
  * Get statistics for a specific round
  * @param poolId - Pool ID
  * @param roundNumber - Round number
+ * @param access - `member` (approved participants) or `public` (guests / non-members)
  * @returns Round statistics
  */
 export async function getRoundStats(
   poolId: string,
-  roundNumber: number
+  roundNumber: number,
+  access: PoolDataAccess = 'member'
 ): Promise<RoundStats> {
   try {
     const { data } = await apiClient.get<RoundStats>(
-      `/pools/${poolId}/survivor/stats/${roundNumber}`
+      poolDataPath(poolId, access, `stats/${roundNumber}`)
     );
     
     // Return data with defaults for missing fields
@@ -280,14 +350,16 @@ export interface LeaderboardResponse {
 /**
  * Get leaderboard data for a pool
  * @param poolId - Pool ID
+ * @param access - `member` (any logged-in user) or `public` (guests)
  * @returns Leaderboard data with entries, total players, alive players, prize pool, and winner count
  */
 export async function getLeaderboard(
-  poolId: string
+  poolId: string,
+  access: PoolDataAccess = 'member'
 ): Promise<LeaderboardResponse> {
   try {
     const { data } = await apiClient.get<LeaderboardResponse>(
-      `/pools/${poolId}/survivor/leaderboard`
+      poolDataPath(poolId, access, 'leaderboard')
     );
 
     // Backend returns object; support legacy array response for backward compatibility

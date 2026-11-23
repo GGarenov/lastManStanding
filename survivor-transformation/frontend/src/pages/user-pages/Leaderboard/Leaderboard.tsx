@@ -22,14 +22,15 @@ export default function Leaderboard() {
   const { t } = useLabels("leaderboard");
   const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
   const user = useAuthStore((s) => s.user);
+  const authChecked = useAuthStore((s) => s.isChecked);
   const { poolId, setPoolId, pools } = useLeaderboardPoolId();
-  const { poolInfo } = useLeaderboardPoolInfo({ poolId, user });
+  const { poolInfo } = useLeaderboardPoolInfo({ poolId, user, authChecked });
   const {
     leaderboardData,
     isLoadingLeaderboard,
     leaderboardError,
     refetchLeaderboard,
-  } = useLeaderboardData({ poolId });
+  } = useLeaderboardData({ poolId, isLoggedIn: !!user, authChecked });
   const {
     statusFilter,
     setStatusFilter,

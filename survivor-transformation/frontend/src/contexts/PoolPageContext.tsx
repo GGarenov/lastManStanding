@@ -3,9 +3,18 @@ import type { TournamentConfig } from '~/config/tournaments/types';
 import type { MyPoolStatusResponse } from '~/api/pools.api';
 import type { ParticipantRound } from '~/api/pools.api';
 
+/**
+ * - `member`: approved/winner participant — data from the member endpoints, can pick.
+ * - `spectator`: guest or logged-in non-member — data from the public endpoints, read-only.
+ */
+export type PoolViewerMode = 'member' | 'spectator';
+
 export interface PoolPageContextValue {
   poolId: string;
   poolInfo: MyPoolStatusResponse | null;
+  viewerMode: PoolViewerMode;
+  /** Shorthand for `viewerMode === 'spectator'`. */
+  isSpectator: boolean;
   tournamentConfig: TournamentConfig | null;
   rounds: ParticipantRound[];
   isLoading: boolean;

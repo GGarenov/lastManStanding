@@ -4,6 +4,8 @@ import * as poolsApi from "~/api/pools.api";
 type UseLeaderboardPoolInfoArgs = {
   poolId: string | null;
   user: { id: string } | null;
+  /** Wait for the auth check so guests and users hit the right endpoint. */
+  authChecked: boolean;
 };
 
 type UseLeaderboardPoolInfoResult = {
@@ -13,13 +15,16 @@ type UseLeaderboardPoolInfoResult = {
 export function useLeaderboardPoolInfo({
   poolId,
   user,
+  authChecked,
 }: UseLeaderboardPoolInfoArgs): UseLeaderboardPoolInfoResult {
   const [poolInfo, setPoolInfo] = useState<poolsApi.MyPoolStatusResponse | null>(
     null
   );
+  const isLoggedIn = user !== null;
 
   useEffect(() => {
-    if (!poolId || !user) {
+    if (!authChecked) return;
+    if (!poolId) {
       setPoolInfo(null);
       return;
     }
@@ -28,7 +33,8 @@ export function useLeaderboardPoolInfo({
 
     async function load() {
       try {
-        const res = await poolsApi.getMyPoolStatus(poolId);
+        // Logged in → per-user status; guest → public pool summary.
+        const res = await poolsApi.getPoolStatusForViewer(poolId, isLoggedIn);
         if (cancelled) return;
         setPoolInfo(res);
       } catch {
@@ -40,7 +46,7 @@ export function useLeaderboardPoolInfo({
     return () => {
       cancelled = true;
     };
-  }, [poolId, user]);
+  }, [poolId, isLoggedIn, authChecked]);
 
   return { poolInfo };
 }

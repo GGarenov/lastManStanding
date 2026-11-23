@@ -3,7 +3,11 @@ import { Clock } from "lucide-react";
 import { useLabels } from "~/hooks/useLabels";
 import { buildPoolLabels } from "~/locales/labels/pool.labels";
 import { cn } from "~/lib/utils";
-import { getParticipantRounds, type ParticipantRound } from "~/api/pools.api";
+import {
+  getParticipantRounds,
+  type ParticipantRound,
+  type PoolDataAccess,
+} from "~/api/pools.api";
 import styles from "./RoundCountdownBanner.module.less";
 import { getPredefinedRound } from "~/config/tournaments";
 
@@ -11,6 +15,8 @@ export interface RoundCountdownBannerProps {
   poolId: string | null;
   /** Optional; used for round label (e.g. "Round of 16"). When absent, falls back to "Round N". */
   tournamentKey?: string | null;
+  /** `member` for approved participants, `public` for guests / non-members. */
+  access?: PoolDataAccess;
   className?: string;
 }
 
@@ -30,6 +36,7 @@ function formatCountdown(ms: number): string {
 export function RoundCountdownBanner({
   poolId,
   tournamentKey,
+  access = "member",
   className,
 }: RoundCountdownBannerProps) {
   const { t } = useLabels("pool");
@@ -48,7 +55,7 @@ export function RoundCountdownBanner({
       return;
     }
     let cancelled = false;
-    getParticipantRounds(poolId)
+    getParticipantRounds(poolId, access)
       .then((data) => {
         if (!cancelled) setRounds(data ?? []);
       })
@@ -58,7 +65,7 @@ export function RoundCountdownBanner({
     return () => {
       cancelled = true;
     };
-  }, [poolId]);
+  }, [poolId, access]);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);

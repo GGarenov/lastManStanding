@@ -161,7 +161,8 @@ function getErrorMessage(e: unknown, fallback: string): string {
 }
 
 export function PickTeamTab() {
-  const { poolId, rounds, tournamentConfig, poolInfo } = usePoolPage();
+  const { poolId, rounds, tournamentConfig, poolInfo, isSpectator } =
+    usePoolPage();
   const { t } = useLabels("pool");
   const { t: tCommon } = useLabels("common");
   const { pickTeam: pickLabels, confirm: confirmLabels } = useMemo(
@@ -188,12 +189,18 @@ export function PickTeamTab() {
     deadlinePassed;
 
   useEffect(() => {
-    if (!poolId) return;
+    // Spectators have no picks; the member-only endpoint would reject them.
+    if (!poolId || isSpectator) {
+      setMyPicks([]);
+      return;
+    }
     poolsApi.getMyPicks(poolId).then(setMyPicks).catch(() => setMyPicks([]));
-  }, [poolId]);
+  }, [poolId, isSpectator]);
 
   const handleSelectTeam = (team: string) => {
     if (isPickingDisabled || isSubmitting) return;
+    // Spectators can't submit picks.
+    if (isSpectator) return;
     setPendingPickTeam(team);
   };
 

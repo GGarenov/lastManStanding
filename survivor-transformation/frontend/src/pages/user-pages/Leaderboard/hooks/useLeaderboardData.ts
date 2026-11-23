@@ -7,6 +7,10 @@ import * as poolsApi from "~/api/pools.api";
 
 type UseLeaderboardDataArgs = {
   poolId: string | null;
+  /** The member leaderboard only needs a login; guests read the public one. */
+  isLoggedIn: boolean;
+  /** Wait for the auth check so the first request goes to the right endpoint. */
+  authChecked: boolean;
 };
 
 type UseLeaderboardDataResult = {
@@ -18,10 +22,13 @@ type UseLeaderboardDataResult = {
 
 export function useLeaderboardData({
   poolId,
+  isLoggedIn,
+  authChecked,
 }: UseLeaderboardDataArgs): UseLeaderboardDataResult {
   const { t } = useLabels("leaderboard");
   const labels = useMemo(() => buildLeaderboardLabels(t), [t]);
   const prevTopRef = useRef<string[]>([]);
+  const access: poolsApi.PoolDataAccess = isLoggedIn ? "member" : "public";
 
   const {
     data: leaderboardData,
@@ -29,12 +36,12 @@ export function useLeaderboardData({
     error: leaderboardError,
     refetch: refetchLeaderboard,
   } = useQuery({
-    queryKey: ["leaderboard", poolId],
+    queryKey: ["leaderboard", poolId, access],
     queryFn: () => {
       if (!poolId) throw new Error("Pool ID missing");
-      return poolsApi.getLeaderboard(poolId);
+      return poolsApi.getLeaderboard(poolId, access);
     },
-    enabled: !!poolId,
+    enabled: !!poolId && authChecked,
     staleTime: 30000,
     refetchInterval: 60000,
   });

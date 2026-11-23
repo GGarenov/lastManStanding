@@ -17,7 +17,12 @@ import { Button } from "~/components/Button/Button";
 import { Card, CardContent } from "~/components/Card/Card";
 import { getTournamentConfig } from "~/config/tournaments";
 import * as poolsApi from "~/api/pools.api";
-import { PoolPageProvider, usePoolPage } from "~/contexts/PoolPageContext";
+import {
+  PoolPageProvider,
+  usePoolPage,
+  type PoolViewerMode,
+} from "~/contexts/PoolPageContext";
+import { useAuthStore } from "~/store/authStore";
 import { PickTeamTab } from "~/components/pools/PickTeamTab/PickTeamTab";
 import { ResultsTab } from "~/components/pools/ResultsTab/ResultsTab";
 import { StandingsTab } from "~/components/pools/StandingsTab/StandingsTab";
@@ -31,6 +36,11 @@ import styles from "./UserPoolPage.module.less";
 interface UserPoolPageProps {
   poolId: string;
   poolName: string;
+  /**
+   * When true, guests and non-members see the pool read-only (spectator mode, public endpoints)
+   * instead of the "join this pool" card.
+   */
+  allowSpectator?: boolean;
 }
 
 function getErrorMessage(e: unknown, fallback: string): string {
@@ -229,12 +239,19 @@ function UserPoolPageContent() {
   );
 }
 
-export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
+export default function UserPoolPage({
+  poolId,
+  poolName,
+  allowSpectator = false,
+}: UserPoolPageProps) {
   const localizedPath = useLocalizedPath();
   const { t } = useLabels("pool");
   const { t: tCommon } = useLabels("common");
   const poolLabels = useMemo(() => buildPoolLabels(t, tCommon), [t, tCommon]);
   const labels = poolLabels.myPool;
+  const userId = useAuthStore((s) => s.user?.id ?? null);
+  const authChecked = useAuthStore((s) => s.isChecked);
+  const isLoggedIn = userId !== null;
 
   const [poolInfo, setPoolInfo] = useState<poolsApi.MyPoolStatusResponse | null>(
     null,
@@ -259,16 +276,23 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
       }
 
       try {
-        const statusRes = await poolsApi.getMyPoolStatus(poolId);
+        const statusRes = await poolsApi.getPoolStatusForViewer(
+          poolId,
+          isLoggedIn,
+        );
         if (myGen !== fetchGenerationRef.current) return;
         setPoolInfo(statusRes);
 
-        if (statusRes.status !== "approved" && statusRes.status !== "winner") {
+        const isMember = poolsApi.isMemberStatus(statusRes.status);
+        if (!isMember && !allowSpectator) {
           setRounds([]);
           return;
         }
 
-        const roundsRes = await poolsApi.getParticipantRounds(poolId);
+        const roundsRes = await poolsApi.getParticipantRounds(
+          poolId,
+          isMember ? "member" : "public",
+        );
         if (myGen !== fetchGenerationRef.current) return;
         setRounds(roundsRes);
       } catch (e) {
@@ -284,7 +308,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
         }
       }
     },
-    [poolId, poolLabels.userPool.loadFailed],
+    [poolId, isLoggedIn, allowSpectator, poolLabels.userPool.loadFailed],
   );
 
   const refreshPoolData = useCallback(
@@ -293,21 +317,24 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
   );
 
   useEffect(() => {
+    // Wait for the auth check so guests and members hit the right endpoints on the first load.
+    if (!authChecked) return;
     void loadPoolPage({ silent: false });
-  }, [loadPoolPage]);
+  }, [loadPoolPage, authChecked]);
 
   const tournamentConfig = poolInfo?.tournamentKey
     ? getTournamentConfig(poolInfo.tournamentKey)
     : null;
 
   const isNotApproved =
-    poolInfo != null &&
-    poolInfo.status !== "approved" &&
-    poolInfo.status !== "winner";
+    poolInfo != null && !poolsApi.isMemberStatus(poolInfo.status);
+  const viewerMode: PoolViewerMode = isNotApproved ? "spectator" : "member";
 
   const contextValue = {
     poolId,
     poolInfo,
+    viewerMode,
+    isSpectator: viewerMode === "spectator",
     tournamentConfig,
     rounds,
     isLoading,
@@ -334,7 +361,7 @@ export default function UserPoolPage({ poolId, poolName }: UserPoolPageProps) {
               </Button>
             </CardContent>
           </Card>
-        ) : isNotApproved ? (
+        ) : isNotApproved && !allowSpectator ? (
           <Card>
             <CardContent className={styles.notApprovedContent}>
               <p className={styles.notApprovedText}>
