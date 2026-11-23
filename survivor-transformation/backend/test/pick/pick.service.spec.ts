@@ -215,6 +215,50 @@ describe('PickService', () => {
       });
     };
 
+    it('publicView: selects only username and never falls back to email', async () => {
+      mockRoundStatsDeps({ isClosed: true, pickDeadline: null });
+      const select = jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue([{ _id: 'u1', email: 'secret@b.com' }]),
+      });
+      userModel.find.mockReturnValue({ select });
+
+      const result = await service.getRoundStats('pool1', 1, undefined, {
+        publicView: true,
+      });
+
+      expect(select).toHaveBeenCalledWith('username');
+      expect(result.allPicks[0].username).toBe('Player');
+      expect(JSON.stringify(result)).not.toContain('secret');
+    });
+
+    it('member view keeps email-prefix fallback when username is missing', async () => {
+      mockRoundStatsDeps({ isClosed: true, pickDeadline: null });
+      userModel.find.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([{ _id: 'u1', email: 'bob@b.com' }]),
+        }),
+      });
+
+      const result = await service.getRoundStats('pool1', 1, 'viewer');
+
+      expect(result.allPicks[0].username).toBe('bob');
+    });
+
+    it('publicView still masks teams before the deadline', async () => {
+      mockRoundStatsDeps({
+        isClosed: false,
+        pickDeadline: new Date(Date.now() + 60_000),
+      });
+
+      const result = await service.getRoundStats('pool1', 1, undefined, {
+        publicView: true,
+      });
+
+      expect(result.picksRevealed).toBe(false);
+      expect(result.pickDistribution).toEqual([]);
+      expect(result.allPicks.every((p) => p.team === null)).toBe(true);
+    });
+
     it('round not found → 404', async () => {
       roundService.getRoundByNumber.mockRejectedValue(new Error('Not found'));
 
@@ -398,6 +442,34 @@ describe('PickService', () => {
       expect(result.totalPlayers).toBe(1);
       expect(result.alivePlayers).toBe(1);
       expect(result.prizePoolEur).toBe(50);
+    });
+
+    it('publicView: selects only username and uses "Player" fallback', async () => {
+      poolModel.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue({ prizePoolEur: 50 }),
+      });
+      participantModel.find.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([
+            { userId: 'u1', eliminated: false, status: 'approved' },
+          ]),
+        }),
+      });
+      const select = jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue([{ _id: 'u1', email: 'secret@b.com' }]),
+      });
+      userModel.find.mockReturnValue({ select });
+      pickModel.find.mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          lean: jest.fn().mockResolvedValue([]),
+        }),
+      });
+
+      const result = await service.getLeaderboard('pool1', { publicView: true });
+
+      expect(select).toHaveBeenCalledWith('username');
+      expect(result.entries[0].username).toBe('Player');
+      expect(JSON.stringify(result)).not.toContain('secret');
     });
   });
 });

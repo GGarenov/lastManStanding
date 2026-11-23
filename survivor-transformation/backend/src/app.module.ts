@@ -11,6 +11,7 @@ import {
   RakeModule,
   RoundModule,
   SurvivorModule,
+  PublicPoolModule,
   UsersModule,
 } from './modules';
 import { AuthGuard } from './guards';
@@ -31,6 +32,7 @@ import { HealthModule } from './health/health.module';
     RoundModule,
     PickModule,
     SurvivorModule,
+    PublicPoolModule,
     AdminModule,
     RakeModule,
     HealthModule,

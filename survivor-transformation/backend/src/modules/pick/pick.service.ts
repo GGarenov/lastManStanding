@@ -13,6 +13,11 @@ import { Pick, PickTeamDto } from './pick.interface';
 import { ParticipantService } from '../participant/participant.service';
 import { RoundService } from '../round/round.service';
 
+export interface PublicViewOptions {
+  /** Unauthenticated spectator view: never expose or derive data from emails. */
+  publicView?: boolean;
+}
+
 @Injectable()
 export class PickService {
   constructor(
@@ -94,10 +99,30 @@ export class PickService {
   }
 
   /**
+   * Resolve the display name for a user.
+   * Public (spectator) views never derive anything from the email address.
+   */
+  private resolveUsername(
+    user: { username?: string; email?: string } | undefined,
+    publicView: boolean,
+  ): string {
+    if (user?.username) return user.username;
+    if (publicView) return 'Player';
+    return user?.email?.split('@')[0] ?? 'Unknown';
+  }
+
+  /**
    * Get statistics for a specific round.
    * Team identities are hidden until the round is closed or the pick deadline has passed.
+   * `publicView: true` is used by the unauthenticated spectator endpoints.
    */
-  async getRoundStats(poolId: string, roundNumber: number, _userId: string) {
+  async getRoundStats(
+    poolId: string,
+    roundNumber: number,
+    _userId?: string,
+    options: PublicViewOptions = {},
+  ) {
+    const publicView = options.publicView === true;
     let round;
     try {
       round = await this.roundService.getRoundByNumber(poolId, roundNumber);
@@ -135,7 +160,7 @@ export class PickService {
     // Fetch user data for all users who made picks
     const users = await this.userModel
       .find({ _id: { $in: userIdsFromPicks } })
-      .select('username email')
+      .select(publicView ? 'username' : 'username email')
       .lean();
 
     // Create a map of userId -> user data
@@ -181,9 +206,7 @@ export class PickService {
     // Format picks with user info
     const formatPick = (pick: any) => {
       const userId = pick.userId?.toString() ?? pick.userId;
-      const user = userMap.get(userId);
-      const username =
-        user?.username ?? user?.email?.split('@')[0] ?? 'Unknown';
+      const username = this.resolveUsername(userMap.get(userId), publicView);
       return {
         userId,
         username,
@@ -229,7 +252,8 @@ export class PickService {
    * Get leaderboard data for a pool
    * Returns object with entries, totalPlayers, alivePlayers, prizePoolEur, winnerCount
    */
-  async getLeaderboard(poolId: string) {
+  async getLeaderboard(poolId: string, options: PublicViewOptions = {}) {
+    const publicView = options.publicView === true;
     const pool = await this.poolModel.findById(poolId).lean();
     const prizePoolEur = pool?.prizePoolEur ?? 0;
 
@@ -255,7 +279,7 @@ export class PickService {
     // Fetch user data for all participants
     const users = await this.userModel
       .find({ _id: { $in: userIds } })
-      .select('username email')
+      .select(publicView ? 'username' : 'username email')
       .lean();
 
     // Create a map of userId -> user data
@@ -291,9 +315,7 @@ export class PickService {
     // Build leaderboard entries
     const leaderboard = participants.map((participant) => {
       const userId = participant.userId?.toString() ?? participant.userId;
-      const user = userMap.get(userId);
-      const username =
-        user?.username ?? user?.email?.split('@')[0] ?? 'Unknown';
+      const username = this.resolveUsername(userMap.get(userId), publicView);
 
       const userPicks = picksByUser.get(userId) || [];
 

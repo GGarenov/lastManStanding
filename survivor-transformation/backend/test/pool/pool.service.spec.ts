@@ -1,5 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PoolService } from '../../src/modules/pool/pool.service';
+
+const VALID_POOL_ID = '665f1c2b9a1e4b0012345678';
 
 describe('PoolService', () => {
   let service: PoolService;
@@ -263,6 +265,76 @@ describe('PoolService', () => {
         playersRemaining: 3,
         prizePoolEur: 100,
       });
+    });
+  });
+
+  describe('findPublicPoolOrThrow', () => {
+    it('throws NotFound for a malformed id without querying the DB', async () => {
+      await expect(service.findPublicPoolOrThrow('not-an-id')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(poolModel.findById).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFound when the pool does not exist', async () => {
+      poolModel.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(
+        service.findPublicPoolOrThrow(VALID_POOL_ID),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it.each(['open', 'active', 'finished'])(
+      'returns the pool when status is %s',
+      async (status) => {
+        const pool = { _id: VALID_POOL_ID, status };
+        poolModel.findById.mockReturnValue({
+          lean: jest.fn().mockResolvedValue(pool),
+        });
+
+        await expect(
+          service.findPublicPoolOrThrow(VALID_POOL_ID),
+        ).resolves.toBe(pool);
+      },
+    );
+  });
+
+  describe('getPublicPoolSummary', () => {
+    it('returns pool header data without any per-user fields', async () => {
+      const startedAt = new Date('2026-06-11T19:00:00Z');
+      poolModel.findById.mockReturnValue({
+        lean: jest.fn().mockResolvedValue({
+          _id: VALID_POOL_ID,
+          name: 'WC Pool',
+          status: 'active',
+          tournamentKey: 'world-cup-2026',
+          prizePoolEur: 400,
+          startedAt,
+        }),
+      });
+      participantModel.countDocuments
+        .mockResolvedValueOnce(7) // playersRemaining
+        .mockResolvedValueOnce(10) // approvedCount
+        .mockResolvedValueOnce(10); // totalPlayers
+
+      const result = await service.getPublicPoolSummary(VALID_POOL_ID);
+
+      expect(result).toMatchObject({
+        id: VALID_POOL_ID,
+        name: 'WC Pool',
+        poolStatus: 'active',
+        tournamentKey: 'world-cup-2026',
+        playersRemaining: 7,
+        totalPlayers: 10,
+        prizePoolEur: 400,
+        startedAt,
+        finishedAt: null,
+      });
+      expect(result).not.toHaveProperty('status');
+      expect(result).not.toHaveProperty('eliminated');
+      expect(participantModel.findOne).not.toHaveBeenCalled();
     });
   });
 });

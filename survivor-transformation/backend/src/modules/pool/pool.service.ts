@@ -1,5 +1,11 @@
-import { Injectable, BadRequestException, Inject, forwardRef } from '@nestjs/common';
-import { Model } from 'mongoose';
+import {
+  Injectable,
+  BadRequestException,
+  Inject,
+  NotFoundException,
+  forwardRef,
+} from '@nestjs/common';
+import { Model, isValidObjectId } from 'mongoose';
 import { POOLS_MODEL } from './pool.providers';
 import { POOL_PARTICIPANTS_MODEL } from '../participant/participant.providers';
 import {
@@ -136,6 +142,59 @@ export class PoolService {
       userId,
     });
 
+    const base = await this.buildPoolSummary(poolId, pool);
+
+    if (!participant) return { status: 'none', eliminated: false, ...base };
+    return {
+      status: participant.status,
+      eliminated: !!participant.eliminated,
+      eliminatedReason: participant.eliminatedReason,
+      ...base,
+    };
+  }
+
+  /**
+   * Looks up a pool for the unauthenticated spectator endpoints.
+   * Every pool status (open / active / finished) is viewable; unknown or malformed ids → 404.
+   */
+  async findPublicPoolOrThrow(poolId: string) {
+    if (!isValidObjectId(poolId)) {
+      throw new NotFoundException('Pool not found');
+    }
+    const pool = await this.poolModel.findById(poolId).lean();
+    if (!pool) throw new NotFoundException('Pool not found');
+    return pool;
+  }
+
+  /** Public pool header data (no per-user fields). */
+  async getPublicPoolSummary(poolId: string) {
+    const pool = await this.findPublicPoolOrThrow(poolId);
+    const base = await this.buildPoolSummary(poolId, pool);
+    const totalPlayers = await this.participantModel.countDocuments({
+      poolId,
+      status: { $in: ['approved', 'winner'] },
+    });
+    return {
+      id: String(pool._id),
+      ...base,
+      totalPlayers,
+      startedAt: pool.startedAt ?? null,
+      finishedAt: pool.finishedAt ?? null,
+    };
+  }
+
+  private async buildPoolSummary(
+    poolId: string,
+    pool: Pick<
+      Pool,
+      | 'name'
+      | 'status'
+      | 'tournamentKey'
+      | 'prizePoolEur'
+      | 'entryFeeEur'
+      | 'rakePerEntryEur'
+    >,
+  ) {
     const playersRemaining = await this.participantModel.countDocuments({
       poolId,
       status: 'approved',
@@ -162,7 +221,7 @@ export class PoolService {
     const entryFeeEur = pool.entryFeeEur ?? ENTRY_FEE_EUR;
     const rakePerEntryEur = pool.rakePerEntryEur ?? RAKE_PER_ENTRY_EUR;
 
-    const base = {
+    return {
       name: pool.name ?? '',
       tournamentKey: pool.tournamentKey ?? undefined,
       poolStatus: pool.status,
@@ -170,14 +229,6 @@ export class PoolService {
       prizePoolEur,
       entryFeeEur,
       rakePerEntryEur,
-    };
-
-    if (!participant) return { status: 'none', eliminated: false, ...base };
-    return {
-      status: participant.status,
-      eliminated: !!participant.eliminated,
-      eliminatedReason: participant.eliminatedReason,
-      ...base,
     };
   }
 }

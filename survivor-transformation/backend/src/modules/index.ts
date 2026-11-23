@@ -34,3 +34,4 @@ export {
 } from './pick';
 export type { Pick, PickTeamDto } from './pick';
 export * from './survivor';
+export { PublicPoolModule, PublicPoolController } from './public-pool';
