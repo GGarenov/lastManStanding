@@ -2,6 +2,7 @@ import type { TFunction } from "i18next";
 
 export const navbarLabelKeys = [
   "nav.home",
+  "nav.myPool",
   "nav.rules",
   "nav.stats",
   "nav.leaderboard",
@@ -21,10 +22,15 @@ export const GENERIC_NAV_CONFIG: NavbarNavItemConfig[] = [
   { to: "/rules", labelKey: "nav.rules" },
 ];
 
+/**
+ * Nav while a tournament is running.
+ * `/` is the live pool view, so it carries the tournament name.
+ * `/my-pool` is where users buy in or see their own entry.
+ */
 export function getTournamentNavConfig(): NavbarNavItemConfig[] {
   return [
-    { to: "/", labelKey: "nav.home" },
-    { to: "/my-pool", useTournamentLabel: true },
+    { to: "/", useTournamentLabel: true },
+    { to: "/my-pool", labelKey: "nav.myPool" },
     { to: "/stats", labelKey: "nav.stats" },
     { to: "/leaderboard", labelKey: "nav.leaderboard" },
     { to: "/rules", labelKey: "nav.rules" },
@@ -46,6 +52,7 @@ export function buildNavbarLabels(t: TFunction<"navbar">) {
   return {
     nav: {
       home: t("nav.home"),
+      myPool: t("nav.myPool"),
       rules: t("nav.rules"),
       stats: t("nav.stats"),
       leaderboard: t("nav.leaderboard"),

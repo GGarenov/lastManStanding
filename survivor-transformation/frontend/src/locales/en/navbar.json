@@ -1,6 +1,7 @@
 {
   "nav": {
     "home": "Home",
+    "myPool": "My pool",
     "rules": "Rules",
     "stats": "Stats",
     "leaderboard": "Leaderboard"

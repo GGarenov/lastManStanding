@@ -1,0 +1,117 @@
+import { useMemo } from "react";
+import { useAuthStore, isAdminUser } from "~/store/authStore";
+import { useOpenPoolsStore } from "~/store/openPoolsStore";
+import { useActiveTournament } from "~/contexts/ActiveTournamentContext";
+import { HomeHero } from "~/components/HomeHero/HomeHero";
+import { HomeFeaturedPool } from "~/components/HomeFeaturedPool/HomeFeaturedPool";
+import { useCompletedPool } from "~/hooks/useCompletedPool";
+import {
+  getFeaturedPool,
+  formatPrizePoolEur,
+  type PoolWithMyStatus,
+} from "~/lib/poolHelpers";
+import styles from "./RulesIntro.module.less";
+
+/**
+ * Top of the Rules page: the former home page content
+ * (hero with buy-in / countdown or completed-pool recap, and the featured pool card).
+ * "How it works" is not repeated here; the Rules page's own "How to play" covers it.
+ */
+export function RulesIntro() {
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user && isAdminUser(user);
+  const { activeTournament } = useActiveTournament();
+  const {
+    pools,
+    fetchPools,
+    isLoading: poolsLoading,
+    error: poolsError,
+    joiningId,
+    joinPool: joinPoolAction,
+    setError: setPoolsError,
+  } = useOpenPoolsStore();
+
+  const hasJoinedAnyPool = useMemo(
+    () =>
+      pools.some((p) => {
+        const withStatus = p as PoolWithMyStatus;
+        return withStatus.myStatus !== undefined && withStatus.myStatus !== "none";
+      }),
+    [pools],
+  );
+
+  const handleJoin = async (poolId: string) => {
+    if (!user) return;
+    setPoolsError(null);
+    try {
+      await joinPoolAction(poolId);
+    } catch {
+      // Error is set in store
+    }
+  };
+
+  const featuredPool = getFeaturedPool(pools);
+  const hasActivePool = pools.some((p) => p.status === "active");
+
+  const { completedPool, completedPoolLoading } = useCompletedPool({
+    user,
+    pools,
+    fetchPools,
+  });
+
+  const showCompletedView = !completedPoolLoading && completedPool !== null;
+
+  const completedPrizeTotalDisplay =
+    completedPool !== null
+      ? formatPrizePoolEur(completedPool.prizePoolEur ?? 0)
+      : undefined;
+  const hasMultipleWinners =
+    (completedPool?.winnerCount ?? 0) > 1 &&
+    (completedPool?.prizePoolEur ?? 0) > 0;
+  const completedPrizeEachDisplay =
+    completedPool !== null && hasMultipleWinners
+      ? formatPrizePoolEur(
+          Math.floor(
+            (completedPool.prizePoolEur ?? 0) / (completedPool.winnerCount ?? 1),
+          ),
+        )
+      : undefined;
+
+  return (
+    <div className={styles.intro}>
+      <HomeHero
+        showCompletedView={showCompletedView}
+        isAdmin={Boolean(isAdmin)}
+        isLoggedIn={Boolean(user)}
+        hasJoinedAnyPool={hasJoinedAnyPool}
+        hasActivePool={hasActivePool}
+        activeTournamentLabel={activeTournament?.label ?? null}
+        completedPoolName={completedPool?.poolName}
+        winnerNames={completedPool?.winnerNames ?? []}
+        hasMultipleWinners={hasMultipleWinners}
+        prizeTotalDisplay={completedPrizeTotalDisplay}
+        prizeEachDisplay={completedPrizeEachDisplay}
+        recapRoundNumber={completedPool?.lastRoundRecap?.roundNumber}
+        recapPlayersRemainingBeforeRound={
+          completedPool?.lastRoundRecap?.playersRemainingBeforeRound
+        }
+        recapTopPicks={completedPool?.lastRoundRecap?.topPicks ?? []}
+        recapWinnerTeam={completedPool?.lastRoundRecap?.winnerTeam ?? null}
+        entryFeeEur={featuredPool?.entryFeeEur}
+        rakePerEntryEur={featuredPool?.rakePerEntryEur}
+      />
+
+      <HomeFeaturedPool
+        activeTournament={Boolean(activeTournament)}
+        featuredPool={featuredPool ?? null}
+        isUserLoggedIn={Boolean(user)}
+        poolsError={poolsError}
+        poolsLoading={poolsLoading}
+        joiningId={joiningId}
+        onJoin={handleJoin}
+      />
+    </div>
+  );
+}
+
+export default RulesIntro;

@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/Card/Card';
 import { Button } from '~/components/Button/Button';
 import { Input } from '~/components/Input/Input';
 import { Label } from '~/components/Label/Label';
 import { useLabels } from '~/hooks/useLabels';
-import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
+import { useAppLocale, useLocalizedPath } from '~/i18n/routing';
+import { getFromState, getPostAuthRedirect } from '~/lib/authRedirect';
 import { buildAuthLabels } from '~/locales/labels/auth.labels';
 import { useAuthStore, isAdminUser } from '~/store/authStore';
 import style from './Login.module.less';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const appLocale = useAppLocale();
   const localizedPath = useLocalizedPath();
   const { t } = useLabels('auth');
@@ -20,16 +22,18 @@ export default function Login() {
   const user = useAuthStore((s) => s.user);
   const isChecked = useAuthStore((s) => s.isChecked);
   const hasRedirected = useRef(false);
+  // Page that sent the user here (pick tab, spectator banner, AuthGuard).
+  const from = getFromState(location.state);
 
   useEffect(() => {
     if (hasRedirected.current) return;
     if (isChecked && user) {
       hasRedirected.current = true;
-      navigate(isAdminUser(user) ? '/admin' : buildLocalizedPath(appLocale, '/'), {
+      navigate(getPostAuthRedirect(isAdminUser(user), appLocale, from), {
         replace: true,
       });
     }
-  }, [isChecked, user, navigate, appLocale]);
+  }, [isChecked, user, navigate, appLocale, from]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +51,8 @@ export default function Login() {
     try {
       await login(email.trim(), password);
       const u = useAuthStore.getState().user;
-      navigate(u && isAdminUser(u) ? '/admin' : buildLocalizedPath(appLocale, '/'), {
+      hasRedirected.current = true;
+      navigate(getPostAuthRedirect(!!u && isAdminUser(u), appLocale, from), {
         replace: true,
       });
     } catch {
@@ -105,7 +110,11 @@ export default function Login() {
             </Button>
             <p className={style.registerText}>
               {labels.login.noAccount}{' '}
-              <Link to={localizedPath('/register')} className={style.registerLink}>
+              <Link
+                to={localizedPath('/register')}
+                state={from ? { from } : undefined}
+                className={style.registerLink}
+              >
                 {labels.login.registerLink}
               </Link>
             </p>

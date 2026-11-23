@@ -4,7 +4,7 @@ import { getPredefinedRound } from "@/config/tournaments";
 import {
   formatPrizePoolEur,
   getFeaturedPoolId,
-} from "@/pages/Home/home.helpers";
+} from "@/lib/poolHelpers";
 
 type SummaryPool = {
   id: string;

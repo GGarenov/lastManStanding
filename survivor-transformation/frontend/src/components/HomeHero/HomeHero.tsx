@@ -8,12 +8,11 @@ import { Button } from "@/components/Button/Button";
 import { CountdownBanner } from "@/components/CountdownBanner/CountdownBanner";
 import { HomeCompletedRecap } from "@/components/HomeCompletedRecap/HomeCompletedRecap";
 import { formatEntryFeeCopy } from "@/config/rake";
+import { COMING_SOON_END_DATE } from "@/config/comingSoon";
+import { HOW_TO_PLAY_ANCHOR } from "@/config/anchors";
 import logoWhite from "~/assets/logo/logo-white.svg";
 import heroBanner from "~/assets/images/banner1.png";
 import styles from "./HomeHero.module.less";
-
-/** End date for "coming soon" countdown: 11 June 2026, 22:00 (10 PM) local time. */
-const COMING_SOON_END_DATE = "2026-06-11T22:00:00";
 
 type HomeHeroProps = {
   showCompletedView: boolean;
@@ -139,12 +138,12 @@ export function HomeHero({
               >
                 {labels.hero.ctaMyPool}
               </Link>
-              <Link
-                to={localizedPath("/rules")}
+              <a
+                href={`#${HOW_TO_PLAY_ANCHOR}`}
                 className={`${styles.ctaButton} ${styles.ctaButtonOutline}`}
               >
                 {labels.hero.ctaHowItWorks}
-              </Link>
+              </a>
             </div>
             {isAdmin && (
               <Link
@@ -216,11 +215,12 @@ export function HomeHero({
                   <ArrowRight className={styles.iconSm} />
                 </Button>
               </Link>
-              <Link to={localizedPath("/rules")}>
-                <Button size="lg" variant="outline">
+              {/* The hero sits on the Rules page, so this jumps to "How to play" below. */}
+              <a href={`#${HOW_TO_PLAY_ANCHOR}`}>
+                <Button size="lg" variant="outline" tabIndex={-1}>
                   {labels.hero.ctaHowItWorks}
                 </Button>
-              </Link>
+              </a>
               {!isLoggedIn && (
                 <Link to={localizedPath("/register")}>
                   <Button size="lg" variant="outline">

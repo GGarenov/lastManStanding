@@ -28,6 +28,7 @@ import { ResultsTab } from "~/components/pools/ResultsTab/ResultsTab";
 import { StandingsTab } from "~/components/pools/StandingsTab/StandingsTab";
 import { PlayoffsTab } from "~/components/pools/PlayoffsTab/PlayoffsTab";
 import { WinnerBanner } from "~/components/WinnerBanner/WinnerBanner";
+import { SpectatorBanner } from "~/components/pools/SpectatorBanner/SpectatorBanner";
 import { useLabels } from "~/hooks/useLabels";
 import { useLocalizedPath } from "~/i18n/routing";
 import { buildPoolLabels } from "~/locales/labels/pool.labels";
@@ -192,6 +193,8 @@ function UserPoolPageContent() {
           </CardContent>
         </Card>
       )}
+
+      <SpectatorBanner />
 
       <div className={styles.tabsWrap}>
         <Tabs value={activeTab} onValueChange={setActiveTab}>

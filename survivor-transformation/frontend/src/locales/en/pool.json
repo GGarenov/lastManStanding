@@ -67,7 +67,13 @@
     "teamUsedAria": "{{team}}, used",
     "usedBadge": "USED",
     "vs": "VS",
-    "yourPick": "Your pick:"
+    "yourPick": "Your pick:",
+    "spectatorNote": "Want to play? Click a team to get started.",
+    "loginToPick": "Log in or register to pick a team.",
+    "buyInToPick": "Buy in to this pool to make your pick.",
+    "pendingApproval": "Your buy-in is waiting for approval. You can pick once the admin approves it.",
+    "poolStarted": "This pool has already started, so you can't join it anymore.",
+    "rememberedPick": "You chose {{team}}"
   },
   "stats": {
     "allPicks": "All Picks",
@@ -138,5 +144,27 @@
     "congrats": "Congratulations!",
     "congratsWithPool": "Congratulations! You won {{poolName}}.",
     "fullTitle": "You are the winner"
+  },
+  "spectator": {
+    "guestTitle": "You're watching as a guest",
+    "guestText": "Log in or create an account, then buy in to make your picks.",
+    "guestStartedText": "This pool is already running. Log in or register so you're ready for the next one.",
+    "nonMemberTitle": "You're not in this pool yet",
+    "nonMemberText": "Buy in to make your picks and play.",
+    "nonMemberStartedText": "This pool has already started. You can follow it live.",
+    "pendingTitle": "Your buy-in is waiting for approval",
+    "pendingText": "You can pick as soon as the admin approves your entry.",
+    "finishedTitle": "This pool has finished",
+    "finishedText": "Check the results, standings and play-offs.",
+    "login": "Log in",
+    "register": "Register",
+    "buyIn": "Buy in"
+  },
+  "poolHome": {
+    "loading": "Loading tournament…",
+    "comingSoonTitle": "The next tournament is coming",
+    "comingSoonText": "No pool is open right now. Read the rules and be ready when registration opens.",
+    "countdownLabel": "Kick-off in",
+    "rulesLink": "Read the rules"
   }
 }

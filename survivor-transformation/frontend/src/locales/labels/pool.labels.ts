@@ -43,6 +43,13 @@ export function buildPoolLabels(
       ) => getPickTeamStageLabel(t, tournamentKey, roundNumber),
       picksLocked: t("pickTeam.picksLocked"),
       mustPick: t("pickTeam.mustPick"),
+      spectatorNote: t("pickTeam.spectatorNote"),
+      loginToPick: t("pickTeam.loginToPick"),
+      buyInToPick: t("pickTeam.buyInToPick"),
+      pendingApproval: t("pickTeam.pendingApproval"),
+      poolStarted: t("pickTeam.poolStarted"),
+      rememberedPick: (team: string) =>
+        t("pickTeam.rememberedPick", { team }),
       picksCloseAt: (datetime: string) =>
         t("pickTeam.picksCloseAt", { datetime }),
       yourPick: t("pickTeam.yourPick"),
@@ -69,6 +76,28 @@ export function buildPoolLabels(
         t("countdown.picksLocked", { roundLabel }),
       timeLeft: (roundLabel: string) =>
         t("countdown.timeLeft", { roundLabel }),
+    },
+    spectator: {
+      guestTitle: t("spectator.guestTitle"),
+      guestText: t("spectator.guestText"),
+      guestStartedText: t("spectator.guestStartedText"),
+      nonMemberTitle: t("spectator.nonMemberTitle"),
+      nonMemberText: t("spectator.nonMemberText"),
+      nonMemberStartedText: t("spectator.nonMemberStartedText"),
+      pendingTitle: t("spectator.pendingTitle"),
+      pendingText: t("spectator.pendingText"),
+      finishedTitle: t("spectator.finishedTitle"),
+      finishedText: t("spectator.finishedText"),
+      login: t("spectator.login"),
+      register: t("spectator.register"),
+      buyIn: t("spectator.buyIn"),
+    },
+    poolHome: {
+      loading: t("poolHome.loading"),
+      comingSoonTitle: t("poolHome.comingSoonTitle"),
+      comingSoonText: t("poolHome.comingSoonText"),
+      countdownLabel: t("poolHome.countdownLabel"),
+      rulesLink: t("poolHome.rulesLink"),
     },
     myPool: {
       loginToJoin: t("myPool.loginToJoin"),

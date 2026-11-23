@@ -17,7 +17,7 @@ import PoolManagement from "~/pages/admin-pages/PoolManagement/PoolManagement";
 import ActivePools from "~/pages/admin-pages/ActivePools/ActivePools";
 import ArchivedPools from "~/pages/admin-pages/ArchivedPools/ArchivedPools";
 import UsersManagement from "~/pages/admin-pages/UsersManagement/UsersManagement";
-import Home from "~/pages/Home/Home";
+import PoolHome from "~/pages/PoolHome/PoolHome";
 import Login from "~/pages/user-pages/Login/Login";
 import Register from "~/pages/user-pages/Register/Register";
 import MyPool from "~/pages/user-pages/MyPool/MyPool";
@@ -106,7 +106,7 @@ function AppRoutes() {
       {/* User routes: `/en/...` | `/bg/...` */}
       <Route path="/:locale" element={<LocaleOutlet />}>
         <Route element={<UserLayout />}>
-          <Route index element={<Home />} />
+          <Route index element={<PoolHome />} />
           <Route path="my-pool" element={<MyPool />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="leaderboard/:poolId" element={<Leaderboard />} />

@@ -23,6 +23,8 @@ import {
   XCircle,
   ListOrdered,
 } from "lucide-react";
+import { RulesIntro } from "~/components/RulesIntro/RulesIntro";
+import { HOW_TO_PLAY_ANCHOR } from "~/config/anchors";
 import styles from "./Rules.module.less";
 
 const FAQ_VALUES = [
@@ -42,6 +44,7 @@ export default function Rules() {
 
   return (
     <div className={styles.page}>
+      <RulesIntro />
       <main className={styles.main}>
         <header className={styles.header}>
           <h1 className={styles.headerTitle}>{labels.page.title}</h1>
@@ -64,7 +67,7 @@ export default function Rules() {
           </Card>
         </section>
 
-        <section className={styles.section}>
+        <section id={HOW_TO_PLAY_ANCHOR} className={styles.section}>
           <h2 className={styles.sectionTitle}>
             <ListOrdered className={styles.iconPrimary} />
             {labels.howToPlay.title}

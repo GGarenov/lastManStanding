@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useLabels } from "~/hooks/useLabels";
 import { useLocalizedPath } from "~/i18n/routing";
 import { buildHomeLabels } from "~/locales/labels/home.labels";
@@ -36,6 +36,8 @@ export function HomeFeaturedPool({
   onJoin,
 }: HomeFeaturedPoolProps) {
   const localizedPath = useLocalizedPath();
+  // Return to this page after login (the Buy-in button is right here).
+  const location = useLocation();
   const { t } = useLabels("home");
   const { t: tCommon } = useLabels("common");
   const labels = useMemo(
@@ -81,7 +83,10 @@ export function HomeFeaturedPool({
             </div>
             <div className={styles.featuredActions}>
               {!isUserLoggedIn ? (
-                <Link to={localizedPath("/login")}>
+                <Link
+                  to={localizedPath("/login")}
+                  state={{ from: location.pathname }}
+                >
                   <Button
                     variant="primary"
                     size="lg"

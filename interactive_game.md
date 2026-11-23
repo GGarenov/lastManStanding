@@ -5,7 +5,7 @@ Goal: anyone (guest or logged in) who opens the site lands on the live tournamen
 already picked, standings, results and playoffs. Picking a team is the only action that needs an
 account and a buy-in.
 
-Status: **Phases 1–2 done — Phases 3–7 not started.**
+Status: **Phases 1–5 done — Phases 6–7 not started.**
 
 ### Decisions (2026-11-23)
 
@@ -88,39 +88,86 @@ Status: **Phases 1–2 done — Phases 3–7 not started.**
   - The local frontend can't reach the Render API (CORS only allows the Netlify domain).
   - Check on Netlify after deploy, logged out: `/en/stats`, `/en/leaderboard`, and the countdown banner.
 
-## Phase 3 — New Home page = live pool view
+## Phase 3 — New Home page = live pool view ✅
 
 > Decision: **reuse the `my-pool` experience as the home page** instead of designing a new page.
 
-- [ ] **3.1** Create a new `Home` (or `PoolHome`) page for `/:locale` index:
+**Done:**
+- `/:locale` index now renders [PoolHome.tsx](survivor-transformation/frontend/src/pages/PoolHome/PoolHome.tsx), which shows `<UserPoolPage allowSpectator />` for the home pool.
+- The home pool comes from `getHomePoolId(pools)` in `lib/poolViewer.ts`:
+  - an active pool beats an open one, which beats a finished one;
+  - within the same status, the user's own pool is preferred;
+  - so a past winner still lands on the current live pool.
+- The page refetches pools once auth is known and on login/logout, so `myStatus` is current.
+- States: loading spinner; error card with Retry; no pool at all → "coming soon" card with countdown and a "Read the rules" button.
+- New [SpectatorBanner](survivor-transformation/frontend/src/components/pools/SpectatorBanner/SpectatorBanner.tsx) above the tabs (spectator mode only):
+
+  | Who / pool status | open | active | finished |
+  |---|---|---|---|
+  | guest | Log in + Register | "already running", Log in + Register | "finished", Log in + Register |
+  | logged in, not joined / rejected | **Buy in** → `/my-pool` | "already started, follow it live" (no button: joining closed) | "finished" |
+  | pending | "waiting for approval" | same | "finished" |
+
+  The Log in / Register buttons pass `state.from` (the current path). Login ignores it until Phase 4.3.
+- Navbar (tournament mode): `/` now carries the **tournament name** (live view), and `/my-pool` is labelled **"My pool" / "Моят турнир"** (buy-in or own entry). Generic nav (no tournament) is unchanged.
+- `COMING_SOON_END_DATE` moved to [config/comingSoon.ts](survivor-transformation/frontend/src/config/comingSoon.ts), shared by HomeHero and PoolHome. Phase 6 changes it there.
+- New labels: `pool.spectator.*`, `pool.poolHome.*`, `navbar.nav.myPool` (en + bg, same keys checked).
+- ⚠️ The old home content (`pages/Home`: hero, featured pool, completed recap) is **not routed anymore** until Phase 5 moves it to Rules. The files are untouched.
+
+**Original tasks:**
+
+- [x] **3.1** Create a new `Home` (or `PoolHome`) page for `/:locale` index:
   - Pick the featured pool: the active pool if there is one, otherwise the most recent finished pool. Reuse `getFeaturedPool` from [home.helpers.ts](survivor-transformation/frontend/src/pages/Home/home.helpers.ts).
   - Render `<UserPoolPage poolId=… poolName=… allowSpectator />`. It picks member or spectator mode by itself (Phase 2).
     For the default pool, use `getSpectatorPoolId(pools)`, but prefer the user's own approved pool when they have one.
   - If there is no pool at all → show a short "Coming soon" state with the countdown (see Phase 5) and a link to Rules.
-- [ ] **3.2** Spectator header: add a small CTA strip above the tabs ("Watching as guest — Log in / Register to play", or "Buy in to play" for logged-in non-members).
-- [ ] **3.3** Keep `/my-pool` as a route. It's still the place with the **Buy-in / Join** button (pool cards). Members going to `/my-pool` still see their pool as today.
-- [ ] **3.4** Navbar: the logo and "Home" go to the live pool view. Rename or keep the "My pool" link, and make sure it's still reachable for the buy-in.
+- [x] **3.2** Spectator header: add a small CTA strip above the tabs ("Watching as guest — Log in / Register to play", or "Buy in to play" for logged-in non-members).
+- [x] **3.3** Keep `/my-pool` as a route. It's still the place with the **Buy-in / Join** button (pool cards). Members going to `/my-pool` still see their pool as today.
+- [x] **3.4** Navbar: the logo and "Home" go to the live pool view. Rename or keep the "My pool" link, and make sure it's still reachable for the buy-in.
 
-## Phase 4 — Pick-a-team flow for guests and non-members
+## Phase 4 — Pick-a-team flow for guests and non-members ✅
 
-- [ ] **4.1** In `PickTeamTab`, for spectators, team buttons stay **clickable** (not disabled) so the interaction feels real. `handleSelectTeam`:
-  - **not logged in** → `navigate(localizedPath('/login'), { state: { from: currentPath } })`
-  - **logged in, not an approved member** (status `none` / `pending` / `rejected`) → `navigate(localizedPath('/my-pool'))`, where the Buy-in / Join button is
-  - **approved member** → current confirm-dialog flow
-- [ ] **4.2** For `pending`, show a toast ("Your buy-in is waiting for approval") instead of, or before, redirecting.
-- [ ] **4.3** Login / Register: respect `location.state.from` and return the user to the page they came from (home pool view) after success. Keep `/admin` for admins. Register's link to Login (and the reverse) should carry the same `from`.
-  - Result: guest clicks a team → login → back on home → clicks a team again → redirected to `/my-pool` → buy-in.
-- [ ] **4.4** Optional: remember the team the guest clicked (sessionStorage) and highlight it after they come back.
-- [ ] **4.5** Add i18n labels (en + bg) for the new CTA texts and toasts (`pool.json`, `home.json`).
+- [x] **4.1** [PickTeamTab](survivor-transformation/frontend/src/components/pools/PickTeamTab/PickTeamTab.tsx): spectator team buttons stay clickable (still disabled when the round is closed or the deadline has passed). Click:
 
-## Phase 5 — Move current Home content to the Rules page
+  | Viewer | Result |
+  |---|---|
+  | not logged in | remembers the team, toast "Log in or register to pick a team", → `/login` with `state.from` = current path |
+  | logged in, `pending` | toast "waiting for approval", stays |
+  | logged in, not joined / rejected, pool **open** | toast "Buy in…" → `/my-pool` |
+  | logged in, not joined, pool **active/finished** | toast "already started, can't join", stays (joining is closed) |
+  | approved member | confirm dialog, as before |
 
-- [ ] **5.1** Move everything inside `survivor_fe_Home_page` (`HomeHero`, `HomeHowItWorks`, `HomeFeaturedPool`, completed-pool recap) to [Rules.tsx](survivor-transformation/frontend/src/pages/user-pages/Rules/Rules.tsx), placed **above** the existing rules content (header / "What is" / How to play / FAQ).
-  - Move the logic from `Home.tsx` (`useOpenPoolsStore`, `useCompletedPool`, `handleJoin`, prize formatting) into a reusable hook or a `RulesIntro` component, so `Rules.tsx` stays readable.
-  - Move `Home.module.less` styles, or import them as a separate module.
-- [ ] **5.2** Remove overlap: **do not move `HomeHowItWorks`**. Delete it from the moved content (and its now-unused labels) and keep the Rules page's own "How to play".
-- [ ] **5.3** Fix links inside HomeHero / HomeFeaturedPool that point to `/` or `/my-pool`, so they still make sense from the Rules page.
-- [ ] **5.4** Delete the old `pages/Home` folder after the move, or rename it to the new pool-home page.
+  Spectators also see a different note under the heading ("Want to play? Click a team…") instead of the "you must pick" warning.
+- [x] **4.2** Pending → toast instead of redirect.
+- [x] **4.3** Login / Register return to `state.from` via [lib/authRedirect.ts](survivor-transformation/frontend/src/lib/authRedirect.ts):
+  - Admins still go to `/admin`.
+  - Only same-app paths are accepted (`//host`, `http:`, backslashes and the login/register pages are rejected), so the redirect can't send people to another site.
+  - The Login ↔ Register links carry `from`.
+  - Side effect: `AuthGuard` already passed `from`, so protected pages (e.g. Profile) now return there after login too.
+- [x] **4.4** [lib/pendingPick.ts](survivor-transformation/frontend/src/lib/pendingPick.ts) stores `{ poolId, round, team }` in sessionStorage (per tab, guarded). On return:
+  - **member** (was just logged out): the confirm dialog opens for that team, but only if it's still pickable. They must still confirm. Then the stored pick is cleared.
+  - **still a spectator**: the team is highlighted, with the note "You chose {{team}}". It's cleared on the next click to `/my-pool`.
+  - The stored pick is ignored or cleared if the pool or round changed, or the team isn't in the round.
+- [x] **4.5** Labels `pool.pickTeam.{spectatorNote, loginToPick, buyInToPick, pendingApproval, poolStarted, rememberedPick}` (en + bg).
+- Tests: `authRedirect.test.ts` and `pendingPick.test.ts` are new.
+- Result: guest clicks a team → login → back on home (team highlighted) → clicks a team again → `/my-pool` → buy-in. ✅
+
+## Phase 5 — Move current Home content to the Rules page ✅
+
+- [x] **5.1** New [RulesIntro](survivor-transformation/frontend/src/components/RulesIntro/RulesIntro.tsx) (the old `Home.tsx` logic: pools store, completed-pool recap, featured pool, join) renders **HomeHero + HomeFeaturedPool** at the top of [Rules.tsx](survivor-transformation/frontend/src/pages/user-pages/Rules/Rules.tsx), above the rules text.
+  - It keeps the old 1200px width; the rules text below stays at its narrower 48rem column.
+  - Moved: `pages/Home/home.helpers.ts` → [lib/poolHelpers.ts](survivor-transformation/frontend/src/lib/poolHelpers.ts) (still used by `useLivePoolSummary`), and `pages/Home/hooks/useCompletedPool.ts` → [hooks/useCompletedPool.ts](survivor-transformation/frontend/src/hooks/useCompletedPool.ts).
+  - `useCompletedPool` now reads the leaderboard, rounds and stats from the **public** endpoints (the recap data is public). So guests now see the completed-pool recap too; before, it failed for them.
+- [x] **5.2** `HomeHowItWorks` (component + styles) **deleted**, together with its `home.howItWorks.*` labels (en + bg) and the builder entries. The Rules "How to play" stays.
+- [x] **5.3** Links:
+  - The hero's "How it works" buttons (both views) now jump in-page to `#how-to-play`, the new anchor on the Rules "How to play" section ([config/anchors.ts](survivor-transformation/frontend/src/config/anchors.ts)), instead of linking to `/rules`, the page they're already on.
+  - `/my-pool` links (buy-in / My pool) and `/leaderboard` stay.
+  - HomeFeaturedPool's "Log in to join" passes `state.from`, so login returns to Rules, where the Buy-in button is.
+- [x] **5.4** Deleted `pages/Home/` (`Home.tsx`, `Home.module.less`, the unused `hooks/useHomeStats.ts`).
+- Checks:
+  - `tsc` errors went from 24 to 23; the removed `Home.tsx` had one.
+  - Lint is clean; tests are the same as `main` (6 already-failing ones); the build passes.
+- Note (unchanged behaviour): when any finished pool exists, the hero shows the **completed-pool recap** instead of the buy-in/countdown hero (`showCompletedView`). That's how the old home worked. Phase 6.3 ("always show the countdown") will need to handle that view too.
 
 ## Phase 6 — CountdownBanner: World Cup start → 1 March 2027
 

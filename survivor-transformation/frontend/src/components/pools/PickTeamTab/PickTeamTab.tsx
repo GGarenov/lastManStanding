@@ -1,4 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "~/store/authStore";
+import { useLocalizedPath } from "~/i18n/routing";
+import {
+  clearPendingPick,
+  readPendingPick,
+  rememberPendingPick,
+} from "~/lib/pendingPick";
 import { formatAppDate } from "~/i18n/dateLocale";
 import { Check, Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -38,6 +46,8 @@ interface MatchCardProps {
   isDisabled: boolean;
   isSubmitting: boolean;
   usedTeamNames: Set<string>;
+  /** Team to emphasise (the one a guest clicked before logging in). */
+  highlightedTeam?: string | null;
   labels: PickTeamLabels;
 }
 
@@ -48,6 +58,7 @@ function MatchCard({
   isDisabled,
   isSubmitting,
   usedTeamNames,
+  highlightedTeam = null,
   labels,
 }: MatchCardProps) {
   const TeamSlot = ({
@@ -93,12 +104,14 @@ function MatchCard({
         onClick={() => onSelectTeam(team)}
         disabled={isDisabled || isSubmitting}
         aria-label={labels.teamSelectAria(team)}
+        aria-pressed={highlightedTeam === team ? true : undefined}
         className={[
           baseClasses,
           styles.teamSlotButton,
           !(isDisabled || isSubmitting)
             ? styles.teamSlotButtonEnabled
             : styles.teamSlotButtonDisabled,
+          highlightedTeam === team && styles.teamSlotHighlighted,
         ]
           .filter(Boolean)
           .join(" ")}
@@ -170,9 +183,17 @@ export function PickTeamTab() {
     [t, tCommon],
   );
 
+  const isLoggedIn = useAuthStore((s) => s.user !== null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const localizedPath = useLocalizedPath();
+
   const [myPicks, setMyPicks] = useState<poolsApi.MyPick[]>([]);
+  const [myPicksLoaded, setMyPicksLoaded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingPickTeam, setPendingPickTeam] = useState<string | null>(null);
+  /** Team a guest clicked before logging in (sessionStorage), highlighted for spectators. */
+  const [rememberedTeam, setRememberedTeam] = useState<string | null>(null);
 
   const activeRound = getActiveRound(rounds);
   const deadlinePassed =
@@ -189,18 +210,85 @@ export function PickTeamTab() {
     deadlinePassed;
 
   useEffect(() => {
+    setMyPicksLoaded(false);
     // Spectators have no picks; the member-only endpoint would reject them.
     if (!poolId || isSpectator) {
       setMyPicks([]);
+      setMyPicksLoaded(true);
       return;
     }
-    poolsApi.getMyPicks(poolId).then(setMyPicks).catch(() => setMyPicks([]));
+    let cancelled = false;
+    poolsApi
+      .getMyPicks(poolId)
+      .then((picks) => !cancelled && setMyPicks(picks))
+      .catch(() => !cancelled && setMyPicks([]))
+      .finally(() => !cancelled && setMyPicksLoaded(true));
+    return () => {
+      cancelled = true;
+    };
   }, [poolId, isSpectator]);
+
+  // A team clicked before logging in: members get the confirm dialog for it (they still confirm);
+  // spectators see it highlighted.
+  const activeRoundNumber = activeRound?.roundNumber ?? null;
+  useEffect(() => {
+    if (!poolId || activeRoundNumber === null || !myPicksLoaded) return;
+    const remembered = readPendingPick(poolId, activeRoundNumber)?.team ?? null;
+    if (!remembered) {
+      setRememberedTeam(null);
+      return;
+    }
+    const inRound = activeRound?.matches.some(
+      (m) => m.homeTeam === remembered || m.awayTeam === remembered,
+    );
+    if (!inRound) {
+      clearPendingPick();
+      setRememberedTeam(null);
+      return;
+    }
+    if (isSpectator) {
+      setRememberedTeam(remembered);
+      return;
+    }
+    clearPendingPick();
+    setRememberedTeam(null);
+    if (!isPickingDisabled && !usedTeamNames.has(remembered)) {
+      setPendingPickTeam(remembered);
+    }
+    // Runs once per pool/round/viewer state; the derived values are read at that moment.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poolId, activeRoundNumber, myPicksLoaded, isSpectator]);
+
+  /** Spectator click → log in, wait for approval, or buy in. */
+  const handleSpectatorSelect = (team: string) => {
+    if (!isLoggedIn) {
+      if (poolId && activeRoundNumber !== null) {
+        rememberPendingPick({ poolId, round: activeRoundNumber, team });
+      }
+      toast.info(pickLabels.loginToPick);
+      navigate(localizedPath("/login"), { state: { from: location.pathname } });
+      return;
+    }
+    if (poolInfo?.status === "pending") {
+      toast.info(pickLabels.pendingApproval);
+      return;
+    }
+    // Joining is only possible while the pool is open.
+    if (poolInfo?.poolStatus !== "open") {
+      toast.info(pickLabels.poolStarted);
+      return;
+    }
+    clearPendingPick();
+    toast.info(pickLabels.buyInToPick);
+    navigate(localizedPath("/my-pool"));
+  };
 
   const handleSelectTeam = (team: string) => {
     if (isPickingDisabled || isSubmitting) return;
-    // Spectators can't submit picks.
-    if (isSpectator) return;
+    if (isSpectator) {
+      handleSpectatorSelect(team);
+      return;
+    }
     setPendingPickTeam(team);
   };
 
@@ -242,6 +330,12 @@ export function PickTeamTab() {
         <h2 className={styles.heading}>{heading}</h2>
         {deadlinePassed ? (
           <p className={styles.headingNote}>{pickLabels.picksLocked}</p>
+        ) : isSpectator ? (
+          <p className={styles.headingNote}>
+            {rememberedTeam
+              ? pickLabels.rememberedPick(rememberedTeam)
+              : pickLabels.spectatorNote}
+          </p>
         ) : !myPickForRound ? (
           <p className={styles.headingNote}>{pickLabels.mustPick}</p>
         ) : null}
@@ -315,6 +409,7 @@ export function PickTeamTab() {
               isDisabled={isPickingDisabled}
               isSubmitting={isSubmitting}
               usedTeamNames={usedTeamNames}
+              highlightedTeam={rememberedTeam}
               labels={pickLabels}
             />
           ))}

@@ -1,0 +1,81 @@
+@import '../../styles/variables.less';
+
+.wrapper {
+  min-height: 100vh;
+  background: var(--app-bg);
+  width: 100%;
+  min-width: 0;
+}
+
+.main {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1rem 1.5rem 2rem;
+
+  @media (min-width: 640px) {
+    max-width: 768px;
+  }
+}
+
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 0;
+}
+
+.loadingIcon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--primary-bg);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.centerContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.trophyIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--primary-bg);
+}
+
+.errorIcon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--destructive-bg);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.mutedText {
+  color: var(--muted-text);
+  max-width: 32rem;
+}
+
+.countdown {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/Card/Card';
 import { Button } from '~/components/Button/Button';
 import { Input } from '~/components/Input/Input';
 import { Label } from '~/components/Label/Label';
 import type { AppLocale } from '~/i18n/constants';
-import { buildLocalizedPath, useAppLocale, useLocalizedPath } from '~/i18n/routing';
+import { useAppLocale, useLocalizedPath } from '~/i18n/routing';
+import { getFromState, getPostAuthRedirect } from '~/lib/authRedirect';
 import { useLabels } from '~/hooks/useLabels';
 import { buildAuthLabels } from '~/locales/labels/auth.labels';
 import { getApiErrorMessage } from '~/api/auth.api';
@@ -15,12 +16,16 @@ import style from './Register.module.less';
 function getRedirectPath(
   user: { role?: string } | null,
   locale: AppLocale,
+  from: unknown,
 ): string {
-  return isAdminUser(user) ? '/admin' : buildLocalizedPath(locale, '/');
+  return getPostAuthRedirect(isAdminUser(user), locale, from);
 }
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // Page that sent the user here (pick tab, spectator banner, login page link).
+  const from = getFromState(location.state);
   const appLocale = useAppLocale();
   const localizedPath = useLocalizedPath();
   const { t } = useLabels('auth');
@@ -34,9 +39,9 @@ export default function Register() {
     if (hasRedirected.current) return;
     if (isChecked && user) {
       hasRedirected.current = true;
-      navigate(getRedirectPath(user, appLocale), { replace: true });
+      navigate(getRedirectPath(user, appLocale, from), { replace: true });
     }
-  }, [isChecked, user, navigate, appLocale]);
+  }, [isChecked, user, navigate, appLocale, from]);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -84,7 +89,8 @@ export default function Register() {
         password,
       );
       const u = useAuthStore.getState().user;
-      navigate(getRedirectPath(u, appLocale), { replace: true });
+      hasRedirected.current = true;
+      navigate(getRedirectPath(u, appLocale, from), { replace: true });
     } catch (err: unknown) {
       const apiMessage = getApiErrorMessage(err);
       if (apiMessage === 'Username is already taken') {
@@ -207,7 +213,11 @@ export default function Register() {
               </Button>
               <p className={style.footerText}>
                 {labels.register.hasAccount}{' '}
-                <Link to={localizedPath('/login')} className={style.loginLink}>
+                <Link
+                  to={localizedPath('/login')}
+                  state={from ? { from } : undefined}
+                  className={style.loginLink}
+                >
                   {labels.register.loginLink}
                 </Link>
               </p>

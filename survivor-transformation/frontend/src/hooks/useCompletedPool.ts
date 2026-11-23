@@ -103,19 +103,25 @@ export function useCompletedPool({
           if (!cancelled) setCompletedPool(null);
           return;
         }
-        const leaderboard = await poolsApi.getLeaderboard(poolId);
+        // Recap data is public (winners, last round), so read the public endpoints:
+        // works for guests and for users who weren't in that pool.
+        const leaderboard = await poolsApi.getLeaderboard(poolId, "public");
         if (cancelled) return;
         const entries = leaderboard.entries ?? [];
         const winnerNames = entries
           .filter((e: { isWinner?: boolean }) => e.isWinner)
           .map((e: { username?: string }) => e.username ?? "—");
-        const rounds = await poolsApi.getParticipantRounds(poolId);
+        const rounds = await poolsApi.getParticipantRounds(poolId, "public");
         const lastRound = [...rounds]
           .sort((a, b) => b.roundNumber - a.roundNumber)
           .find((round) => round.matches.length > 0);
         let lastRoundRecap: CompletedPoolLastRoundRecap | null = null;
         if (lastRound) {
-          const roundStats = await poolsApi.getRoundStats(poolId, lastRound.roundNumber);
+          const roundStats = await poolsApi.getRoundStats(
+            poolId,
+            lastRound.roundNumber,
+            "public",
+          );
           const topPicks = [...(roundStats.pickDistribution ?? [])]
             .filter((bucket) => bucket.team)
             .sort((a, b) => b.count - a.count)

@@ -1,0 +1,63 @@
+@import '../../../styles/variables.less';
+
+.banner {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid ~"color-mix(in srgb, var(--primary-bg) 40%, transparent)";
+  background: ~"color-mix(in srgb, var(--primary-bg) 10%, transparent)";
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconWrap {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: ~"color-mix(in srgb, var(--primary-bg) 20%, transparent)";
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--primary-bg);
+}
+
+.copy {
+  min-width: 0;
+}
+
+.title {
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.text {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
